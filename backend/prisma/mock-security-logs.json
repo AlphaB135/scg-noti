@@ -1,0 +1,1442 @@
+[
+  {
+    "id": "54440c58-0ca4-4565-91fb-faee39f1cf72",
+    "userId": "f1c1fc83-ae57-4119-99b8-e1bd12a15bf3",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.137",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-25T15:10:48.300091Z"
+  },
+  {
+    "id": "6671eef1-6b27-4f5b-9eff-74d462c26b99",
+    "userId": "f1c1fc83-ae57-4119-99b8-e1bd12a15bf3",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.185",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-05-01T03:01:55.300138Z"
+  },
+  {
+    "id": "fee54e92-327a-47b6-b7c6-825c5bd2bceb",
+    "userId": "f1c1fc83-ae57-4119-99b8-e1bd12a15bf3",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.148",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-30T07:51:05.300174Z"
+  },
+  {
+    "id": "b11d0409-4ca9-47d2-a9c8-0e710e9aa1aa",
+    "userId": "f1c1fc83-ae57-4119-99b8-e1bd12a15bf3",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.114",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-20T23:57:20.300206Z"
+  },
+  {
+    "id": "989ff3e6-412f-4d35-8fa9-4078137f1960",
+    "userId": "f1c1fc83-ae57-4119-99b8-e1bd12a15bf3",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.101",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-28T11:49:09.300222Z"
+  },
+  {
+    "id": "c568deb3-3947-4f77-ade8-c581d9da6345",
+    "userId": "f1c1fc83-ae57-4119-99b8-e1bd12a15bf3",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.247",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-08T22:21:10.300236Z"
+  },
+  {
+    "id": "5d61455d-5ab7-4fd1-8ac6-8192668caf54",
+    "userId": "f1c1fc83-ae57-4119-99b8-e1bd12a15bf3",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.249",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-05-01T18:16:56.300251Z"
+  },
+  {
+    "id": "20c0f5a0-a44f-4d3d-a662-27a4c53ccd65",
+    "userId": "f1c1fc83-ae57-4119-99b8-e1bd12a15bf3",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.82",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-21T14:31:45.300266Z"
+  },
+  {
+    "id": "4fb9aab6-7519-4f38-b8f7-e11a1c562d67",
+    "userId": "f1c1fc83-ae57-4119-99b8-e1bd12a15bf3",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.42",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-03T16:13:30.300280Z"
+  },
+  {
+    "id": "a6bd3aef-2121-4fbb-9717-63572f4989f5",
+    "userId": "f1c1fc83-ae57-4119-99b8-e1bd12a15bf3",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.228",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-13T08:06:54.300293Z"
+  },
+  {
+    "id": "6cd215ec-b0fe-4cf7-b197-56a28b6b0c9b",
+    "userId": "c450bec4-1a99-494a-8723-81cc1f182ada",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.94",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-08T20:51:14.300307Z"
+  },
+  {
+    "id": "effeddee-cdf5-4cc7-9289-20ffa82f4020",
+    "userId": "c450bec4-1a99-494a-8723-81cc1f182ada",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.75",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-18T16:02:53.300320Z"
+  },
+  {
+    "id": "6599f062-d188-4710-b0bc-70fc74a8d90f",
+    "userId": "c450bec4-1a99-494a-8723-81cc1f182ada",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.176",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-26T21:32:21.300337Z"
+  },
+  {
+    "id": "633ea57a-c84f-4e63-8c15-91461e9eb42a",
+    "userId": "c450bec4-1a99-494a-8723-81cc1f182ada",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.60",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-27T10:48:21.300349Z"
+  },
+  {
+    "id": "0ef28e93-a598-411c-879d-00d58d8bbd76",
+    "userId": "c450bec4-1a99-494a-8723-81cc1f182ada",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.27",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-12T04:42:24.300369Z"
+  },
+  {
+    "id": "7725e32c-1833-43c3-9ea1-87884891ab03",
+    "userId": "c450bec4-1a99-494a-8723-81cc1f182ada",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.138",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-22T14:25:24.300390Z"
+  },
+  {
+    "id": "77348291-7f28-47a6-8de0-27104b0ad1a7",
+    "userId": "c450bec4-1a99-494a-8723-81cc1f182ada",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.57",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-20T15:47:02.300418Z"
+  },
+  {
+    "id": "8169b5db-c373-4102-a633-575ee3da3586",
+    "userId": "c450bec4-1a99-494a-8723-81cc1f182ada",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.250",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-11T23:43:41.300452Z"
+  },
+  {
+    "id": "246975df-6e92-43ce-8d64-10df2b9d0bff",
+    "userId": "c450bec4-1a99-494a-8723-81cc1f182ada",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.36",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-14T22:54:40.300465Z"
+  },
+  {
+    "id": "d2832fdd-e060-41e1-a667-154c05781ef3",
+    "userId": "c450bec4-1a99-494a-8723-81cc1f182ada",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.46",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-16T13:36:00.300478Z"
+  },
+  {
+    "id": "471e96c5-368a-4208-9a5b-41e2121e4b72",
+    "userId": "82d00b67-96c9-448e-b941-a3cbfdbd0a79",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.26",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-28T03:30:23.300491Z"
+  },
+  {
+    "id": "53ce86e6-c825-4668-a47b-e20ee200b40a",
+    "userId": "82d00b67-96c9-448e-b941-a3cbfdbd0a79",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.203",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-07T04:34:45.300503Z"
+  },
+  {
+    "id": "eeb3a50d-6ce9-4559-8650-6dc132c25290",
+    "userId": "82d00b67-96c9-448e-b941-a3cbfdbd0a79",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.131",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-15T07:10:36.300515Z"
+  },
+  {
+    "id": "13ddc992-56a0-4c6a-9ba7-d8336f1d9877",
+    "userId": "82d00b67-96c9-448e-b941-a3cbfdbd0a79",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.183",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-28T07:04:59.300527Z"
+  },
+  {
+    "id": "7d6425fd-f362-421e-89b1-6060fb0cd592",
+    "userId": "82d00b67-96c9-448e-b941-a3cbfdbd0a79",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.20",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-10T10:14:01.300545Z"
+  },
+  {
+    "id": "c8752602-a33c-4f28-942c-b9a527b305cf",
+    "userId": "82d00b67-96c9-448e-b941-a3cbfdbd0a79",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.112",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-24T20:18:26.300560Z"
+  },
+  {
+    "id": "002a1628-f277-47c9-86c3-a40c36beb78e",
+    "userId": "82d00b67-96c9-448e-b941-a3cbfdbd0a79",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.208",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-10T15:15:30.300580Z"
+  },
+  {
+    "id": "90042a90-7692-488b-b9f3-9e4fdf571892",
+    "userId": "82d00b67-96c9-448e-b941-a3cbfdbd0a79",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.94",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-18T22:37:58.300620Z"
+  },
+  {
+    "id": "25ede6f4-a765-4bd8-ba2b-72e21931758f",
+    "userId": "82d00b67-96c9-448e-b941-a3cbfdbd0a79",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.209",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-04T23:48:02.300642Z"
+  },
+  {
+    "id": "6202d944-1262-49c0-b818-6205ae99d392",
+    "userId": "82d00b67-96c9-448e-b941-a3cbfdbd0a79",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.115",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-13T04:00:13.300656Z"
+  },
+  {
+    "id": "35256c39-b0cb-44d6-b9a0-961cfd122e51",
+    "userId": "b4687121-13bc-4fcf-884f-fe257b6902c6",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.198",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-15T10:19:14.300671Z"
+  },
+  {
+    "id": "e16a3472-4dcd-4c9f-b545-df819a22ab90",
+    "userId": "b4687121-13bc-4fcf-884f-fe257b6902c6",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.72",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-28T02:29:55.300685Z"
+  },
+  {
+    "id": "b2ab8c77-d925-4340-a57c-3bdb19f37f82",
+    "userId": "b4687121-13bc-4fcf-884f-fe257b6902c6",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.118",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-27T22:39:46.300697Z"
+  },
+  {
+    "id": "b930f5d6-39aa-4253-a56c-a35e8b481b49",
+    "userId": "b4687121-13bc-4fcf-884f-fe257b6902c6",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.97",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-16T16:14:51.300714Z"
+  },
+  {
+    "id": "32821048-b841-453d-b217-c62ff3f36339",
+    "userId": "b4687121-13bc-4fcf-884f-fe257b6902c6",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.168",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-25T23:35:36.300728Z"
+  },
+  {
+    "id": "c9a8ee78-20fa-4037-81ff-532e28a7d1d2",
+    "userId": "b4687121-13bc-4fcf-884f-fe257b6902c6",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.159",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-05-01T19:27:50.300741Z"
+  },
+  {
+    "id": "c3cfe4c2-c0bf-459f-9f23-7b687d35ebb3",
+    "userId": "b4687121-13bc-4fcf-884f-fe257b6902c6",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.244",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-15T05:16:14.300753Z"
+  },
+  {
+    "id": "0044ea1c-0b8b-405e-9f23-0a0581fbf72b",
+    "userId": "b4687121-13bc-4fcf-884f-fe257b6902c6",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.71",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-05-01T03:53:54.300766Z"
+  },
+  {
+    "id": "10fda21c-2e43-4d26-bca1-efeb64132bad",
+    "userId": "b4687121-13bc-4fcf-884f-fe257b6902c6",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.134",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-28T02:48:17.300777Z"
+  },
+  {
+    "id": "b9c0af3a-84ed-4400-9544-02d86f9c6453",
+    "userId": "b4687121-13bc-4fcf-884f-fe257b6902c6",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.8",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-15T01:22:38.300789Z"
+  },
+  {
+    "id": "0327ce26-97df-4754-8eda-6cb862cb5312",
+    "userId": "ee9e8e6b-f6f9-400c-9acd-a48e71c63a42",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.184",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-19T05:14:31.300807Z"
+  },
+  {
+    "id": "4df483b9-1cb0-49e0-855f-093a90ba4621",
+    "userId": "ee9e8e6b-f6f9-400c-9acd-a48e71c63a42",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.50",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-15T08:30:27.300827Z"
+  },
+  {
+    "id": "9077919d-6128-40e8-8049-7abf94ae461a",
+    "userId": "ee9e8e6b-f6f9-400c-9acd-a48e71c63a42",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.44",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-24T22:42:16.300856Z"
+  },
+  {
+    "id": "e3a349e4-5470-457b-83c6-8b000c799dc3",
+    "userId": "ee9e8e6b-f6f9-400c-9acd-a48e71c63a42",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.166",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-02T22:14:25.300879Z"
+  },
+  {
+    "id": "764f9a73-1210-49d7-af79-af46c74a91e5",
+    "userId": "ee9e8e6b-f6f9-400c-9acd-a48e71c63a42",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.50",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-23T21:09:43.300909Z"
+  },
+  {
+    "id": "92313ee7-ee11-46a7-8bb8-867f146713ae",
+    "userId": "ee9e8e6b-f6f9-400c-9acd-a48e71c63a42",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.13",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-05T10:57:55.300932Z"
+  },
+  {
+    "id": "11bc34d7-c6bc-41e1-b279-30c21cc38f3f",
+    "userId": "ee9e8e6b-f6f9-400c-9acd-a48e71c63a42",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.231",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-28T13:40:09.300951Z"
+  },
+  {
+    "id": "43dfe0fb-34b5-4526-83b6-6bc9d9d46ff2",
+    "userId": "ee9e8e6b-f6f9-400c-9acd-a48e71c63a42",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.102",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-21T15:59:13.300962Z"
+  },
+  {
+    "id": "7dbd8db6-b618-45dd-978d-bb85a0bd7c3a",
+    "userId": "ee9e8e6b-f6f9-400c-9acd-a48e71c63a42",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.72",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-05T19:33:21.300973Z"
+  },
+  {
+    "id": "2b7e6aed-f9db-4dc2-9246-a866784eda45",
+    "userId": "ee9e8e6b-f6f9-400c-9acd-a48e71c63a42",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.251",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-10T14:35:20.300985Z"
+  },
+  {
+    "id": "2aa1bb31-c6cc-4220-b61f-45566085f192",
+    "userId": "a67aa320-fc10-4533-a19c-89ca0151e5a2",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.238",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-17T04:21:10.300996Z"
+  },
+  {
+    "id": "637e8490-3803-407f-944d-14b7d9b14203",
+    "userId": "a67aa320-fc10-4533-a19c-89ca0151e5a2",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.78",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-12T03:21:44.301012Z"
+  },
+  {
+    "id": "9b75395b-67db-4ea5-8826-4e9af26b1972",
+    "userId": "a67aa320-fc10-4533-a19c-89ca0151e5a2",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.24",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-02T17:50:45.301023Z"
+  },
+  {
+    "id": "d9150410-46a3-4736-8e90-42fb9673ed1b",
+    "userId": "a67aa320-fc10-4533-a19c-89ca0151e5a2",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.80",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-03T16:01:13.301034Z"
+  },
+  {
+    "id": "5f454c67-9595-414c-bab2-17e422e6f23a",
+    "userId": "a67aa320-fc10-4533-a19c-89ca0151e5a2",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.241",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-24T11:31:56.301046Z"
+  },
+  {
+    "id": "5a297367-9e38-4f7b-ab00-57227cd63d6e",
+    "userId": "a67aa320-fc10-4533-a19c-89ca0151e5a2",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.87",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-29T14:00:35.301058Z"
+  },
+  {
+    "id": "f509f5aa-718d-4f59-915d-914703324ef0",
+    "userId": "a67aa320-fc10-4533-a19c-89ca0151e5a2",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.214",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-08T12:54:40.301071Z"
+  },
+  {
+    "id": "ab91b0ef-4772-4a9f-9449-1029fb1d979d",
+    "userId": "a67aa320-fc10-4533-a19c-89ca0151e5a2",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.16",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-13T10:40:27.301082Z"
+  },
+  {
+    "id": "f6282f8e-b3ae-4d4a-a5fa-5445d93fc037",
+    "userId": "a67aa320-fc10-4533-a19c-89ca0151e5a2",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.16",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-29T23:51:28.301095Z"
+  },
+  {
+    "id": "d4af68fb-fab1-4292-8f13-4fe192ca84bf",
+    "userId": "a67aa320-fc10-4533-a19c-89ca0151e5a2",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.28",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-08T19:06:40.301107Z"
+  },
+  {
+    "id": "1f0fcaaa-7575-4948-bc6f-7608379c9b17",
+    "userId": "7e008ce1-7e81-4292-b7c5-f0bc0ad6504d",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.156",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-15T22:30:42.301122Z"
+  },
+  {
+    "id": "22c95efa-cee0-4eca-900b-e1da2d27f3c7",
+    "userId": "7e008ce1-7e81-4292-b7c5-f0bc0ad6504d",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.189",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-20T04:40:09.301144Z"
+  },
+  {
+    "id": "5a9a68de-a67c-4c79-b66b-a476a88c846b",
+    "userId": "7e008ce1-7e81-4292-b7c5-f0bc0ad6504d",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.237",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-10T11:55:19.301186Z"
+  },
+  {
+    "id": "16730955-8b6d-4dcd-80a7-c860f1fd846f",
+    "userId": "7e008ce1-7e81-4292-b7c5-f0bc0ad6504d",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.7",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-27T18:44:54.301198Z"
+  },
+  {
+    "id": "6cb804e2-0ad5-49a1-b51a-8f178a4ecb6e",
+    "userId": "7e008ce1-7e81-4292-b7c5-f0bc0ad6504d",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.80",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-21T02:33:00.301210Z"
+  },
+  {
+    "id": "a8ecc2b1-8567-43c4-bdd2-aaa9a133e2a4",
+    "userId": "7e008ce1-7e81-4292-b7c5-f0bc0ad6504d",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.232",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-24T11:10:05.301222Z"
+  },
+  {
+    "id": "48bf61c0-5649-4ca6-a72b-899f22f8e236",
+    "userId": "7e008ce1-7e81-4292-b7c5-f0bc0ad6504d",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.95",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-19T16:13:10.301234Z"
+  },
+  {
+    "id": "c0128330-62bd-4fcf-bb50-91844d20ffe2",
+    "userId": "7e008ce1-7e81-4292-b7c5-f0bc0ad6504d",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.172",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-27T03:08:00.301247Z"
+  },
+  {
+    "id": "1d240d75-e445-4ea1-a65b-c8aae6530b84",
+    "userId": "7e008ce1-7e81-4292-b7c5-f0bc0ad6504d",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.26",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-20T16:56:08.301258Z"
+  },
+  {
+    "id": "1f2c3dad-fa81-46dc-bcd5-4af4c76e5ba0",
+    "userId": "7e008ce1-7e81-4292-b7c5-f0bc0ad6504d",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.68",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-05-01T23:26:28.301274Z"
+  },
+  {
+    "id": "2a6765b8-cd32-4b5c-bc99-4999c3389bc7",
+    "userId": "6917aba9-9b7d-4c62-bf0f-e6500fa2aaab",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.184",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-05-03T03:58:37.301287Z"
+  },
+  {
+    "id": "8aa7a784-a6f1-448f-aa20-59cfb54326d2",
+    "userId": "6917aba9-9b7d-4c62-bf0f-e6500fa2aaab",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.170",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-12T03:50:30.301298Z"
+  },
+  {
+    "id": "6bcefd6c-fa08-4943-80a5-c72ebe324015",
+    "userId": "6917aba9-9b7d-4c62-bf0f-e6500fa2aaab",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.159",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-13T07:57:20.301310Z"
+  },
+  {
+    "id": "4d01a5c3-c5f6-4f0e-aeee-4ceb6e64598a",
+    "userId": "6917aba9-9b7d-4c62-bf0f-e6500fa2aaab",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.181",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-06T15:29:39.301322Z"
+  },
+  {
+    "id": "92b692fe-2c86-40a1-8701-a9dd501aab67",
+    "userId": "6917aba9-9b7d-4c62-bf0f-e6500fa2aaab",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.229",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-17T08:33:48.301334Z"
+  },
+  {
+    "id": "b293c82c-026b-4f9b-979c-02ab60a8ad8d",
+    "userId": "6917aba9-9b7d-4c62-bf0f-e6500fa2aaab",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.210",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-06T11:07:48.301346Z"
+  },
+  {
+    "id": "aee28421-6958-4990-b126-c7fbf1e05132",
+    "userId": "6917aba9-9b7d-4c62-bf0f-e6500fa2aaab",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.156",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-20T01:28:51.301358Z"
+  },
+  {
+    "id": "295bbbd4-d65e-4f41-8286-fa26beabd8f2",
+    "userId": "6917aba9-9b7d-4c62-bf0f-e6500fa2aaab",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.90",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-16T17:52:45.301371Z"
+  },
+  {
+    "id": "6c7c337a-334c-44c2-bf41-27ab830a3bf1",
+    "userId": "6917aba9-9b7d-4c62-bf0f-e6500fa2aaab",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.221",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-26T21:42:14.301385Z"
+  },
+  {
+    "id": "078df837-aaf9-4593-89d7-727deab124bf",
+    "userId": "6917aba9-9b7d-4c62-bf0f-e6500fa2aaab",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.46",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-14T00:20:07.301397Z"
+  },
+  {
+    "id": "f4696add-3f4f-45de-bde0-0edea45d937e",
+    "userId": "98b17ad8-2b2b-4678-b185-83ae29c9b2bd",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.59",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-10T13:00:09.301409Z"
+  },
+  {
+    "id": "c6c23f6b-85f1-4f77-baea-23222d2e9f3b",
+    "userId": "98b17ad8-2b2b-4678-b185-83ae29c9b2bd",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.159",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-20T00:41:53.301422Z"
+  },
+  {
+    "id": "da6005e3-7a4e-4807-a649-5fbddf0141d2",
+    "userId": "98b17ad8-2b2b-4678-b185-83ae29c9b2bd",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.21",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-17T18:19:29.301435Z"
+  },
+  {
+    "id": "79538a3a-073a-43a5-b3a4-e8b525350fbf",
+    "userId": "98b17ad8-2b2b-4678-b185-83ae29c9b2bd",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.229",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-20T21:53:50.301446Z"
+  },
+  {
+    "id": "fdcbc3e2-7ec0-4a49-90b1-2cf8235fa350",
+    "userId": "98b17ad8-2b2b-4678-b185-83ae29c9b2bd",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.36",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-24T16:55:44.301457Z"
+  },
+  {
+    "id": "4923dc57-ad29-40a6-8666-6089c7a0f693",
+    "userId": "98b17ad8-2b2b-4678-b185-83ae29c9b2bd",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.183",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-06T23:47:32.301469Z"
+  },
+  {
+    "id": "de114437-cc72-4fa5-b83d-befcecd4ccfa",
+    "userId": "98b17ad8-2b2b-4678-b185-83ae29c9b2bd",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.167",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-23T18:31:01.301481Z"
+  },
+  {
+    "id": "0823b06d-c147-40e0-a9db-4b448a8d2a51",
+    "userId": "98b17ad8-2b2b-4678-b185-83ae29c9b2bd",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.1",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-27T03:35:50.301581Z"
+  },
+  {
+    "id": "72a5b5bd-06a7-48b8-8b71-e558400092e4",
+    "userId": "98b17ad8-2b2b-4678-b185-83ae29c9b2bd",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.62",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-20T01:36:22.301632Z"
+  },
+  {
+    "id": "ade54773-19b6-4e0b-99bf-42fb1c116b53",
+    "userId": "98b17ad8-2b2b-4678-b185-83ae29c9b2bd",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.56",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-28T17:42:49.301645Z"
+  },
+  {
+    "id": "bd8b2ffc-25a5-406f-8d2c-f283b2f79b24",
+    "userId": "873d6464-c4e2-4fde-adad-e9177b3fb25a",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.99",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-29T14:39:03.301659Z"
+  },
+  {
+    "id": "29191dcb-b451-4d91-b808-bb3beaa90395",
+    "userId": "873d6464-c4e2-4fde-adad-e9177b3fb25a",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.111",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-03T00:03:36.301671Z"
+  },
+  {
+    "id": "5bfe7961-8990-4ade-bb0c-962d257e330f",
+    "userId": "873d6464-c4e2-4fde-adad-e9177b3fb25a",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.251",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-03T18:17:19.301682Z"
+  },
+  {
+    "id": "5ad36261-ef62-4ca5-bdf8-29390bd7a408",
+    "userId": "873d6464-c4e2-4fde-adad-e9177b3fb25a",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.233",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-14T10:15:12.301695Z"
+  },
+  {
+    "id": "d8df5185-7c02-49c8-a262-bd2f5cf12abe",
+    "userId": "873d6464-c4e2-4fde-adad-e9177b3fb25a",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.22",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-15T00:33:55.301707Z"
+  },
+  {
+    "id": "0d521571-6811-4cda-8a18-771f89414dba",
+    "userId": "873d6464-c4e2-4fde-adad-e9177b3fb25a",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.109",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-09T02:43:43.301718Z"
+  },
+  {
+    "id": "e9dac463-bc4d-4b24-b746-967eb567fa49",
+    "userId": "873d6464-c4e2-4fde-adad-e9177b3fb25a",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.6",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-21T06:43:52.301730Z"
+  },
+  {
+    "id": "82150310-f479-41e5-a990-f1b15ef0cdff",
+    "userId": "873d6464-c4e2-4fde-adad-e9177b3fb25a",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.142",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-28T06:28:04.301742Z"
+  },
+  {
+    "id": "553d2e11-6de1-42cf-9abc-c6ab8dda7cc2",
+    "userId": "873d6464-c4e2-4fde-adad-e9177b3fb25a",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.141",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-23T03:32:43.301754Z"
+  },
+  {
+    "id": "8080bb02-dace-4c5d-8ba9-c9152429c42b",
+    "userId": "873d6464-c4e2-4fde-adad-e9177b3fb25a",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.82",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-03T09:07:02.301765Z"
+  },
+  {
+    "id": "647a2b83-278e-43d1-95c5-46003a85bf29",
+    "userId": "59ac94ba-bc72-49b5-a760-49e538366076",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.207",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-21T09:03:07.301777Z"
+  },
+  {
+    "id": "8b55e33a-d029-49bc-891c-c338bb215d7a",
+    "userId": "59ac94ba-bc72-49b5-a760-49e538366076",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.126",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-05T01:31:58.301788Z"
+  },
+  {
+    "id": "34174aa4-c79a-424d-bf52-197b98430bb6",
+    "userId": "59ac94ba-bc72-49b5-a760-49e538366076",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.189",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-11T00:22:20.301799Z"
+  },
+  {
+    "id": "ac36206a-18e3-4fad-be8e-25bf3cec18d8",
+    "userId": "59ac94ba-bc72-49b5-a760-49e538366076",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.48",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-13T12:01:14.301810Z"
+  },
+  {
+    "id": "d1f8b690-6dc1-40dd-ac1b-aeab4c2c20d0",
+    "userId": "59ac94ba-bc72-49b5-a760-49e538366076",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.10",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-04T11:24:06.301822Z"
+  },
+  {
+    "id": "cd97383e-7837-4aa9-a58a-11af8f8248b3",
+    "userId": "59ac94ba-bc72-49b5-a760-49e538366076",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.114",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-03T10:34:36.301833Z"
+  },
+  {
+    "id": "65c6d187-7bdc-42c3-bd3d-85eb49033743",
+    "userId": "59ac94ba-bc72-49b5-a760-49e538366076",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.195",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-29T02:24:56.301848Z"
+  },
+  {
+    "id": "b7c6b635-0742-4f33-ba07-549eb69b55e4",
+    "userId": "59ac94ba-bc72-49b5-a760-49e538366076",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.54",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-11T18:43:16.301863Z"
+  },
+  {
+    "id": "532e19f6-dd7d-45c9-bd15-3f2e478954ee",
+    "userId": "59ac94ba-bc72-49b5-a760-49e538366076",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.94",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-04T09:59:44.301875Z"
+  },
+  {
+    "id": "8ec83325-992d-4f46-8ef8-4f84ff500234",
+    "userId": "59ac94ba-bc72-49b5-a760-49e538366076",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.73",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-17T18:41:58.301895Z"
+  },
+  {
+    "id": "5a943fc2-ffd6-4de5-9b28-60b1c9bc0b9e",
+    "userId": "9d5cc8ee-b7d2-4ab6-8d2f-ed881b9207a9",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.172",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-25T14:53:11.301932Z"
+  },
+  {
+    "id": "c6e74529-2247-4460-a6eb-503844d2aeb4",
+    "userId": "9d5cc8ee-b7d2-4ab6-8d2f-ed881b9207a9",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.122",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-05T22:11:11.301946Z"
+  },
+  {
+    "id": "d4f28484-ca0b-43ac-a0a0-907cd884a172",
+    "userId": "9d5cc8ee-b7d2-4ab6-8d2f-ed881b9207a9",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.5",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-18T10:17:32.301973Z"
+  },
+  {
+    "id": "0c661d5a-9604-4f1c-b0e3-d4758f2daf22",
+    "userId": "9d5cc8ee-b7d2-4ab6-8d2f-ed881b9207a9",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.140",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-07T16:18:13.302005Z"
+  },
+  {
+    "id": "ad7fca58-8e7a-4c2c-9a81-fbb0683cb942",
+    "userId": "9d5cc8ee-b7d2-4ab6-8d2f-ed881b9207a9",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.80",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-11T10:22:59.302017Z"
+  },
+  {
+    "id": "a1d738b8-faba-49e7-a8b7-c98a53332a6d",
+    "userId": "9d5cc8ee-b7d2-4ab6-8d2f-ed881b9207a9",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.173",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-05-02T02:32:41.302029Z"
+  },
+  {
+    "id": "87911a38-533c-4d96-8e22-94ff13a0aeec",
+    "userId": "9d5cc8ee-b7d2-4ab6-8d2f-ed881b9207a9",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.136",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-16T00:01:37.302048Z"
+  },
+  {
+    "id": "afc1e05e-f83e-4ccc-92fe-d95573ba6f39",
+    "userId": "9d5cc8ee-b7d2-4ab6-8d2f-ed881b9207a9",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.179",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-24T21:38:38.302084Z"
+  },
+  {
+    "id": "fd607667-3c65-4836-8504-7d37c75b1928",
+    "userId": "9d5cc8ee-b7d2-4ab6-8d2f-ed881b9207a9",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.185",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-29T19:09:15.302095Z"
+  },
+  {
+    "id": "aaf5790f-c5dc-4077-9286-52b2ac969191",
+    "userId": "9d5cc8ee-b7d2-4ab6-8d2f-ed881b9207a9",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.204",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-12T19:35:44.302107Z"
+  },
+  {
+    "id": "bff5a41b-6303-41cd-b863-261b84d7f32d",
+    "userId": "f99e0a5a-2424-4715-a093-9a3693d2aa98",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.116",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-30T12:24:38.302120Z"
+  },
+  {
+    "id": "9a822dd6-aa83-42d2-8f5c-b70024252d2d",
+    "userId": "f99e0a5a-2424-4715-a093-9a3693d2aa98",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.141",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-14T18:49:31.302132Z"
+  },
+  {
+    "id": "b77a2164-6006-4f2f-9208-4d5c1c09f04f",
+    "userId": "f99e0a5a-2424-4715-a093-9a3693d2aa98",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.114",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-05T10:23:12.302143Z"
+  },
+  {
+    "id": "0fe5335e-38c6-4640-909a-758281b03971",
+    "userId": "f99e0a5a-2424-4715-a093-9a3693d2aa98",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.157",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-05-01T05:30:39.302155Z"
+  },
+  {
+    "id": "1b8b838d-d3c4-4bd8-a2fb-b2353e5cf070",
+    "userId": "f99e0a5a-2424-4715-a093-9a3693d2aa98",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.187",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-11T13:26:27.302171Z"
+  },
+  {
+    "id": "99986bc3-c0e6-4c56-84bf-3bacd944c8ac",
+    "userId": "f99e0a5a-2424-4715-a093-9a3693d2aa98",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.93",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-12T15:12:13.302183Z"
+  },
+  {
+    "id": "52eab5b7-c971-47e7-a18a-a102a5d40c5d",
+    "userId": "f99e0a5a-2424-4715-a093-9a3693d2aa98",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.51",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-08T18:42:16.302194Z"
+  },
+  {
+    "id": "4b7f4aa2-1299-4ded-a860-3adb475b6394",
+    "userId": "f99e0a5a-2424-4715-a093-9a3693d2aa98",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.218",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-05-01T17:58:35.302206Z"
+  },
+  {
+    "id": "1d949222-7958-4cd4-a414-bfbb2f82a91a",
+    "userId": "f99e0a5a-2424-4715-a093-9a3693d2aa98",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.113",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-06T16:18:08.302218Z"
+  },
+  {
+    "id": "d6f86ff9-918d-4a78-8ba4-83573e758c13",
+    "userId": "f99e0a5a-2424-4715-a093-9a3693d2aa98",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.203",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-10T01:31:59.302234Z"
+  },
+  {
+    "id": "ec669d05-df85-44a2-8391-c78aea105d7b",
+    "userId": "030625a3-3fdf-4500-bf19-f74c1219240d",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.153",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-29T09:57:13.302274Z"
+  },
+  {
+    "id": "129fc110-e75e-491d-b034-31f0990ea12e",
+    "userId": "030625a3-3fdf-4500-bf19-f74c1219240d",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.72",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-05T04:24:55.302293Z"
+  },
+  {
+    "id": "c8792ba3-0a9d-48e6-897e-a29bb8823bf8",
+    "userId": "030625a3-3fdf-4500-bf19-f74c1219240d",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.32",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-05-03T03:47:28.302304Z"
+  },
+  {
+    "id": "75b8e7da-2897-4b36-a77b-56c56df8a0ee",
+    "userId": "030625a3-3fdf-4500-bf19-f74c1219240d",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.120",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-05T03:13:32.302316Z"
+  },
+  {
+    "id": "52b8959b-95b4-40fb-8fb6-d3140182c2ba",
+    "userId": "030625a3-3fdf-4500-bf19-f74c1219240d",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.48",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-14T10:46:53.302329Z"
+  },
+  {
+    "id": "94782a1e-3adc-40f1-b379-ff96d2460fd9",
+    "userId": "030625a3-3fdf-4500-bf19-f74c1219240d",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.134",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-12T15:31:58.302340Z"
+  },
+  {
+    "id": "084b50c4-64f9-466b-b988-287e215d2d73",
+    "userId": "030625a3-3fdf-4500-bf19-f74c1219240d",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.56",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-12T02:01:12.302352Z"
+  },
+  {
+    "id": "12f26096-c1c1-49e8-930b-9043341f3c5d",
+    "userId": "030625a3-3fdf-4500-bf19-f74c1219240d",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.147",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-08T02:29:49.302367Z"
+  },
+  {
+    "id": "06cde041-fff8-4c36-ba22-32161b2538da",
+    "userId": "030625a3-3fdf-4500-bf19-f74c1219240d",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.42",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-25T12:39:02.302399Z"
+  },
+  {
+    "id": "a3b9724e-214a-4aee-8e33-bdaca10d5e9b",
+    "userId": "030625a3-3fdf-4500-bf19-f74c1219240d",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.118",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-16T03:49:50.302428Z"
+  },
+  {
+    "id": "f0605211-4403-426d-a9cb-101b00e95e6b",
+    "userId": "378d7763-8129-48d5-b6e8-185fe7387f6e",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.139",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-20T14:51:31.302440Z"
+  },
+  {
+    "id": "df9fac13-9384-4dda-9a23-e731d561a0cc",
+    "userId": "378d7763-8129-48d5-b6e8-185fe7387f6e",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.224",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-28T09:09:32.302451Z"
+  },
+  {
+    "id": "4a7210d4-591a-489d-adb5-c546ae46e9ca",
+    "userId": "378d7763-8129-48d5-b6e8-185fe7387f6e",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.89",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-19T23:32:59.302463Z"
+  },
+  {
+    "id": "8c9b717b-0678-4ff8-9fcb-6bc86b1ac734",
+    "userId": "378d7763-8129-48d5-b6e8-185fe7387f6e",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.88",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-23T06:34:41.302474Z"
+  },
+  {
+    "id": "9ab8bc60-a90f-44aa-9e6b-d4523f9e29b8",
+    "userId": "378d7763-8129-48d5-b6e8-185fe7387f6e",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.59",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-25T11:31:32.302485Z"
+  },
+  {
+    "id": "7dfee798-523a-4098-9e05-7a2671825a8a",
+    "userId": "378d7763-8129-48d5-b6e8-185fe7387f6e",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.97",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-05T12:38:46.302496Z"
+  },
+  {
+    "id": "fb696de0-75fe-42ad-834c-8315314cda15",
+    "userId": "378d7763-8129-48d5-b6e8-185fe7387f6e",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.14",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-11T10:15:24.302507Z"
+  },
+  {
+    "id": "381d1dd4-a9f7-4ab7-8816-8a8956dea271",
+    "userId": "378d7763-8129-48d5-b6e8-185fe7387f6e",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.9",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-10T13:24:05.302519Z"
+  },
+  {
+    "id": "39bb58ee-bc01-4ec9-a3e7-0c35a3b19526",
+    "userId": "378d7763-8129-48d5-b6e8-185fe7387f6e",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.111",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-11T11:10:26.302530Z"
+  },
+  {
+    "id": "43865486-fc61-4e32-9bb9-94e95dd636da",
+    "userId": "378d7763-8129-48d5-b6e8-185fe7387f6e",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.175",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-09T01:38:52.302544Z"
+  },
+  {
+    "id": "d33e4716-22f5-4d6f-8396-b86f27278146",
+    "userId": "24796cfc-9151-4bc5-ab2b-4ebfa247ae26",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.92",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-13T20:17:42.302558Z"
+  },
+  {
+    "id": "67d3f1c7-7a7d-4449-a152-d6c1fca153ec",
+    "userId": "24796cfc-9151-4bc5-ab2b-4ebfa247ae26",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.245",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-30T15:56:18.302570Z"
+  },
+  {
+    "id": "a7c323ae-6182-41ea-9cbb-831c6e6d3c1a",
+    "userId": "24796cfc-9151-4bc5-ab2b-4ebfa247ae26",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.198",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-23T12:16:22.302591Z"
+  },
+  {
+    "id": "2e2255a2-38b6-4fd2-b746-1e5d3e13d8d6",
+    "userId": "24796cfc-9151-4bc5-ab2b-4ebfa247ae26",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.235",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-22T23:02:52.302619Z"
+  },
+  {
+    "id": "71b2218c-9f95-406b-bb29-5496900b26a4",
+    "userId": "24796cfc-9151-4bc5-ab2b-4ebfa247ae26",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.87",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-12T20:22:35.302638Z"
+  },
+  {
+    "id": "c09a582a-59a1-4286-9ffc-94493fdde5b9",
+    "userId": "24796cfc-9151-4bc5-ab2b-4ebfa247ae26",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.50",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-06T14:01:45.302679Z"
+  },
+  {
+    "id": "524c93f8-234a-4f75-98e3-1d3b432f0bdf",
+    "userId": "24796cfc-9151-4bc5-ab2b-4ebfa247ae26",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.148",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-16T17:33:37.302704Z"
+  },
+  {
+    "id": "c4428746-3128-4660-8840-3f029698f1fd",
+    "userId": "24796cfc-9151-4bc5-ab2b-4ebfa247ae26",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.26",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-05-01T20:00:01.302719Z"
+  },
+  {
+    "id": "ff5b7422-2eb1-4ab9-9398-ad9b24b4cf4e",
+    "userId": "24796cfc-9151-4bc5-ab2b-4ebfa247ae26",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.157",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-18T21:35:29.302730Z"
+  },
+  {
+    "id": "2a496edd-cb14-4675-85f2-98327214ffdb",
+    "userId": "24796cfc-9151-4bc5-ab2b-4ebfa247ae26",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.167",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-19T21:37:20.302742Z"
+  },
+  {
+    "id": "bad0ff2c-fb61-4736-a290-8e7fcacb640d",
+    "userId": "bca8e31a-c58e-4026-a87e-4914b514997e",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.98",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-11T20:52:45.302756Z"
+  },
+  {
+    "id": "12cb0f76-0642-4da1-96fe-4da1d56bbfd2",
+    "userId": "bca8e31a-c58e-4026-a87e-4914b514997e",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.213",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-24T15:46:45.302768Z"
+  },
+  {
+    "id": "eb5a3954-a0c2-4f29-ae14-c160aa8e8a00",
+    "userId": "bca8e31a-c58e-4026-a87e-4914b514997e",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.217",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-20T19:31:38.302779Z"
+  },
+  {
+    "id": "6305e053-0a6b-4fb4-ae37-4c16ed4312bd",
+    "userId": "bca8e31a-c58e-4026-a87e-4914b514997e",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.245",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-12T05:57:05.302790Z"
+  },
+  {
+    "id": "fd58169c-b8b5-4948-93c6-bcce239e7926",
+    "userId": "bca8e31a-c58e-4026-a87e-4914b514997e",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.45",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-16T01:57:39.302802Z"
+  },
+  {
+    "id": "cb24bc35-6fa7-486f-bf53-39a175bcb62b",
+    "userId": "bca8e31a-c58e-4026-a87e-4914b514997e",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.105",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-05T22:48:47.302813Z"
+  },
+  {
+    "id": "0b7599e8-9829-46ab-a728-285ff9cb1e13",
+    "userId": "bca8e31a-c58e-4026-a87e-4914b514997e",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.52",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-05-02T03:03:16.302824Z"
+  },
+  {
+    "id": "c555e831-5d7b-4bf6-a6cc-decd2db6cab2",
+    "userId": "bca8e31a-c58e-4026-a87e-4914b514997e",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.139",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-05-02T08:04:35.302835Z"
+  },
+  {
+    "id": "8dfd50f4-28ba-456b-b5ce-5cc927c02281",
+    "userId": "bca8e31a-c58e-4026-a87e-4914b514997e",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.26",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-09T09:58:05.302846Z"
+  },
+  {
+    "id": "99ca9c9e-4e9e-459d-9234-6d83258676a1",
+    "userId": "bca8e31a-c58e-4026-a87e-4914b514997e",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.175",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-05-03T09:32:10.302858Z"
+  },
+  {
+    "id": "5527448c-6396-4849-9033-4f536ff53ea0",
+    "userId": "5df18139-b093-4b30-ba13-fbf477b3ef2c",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.40",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-05-01T01:17:19.302869Z"
+  },
+  {
+    "id": "b8ed389e-a6eb-4821-853c-76d26058ccf9",
+    "userId": "5df18139-b093-4b30-ba13-fbf477b3ef2c",
+    "action": "LOGOUT",
+    "ipAddress": "192.168.1.89",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-19T15:01:07.302881Z"
+  },
+  {
+    "id": "62f59f91-0559-4baa-83c3-caabc58bd464",
+    "userId": "5df18139-b093-4b30-ba13-fbf477b3ef2c",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.62",
+    "userAgent": "Mozilla/5.0 (Linux; Android 12; SM-G991B)",
+    "createdAt": "2025-04-25T13:23:18.302892Z"
+  },
+  {
+    "id": "0e85ea40-e135-458b-b707-e19f1915f08c",
+    "userId": "5df18139-b093-4b30-ba13-fbf477b3ef2c",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.67",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-18T04:13:34.302905Z"
+  },
+  {
+    "id": "c730e6bb-a308-4e5c-abd3-f3d54e10e134",
+    "userId": "5df18139-b093-4b30-ba13-fbf477b3ef2c",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.52",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-10T15:26:10.302917Z"
+  },
+  {
+    "id": "36bc8f1c-bb08-4a84-8094-74dfe645491a",
+    "userId": "5df18139-b093-4b30-ba13-fbf477b3ef2c",
+    "action": "LOGIN_SUCCESS",
+    "ipAddress": "192.168.1.180",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-23T05:25:43.302929Z"
+  },
+  {
+    "id": "2d62cecd-09b9-44ce-a2ad-a9bd1e82156d",
+    "userId": "5df18139-b093-4b30-ba13-fbf477b3ef2c",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.237",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "createdAt": "2025-04-27T19:39:09.302943Z"
+  },
+  {
+    "id": "e1e74107-73b0-469e-8015-b4eaae2889e8",
+    "userId": "5df18139-b093-4b30-ba13-fbf477b3ef2c",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.192",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-11T05:26:01.302972Z"
+  },
+  {
+    "id": "925609a0-c418-4526-bf1b-bbd376d18a87",
+    "userId": "5df18139-b093-4b30-ba13-fbf477b3ef2c",
+    "action": "LOGIN_FAILURE",
+    "ipAddress": "192.168.1.26",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+    "createdAt": "2025-04-15T16:04:02.303008Z"
+  },
+  {
+    "id": "c3ea1717-c3aa-4022-92db-34b227041e69",
+    "userId": "5df18139-b093-4b30-ba13-fbf477b3ef2c",
+    "action": "PASSWORD_RESET",
+    "ipAddress": "192.168.1.139",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "createdAt": "2025-04-14T05:11:57.303030Z"
+  }
+]
