@@ -1,7 +1,8 @@
-import { DashboardStats } from "@/components/dashboard/dashboard-stats"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { RecentNotifications } from "@/components/dashboard/recent-notifications"
-import { ApprovalActivity } from "@/components/dashboard/approval-activity"
+import { DashboardStats }      from '@/components/dashboard/dashboard-stats'
+import { DashboardHeader }     from '@/components/dashboard/dashboard-header'
+import { RecentNotifications } from '@/components/dashboard/recent-notifications'
+import { ApprovalActivity }     from '@/components/dashboard/approval-activity'
+
 
 export default function DashboardPage() {
   return (
