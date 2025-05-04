@@ -3,8 +3,10 @@ packages:
   - frontend
 
 ignoredBuiltDependencies:
+  - esbuild
   - prisma
 
 onlyBuiltDependencies:
   - '@prisma/client'
+  - '@prisma/engines'
   - bcrypt

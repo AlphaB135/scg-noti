@@ -6,10 +6,19 @@ import { prisma } from '../../config/prismaClient'
 import { JWT_SECRET } from '../../config/env'
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body
+  const { employeeCode, password } = req.body
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } })
+    const user = await prisma.user.findFirst({
+      where: {
+        employeeProfile: {
+          employeeCode: employeeCode,
+        },
+      },
+      include: {
+        employeeProfile: true,
+      },
+    })
     if (!user) return res.status(401).json({ message: 'Invalid credentials' })
 
     const passwordMatch = await bcrypt.compare(password, user.passwordHash)
@@ -46,11 +55,13 @@ export const me = async (req: Request, res: Response) => {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { adminProfile: true },
+      include: { employeeProfile: true },
     })
     if (!user) return res.status(404).json({ message: 'User not found' })
 
-    res.json({ user })
+    // ลบฟิลด์ sensitive ถ้าต้องการ
+    const { passwordHash, ...rest } = user
+    res.json({ user: rest })
   } catch (err) {
     res.status(500).json({ message: 'Internal server error', error: err })
   }

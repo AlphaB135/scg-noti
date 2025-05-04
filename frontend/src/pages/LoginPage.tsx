@@ -1,51 +1,59 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios, { AxiosError } from 'axios'; // ✅ แก้ตรงนี้
+// frontend/src/pages/LoginPage.tsx
+
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import api from '../lib/real-api'
 
 interface LoginPageProps {
-  setRole: (role: string) => void;
+  setRole: (role: string) => void
 }
 
 export default function LoginPage({ setRole }: LoginPageProps) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+    e.preventDefault()
+    setError('')
+    setLoading(true)
 
     try {
-      const response = await axios.post(
-        '/api/auth/login',
-        { username, password },
-        { withCredentials: true }
-      );
+      const response = await api.post('/auth/login', {
+        employeeCode: username,
+        password,
+      })
+      
+      const { role } = response.data
+      setRole(role)
 
-      const data = response.data;
-      setRole(data.role);
-
-      if (data.role === 'ADMIN') {
-        navigate('/admin');
-      } else if (data.role === 'EMPLOYEE') {
-        navigate('/employee');
-      } else if (data.role === 'SUPERVISOR') {
-        navigate('/supervisor/explanations');
-      } else {
-        console.warn('⚠️ สิทธิ์ผู้ใช้ผิดปกติ:', data.role);
-        setError('สิทธิ์ของผู้ใช้นี้ไม่ถูกต้อง');
+      switch (role) {
+        case 'ADMIN':
+          navigate('/admin')
+          break
+        case 'EMPLOYEE':
+          navigate('/employee')
+          break
+        case 'SUPERVISOR':
+          navigate('/supervisor/explanations')
+          break
+        case 'SUPERADMIN':
+          navigate('/superadmin')
+          break
+        default:
+          console.warn('⚠️ สิทธิ์ผู้ใช้ผิดปกติ:', role)
+          setError('สิทธิ์ของผู้ใช้นี้ไม่ถูกต้อง')
       }
     } catch (err: unknown) {
-      const error = err as AxiosError<{ message?: string }>;
-      console.error('❌ Login error:', error);
-      setError(error.response?.data?.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+      console.error('❌ Login error:', err)
+      const message = (err as any)?.response?.data?.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'
+      setError(message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -60,7 +68,9 @@ export default function LoginPage({ setRole }: LoginPageProps) {
         <h2 className="text-2xl font-bold mb-4 text-center">เข้าสู่ระบบ</h2>
 
         {error && (
-          <div className="bg-red-100 text-red-700 p-2 rounded mb-3 text-sm">{error}</div>
+          <div className="bg-red-100 text-red-700 p-2 rounded mb-3 text-sm">
+            {error}
+          </div>
         )}
 
         <input
@@ -89,11 +99,11 @@ export default function LoginPage({ setRole }: LoginPageProps) {
         </button>
 
         <p className="text-sm text-center mt-4">
-          <Link to="/forgot-password" className="gray-500 hover:underline">
+          <a href="/forgot-password" className="text-gray-500 hover:underline">
             ลืมรหัสผ่าน ?
-          </Link>
+          </a>
         </p>
       </form>
     </div>
-  );
+  )
 }

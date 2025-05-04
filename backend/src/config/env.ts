@@ -1,2 +1,5 @@
-import 'dotenv/config';
-export const { JWT_SECRET } = process.env;
+// 📁 backend/src/config/env.ts
+import dotenv from 'dotenv'
+dotenv.config()
+
+export const JWT_SECRET = process.env.JWT_SECRET!
