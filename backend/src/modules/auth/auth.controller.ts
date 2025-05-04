@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../../config/env'
 import { prisma } from '../../config/prismaClient'
 
-export async function login(req: Request, res: Response) {
+export async function login(req: Request, res: Response): Promise<void> {
   try {
     console.log('📥 [LOGIN] req.body:', req.body)
 
@@ -14,7 +14,8 @@ export async function login(req: Request, res: Response) {
     const code = employeeCode ?? email
     if (!code || !password) {
       console.warn('⚠️ Missing credentials:', { code, password })
-      return res.status(400).json({ message: 'Missing credentials' })
+      res.status(400).json({ message: 'Missing credentials' })
+      return
     }
 
     // หา user ผ่าน relation ไปยัง employeeProfile.employeeCode
@@ -24,13 +25,15 @@ export async function login(req: Request, res: Response) {
     })
     if (!user) {
       console.warn('⚠️ ไม่พบผู้ใช้:', code)
-      return res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' })
+      res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' })
+      return
     }
 
     const valid = await bcrypt.compare(password, user.passwordHash)
     if (!valid) {
       console.warn('⚠️ รหัสผ่านไม่ถูกต้อง:', code)
-      return res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' })
+      res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' })
+      return
     }
 
     // สร้าง fingerprint (IP + User-Agent)
@@ -49,16 +52,19 @@ export async function login(req: Request, res: Response) {
       '| SessionID:', session.id
     )
 
-    return res
+    // ส่ง cookie และ JSON ตอบกลับ
+    res
       .cookie('token', token, { httpOnly: true, sameSite: 'strict' })
       .json({ ok: true, role: user.role })
+    return
   } catch (err) {
     console.error('❌ [LOGIN ERROR]', err)
-    return res.status(500).json({ message: 'เกิดข้อผิดพลาดในฝั่งเซิร์ฟเวอร์' })
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดในฝั่งเซิร์ฟเวอร์' })
+    return
   }
 }
 
-export async function logout(req: Request, res: Response) {
+export async function logout(req: Request, res: Response): Promise<void> {
   const token = req.cookies?.token as string | undefined
   if (token) {
     try {
@@ -71,15 +77,17 @@ export async function logout(req: Request, res: Response) {
   }
 
   console.log('🔓 Logged out session')
-  return res.clearCookie('token').json({ ok: true })
+  res.clearCookie('token').json({ ok: true })
+  return
 }
 
-export async function me(req: Request, res: Response) {
+export async function me(req: Request, res: Response): Promise<void> {
   const userId = (req.user as any)?.id
   console.log('📥 [ME] req.user:', req.user)
   if (!userId) {
     console.warn('⚠️ Unauthorized access to /me')
-    return res.status(401).json({ message: 'Unauthorized' })
+    res.status(401).json({ message: 'Unauthorized' })
+    return
   }
 
   const user = await prisma.user.findUnique({
@@ -88,10 +96,11 @@ export async function me(req: Request, res: Response) {
   })
   if (!user) {
     console.warn('⚠️ User not found for id:', userId)
-    return res.status(404).json({ message: 'User not found' })
+    res.status(404).json({ message: 'User not found' })
+    return
   }
 
-  // ใช้ non-null assertion เพราะเรารู้ว่า employeeProfile ต้องมีข้อมูล
   console.log('✅ [ME] returning user:', user.employeeProfile!.employeeCode)
-  return res.json({ user })
+  res.json({ user })
+  return
 }
