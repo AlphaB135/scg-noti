@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'            // ← เพิ่มบรรทัดนี้
 import api from '../lib/real-api'
 
 interface LoginPageProps {
@@ -37,10 +38,8 @@ export default function LoginPage({ setRole }: LoginPageProps) {
           navigate('/employee')
           break
         case 'SUPERVISOR':
-          navigate('/supervisor/explanations')
-          break
         case 'SUPERADMIN':
-          navigate('/superadmin')
+          navigate('/dashboard')
           break
         default:
           console.warn('⚠️ สิทธิ์ผู้ใช้ผิดปกติ:', role)
@@ -48,7 +47,13 @@ export default function LoginPage({ setRole }: LoginPageProps) {
       }
     } catch (err: unknown) {
       console.error('❌ Login error:', err)
-      const message = (err as any)?.response?.data?.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'
+      // เลี่ยงการ cast any, ใช้ axios.isAxiosError ตรวจสอบก่อนอ่าน response
+      let message = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'
+      if (axios.isAxiosError(err)) {
+        message = err.response?.data?.message ?? err.message
+      } else if (err instanceof Error) {
+        message = err.message
+      }
       setError(message)
     } finally {
       setLoading(false)

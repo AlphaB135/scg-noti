@@ -1,11 +1,11 @@
+// backend/src/routes/dashboard.ts
 import { Router, Request, Response } from 'express'
 import { prisma } from '../config/prismaClient'
 
 const router = Router()
 
-router.get('/overview', async (req: Request, res: Response) => {
+router.get('/overview', async (req, res) => {
   try {
-    // ดึงตัวเลขจากแต่ละตาราง + คำนวน %
     const [notifTotal, notifPending, notifApproved] = await Promise.all([
       prisma.notification.count(),
       prisma.notification.count({ where: { status: 'PENDING' } }),
@@ -14,8 +14,8 @@ router.get('/overview', async (req: Request, res: Response) => {
 
     const [apprTotal, apprPending, apprCompleted] = await Promise.all([
       prisma.approval.count(),
-      prisma.approval.count({ where: { status: 'PENDING' } }),
-      prisma.approval.count({ where: { status: 'COMPLETED' } }),
+      prisma.approval.count({ where: { response: 'PENDING' } }),      // หรือ 'APPROVE'/'REJECT'
+      prisma.approval.count({ where: { response: 'APPROVE' } }),
     ])
 
     const [userTotal, userActive] = await Promise.all([

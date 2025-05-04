@@ -1,29 +1,18 @@
 // 📁 backend/src/routes/auth.ts
-import { Router, RequestHandler } from 'express'
+import { Router } from 'express'
 import { login, logout, me } from '../modules/auth/auth.controller'
-import { jwtGuard } from '../middleware/auth/jwtGuard'
+// ตรงนี้ import jwtGuard จากโฟลเดอร์ modules/auth
+import { jwtGuard } from '../modules/auth/jwtGuard'
 
 const router = Router()
 
 // Public login route
-router.post(
-  '/login',
-  // cast through unknown to satisfy RequestHandler signature
-  (login as unknown) as RequestHandler
-)
+router.post('/login', login)
 
-// Logout (protected) – invalidate session
-router.post(
-  '/logout',
-  (jwtGuard as unknown) as RequestHandler,
-  (logout as unknown) as RequestHandler
-)
+// Logout (protected)
+router.post('/logout', jwtGuard, logout)
 
 // Get current user (protected)
-router.get(
-  '/me',
-  (jwtGuard as unknown) as RequestHandler,
-  (me as unknown) as RequestHandler
-)
+router.get('/me', jwtGuard, me)
 
 export default router

@@ -1,19 +1,40 @@
 // 📁 backend/src/routes/index.ts
 import { Router } from 'express'
 import { login, logout, me } from '../modules/auth/auth.controller'
-import { jwtGuard } from '../middleware/auth/jwtGuard'
+import { jwtGuard } from '../modules/auth/jwtGuard'
 import dashboardRouter from './dashboard'
+import notificationsRouter from './notifications'
+/* import approvalsRouter from './approvals'
+import rpaRouter from './rpa'
+import auditLogsRouter from './audit-logs'
+import settingsRouter from './settings'
+ */
+const router = Router()
 
-const r = Router()
+// ─── Auth routes ────────────────────────────────────────────────────────────────
+// Public: login
+router.post('/auth/login', login)
+// Protected: logout & clear session
+router.post('/auth/logout', jwtGuard, logout)
+// Protected: current user info
+router.get('/me', jwtGuard, me)
 
-// Auth routes
-r.post('/auth/login', login)
-// Logout และลบ session
-r.post('/auth/logout', jwtGuard, logout)
-// ดึงข้อมูลผู้ใช้งานปัจจุบัน
-r.get('/me', jwtGuard, me)
+// ─── Dashboard (overview) ───────────────────────────────────────────────────────
+router.use('/dashboard', jwtGuard, dashboardRouter)
 
-// Dashboard routes (ต้อง authenticated ก่อน)
-r.use('/dashboard', jwtGuard, dashboardRouter)
+// ─── Notifications ─────────────────────────────────────────────────────────────
+router.use('/notifications', jwtGuard, notificationsRouter)
 
-export default r
+// ─── Approvals ─────────────────────────────────────────────────────────────────
+/* router.use('/approvals', jwtGuard, approvalsRouter)
+
+// ─── RPA Trigger ────────────────────────────────────────────────────────────────
+router.use('/rpa', jwtGuard, rpaRouter)
+
+// ─── Audit Logs ────────────────────────────────────────────────────────────────
+router.use('/audit-logs', jwtGuard, auditLogsRouter)
+
+// ─── Settings ──────────────────────────────────────────────────────────────────
+router.use('/settings', jwtGuard, settingsRouter) */
+
+export default router
