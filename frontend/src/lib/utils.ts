@@ -1,8 +1,12 @@
-import { type ClassValue, clsx } from "clsx"
+// frontend/src/lib/utils.ts
+
+// นำเข้า clsx เป็น default export พร้อม type ClassValue
+import clsx, { type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  // clsx รับ argument แยก ไม่ใช่ array
+  return twMerge(clsx(...inputs))
 }
 
 export function formatDate(date: string | Date) {

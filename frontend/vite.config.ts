@@ -1,14 +1,17 @@
 // frontend/vite.config.ts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
+import { fileURLToPath, URL } from 'url'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+  
+  ],
   resolve: {
     alias: {
-      // ให้ @ แทน path ไปที่ src/
-      '@': path.resolve(__dirname, 'src'),
+      // ให้ @ ชี้ไปที่โฟลเดอร์ src ของโปรเจกต์
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
   server: {

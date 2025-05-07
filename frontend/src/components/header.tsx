@@ -1,7 +1,6 @@
-"use client"
-
+// src/components/Header.tsx
 import { useState } from "react"
-import { usePathname } from "next/navigation"
+import { useLocation } from "react-router-dom"
 import { Bell, Menu, Search, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,25 +16,16 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { AppSidebar } from "./app-sidebar"
 
 export function Header() {
-  const pathname = usePathname()
+  const { pathname } = useLocation()
   const [searchOpen, setSearchOpen] = useState(false)
 
-  // Get page title based on pathname
   const getPageTitle = () => {
-    switch (true) {
-      case pathname.includes("/dashboard"):
-        return "Dashboard"
-      case pathname.includes("/notifications"):
-        return "Notifications"
-      case pathname.includes("/approvals"):
-        return "Approvals"
-      case pathname.includes("/rpa"):
-        return "RPA Trigger"
-      case pathname.includes("/settings"):
-        return "Settings"
-      default:
-        return "SCG Notification System"
-    }
+    if (pathname.startsWith("/dashboard")) return "Dashboard"
+    if (pathname.startsWith("/notifications")) return "Notifications"
+    if (pathname.startsWith("/approvals")) return "Approvals"
+    if (pathname.startsWith("/rpa")) return "RPA Trigger"
+    if (pathname.startsWith("/settings")) return "Settings"
+    return "SCG Notification System"
   }
 
   return (

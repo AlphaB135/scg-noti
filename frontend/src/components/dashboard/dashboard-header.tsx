@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
-import Link from "next/link"
+import { Link } from "react-router-dom"
 
 export function DashboardHeader() {
   return (
