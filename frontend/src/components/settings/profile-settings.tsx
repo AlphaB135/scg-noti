@@ -56,11 +56,11 @@ export function ProfileSettings() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-noto">
       <Card>
         <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Manage your personal information and how it appears across the system.</CardDescription>
+          <CardTitle>โปรไฟล์</CardTitle>
+          <CardDescription>การตั้งค่าและจัดการข้อมูลส่วนบุคคล</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-6">
@@ -69,13 +69,13 @@ export function ProfileSettings() {
               <AvatarFallback className="text-2xl">JD</AvatarFallback>
             </Avatar>
             <div className="space-y-2">
-              <h3 className="font-medium">Profile Picture</h3>
+              <h3 className="font-medium">รูปโปรไฟล์</h3>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
-                  Upload New
+                  อัพโหลด
                 </Button>
                 <Button variant="outline" size="sm" className="text-red-500">
-                  Remove
+                  ลบรูปโปรไฟล์
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">JPG, GIF or PNG. Max size 1MB.</p>
@@ -90,7 +90,7 @@ export function ProfileSettings() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>ชื่อจริง</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter your full name" {...field} />
                       </FormControl>
@@ -104,7 +104,7 @@ export function ProfileSettings() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>อีเมล</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter your email" {...field} />
                       </FormControl>
@@ -118,7 +118,7 @@ export function ProfileSettings() {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Job Title</FormLabel>
+                      <FormLabel>ตำแหน่งงาน</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter your job title" {...field} />
                       </FormControl>
@@ -132,7 +132,7 @@ export function ProfileSettings() {
                   name="department"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Department</FormLabel>
+                      <FormLabel>แผนก</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter your department" {...field} />
                       </FormControl>
@@ -151,7 +151,7 @@ export function ProfileSettings() {
                     <FormControl>
                       <Textarea placeholder="Write a short bio about yourself" className="resize-none" {...field} />
                     </FormControl>
-                    <FormDescription>Brief description for your profile. Max 160 characters.</FormDescription>
+                    <FormDescription>คำอธิบายสั้น ๆ สำหรับโปรไฟล์ของคุณ ( ไม่เกิน 160 ตัวอักษร )</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -159,7 +159,7 @@ export function ProfileSettings() {
 
               <div className="flex justify-end">
                 <Button type="submit" disabled={isLoading} className="bg-[#E2001A] hover:bg-[#C0001A] text-white">
-                  {isLoading ? "Saving..." : "Save Changes"}
+                  {isLoading ? "Saving..." : "บันทึกการเปลี่ยนแปลง"}
                 </Button>
               </div>
             </form>

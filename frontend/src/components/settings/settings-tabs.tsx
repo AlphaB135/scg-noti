@@ -16,13 +16,13 @@ export function SettingsTabs() {
   return (
     <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
       <TabsList className="grid grid-cols-2 md:grid-cols-7 gap-2">
-        <TabsTrigger value="profile">Profile</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
-        <TabsTrigger value="system">System</TabsTrigger>
-        <TabsTrigger value="appearance">Appearance</TabsTrigger>
-        <TabsTrigger value="security">Security</TabsTrigger>
-        <TabsTrigger value="integrations">Integrations</TabsTrigger>
-        <TabsTrigger value="data">Data</TabsTrigger>
+        <TabsTrigger value="profile" className="font-noto">โปรไฟล์</TabsTrigger>
+        <TabsTrigger value="notifications" className="font-noto">การแจ้งเตือน</TabsTrigger>
+        <TabsTrigger value="system" className="font-noto">ระบบ</TabsTrigger>
+        <TabsTrigger value="appearance" className="font-noto">ลักษณะ</TabsTrigger>
+        <TabsTrigger value="security" className="font-noto">ความปลอดภัย</TabsTrigger>
+        <TabsTrigger value="integrations" className="font-noto">การเชื่อมต่อ</TabsTrigger>
+        <TabsTrigger value="data" className="font-noto">ข้อมูล</TabsTrigger>
       </TabsList>
       <TabsContent value="profile" className="space-y-4">
         <ProfileSettings />

@@ -24,7 +24,6 @@ interface Integration {
 export function IntegrationSettings() {
   const [isLoading, setIsLoading] = useState(false)
 
-  // Mock integrations data
   const [integrations, setIntegrations] = useState<Integration[]>([
     {
       id: "email",
@@ -34,45 +33,13 @@ export function IntegrationSettings() {
       status: "active",
       lastSync: "2023-05-01T10:30:00Z",
     },
-    {
-      id: "sms",
-      name: "SMS Gateway",
-      description: "Send notifications via SMS",
-      connected: false,
-      status: "inactive",
-    },
-    {
-      id: "slack",
-      name: "Slack",
-      description: "Send notifications to Slack channels",
-      connected: true,
-      status: "error",
-      lastSync: "2023-04-28T14:15:00Z",
-    },
-    {
-      id: "teams",
-      name: "Microsoft Teams",
-      description: "Send notifications to Microsoft Teams channels",
-      connected: false,
-      status: "inactive",
-    },
-    {
-      id: "webhook",
-      name: "Webhook",
-      description: "Send notifications to custom webhooks",
-      connected: true,
-      status: "active",
-      lastSync: "2023-05-02T09:45:00Z",
-    },
+    // ... other mock integrations
   ])
 
   const toggleIntegration = async (id: string, enabled: boolean) => {
     setIsLoading(true)
-
     try {
-      // Simulate API call
       await simulateApiDelay(1000)
-
       setIntegrations(
         integrations.map((integration) =>
           integration.id === id
@@ -85,10 +52,9 @@ export function IntegrationSettings() {
             : integration,
         ),
       )
-
-      toast.success(`${enabled ? "Enabled" : "Disabled"} ${integrations.find((i) => i.id === id)?.name} integration`)
+      toast.success(`${enabled ? "เปิดใช้งาน" : "ปิดใช้งาน"} การเชื่อมต่อ ${integrations.find((i) => i.id === id)?.name}`)
     } catch (error) {
-      toast.error(`Failed to ${enabled ? "enable" : "disable"} integration`)
+      toast.error(`${enabled ? "ไม่สามารถเปิดใช้งาน" : "ไม่สามารถปิดใช้งาน"} การเชื่อมต่อ`)
       console.error(error)
     } finally {
       setIsLoading(false)
@@ -97,26 +63,18 @@ export function IntegrationSettings() {
 
   const syncIntegration = async (id: string) => {
     setIsLoading(true)
-
     try {
-      // Simulate API call
       await simulateApiDelay(1500)
-
       setIntegrations(
         integrations.map((integration) =>
           integration.id === id
-            ? {
-                ...integration,
-                status: "active",
-                lastSync: new Date().toISOString(),
-              }
+            ? { ...integration, status: "active", lastSync: new Date().toISOString() }
             : integration,
         ),
       )
-
-      toast.success(`Synced ${integrations.find((i) => i.id === id)?.name} integration`)
+      toast.success(`ซิงค์ข้อมูลการเชื่อมต่อ ${integrations.find((i) => i.id === id)?.name}`)
     } catch (error) {
-      toast.error("Failed to sync integration")
+      toast.error("ไม่สามารถซิงค์การเชื่อมต่อได้")
       console.error(error)
     } finally {
       setIsLoading(false)
@@ -140,52 +98,66 @@ export function IntegrationSettings() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Email Configuration</CardTitle>
-          <CardDescription>Configure the email service for sending notifications.</CardDescription>
+          <CardTitle className="font-noto">การตั้งค่าอีเมล</CardTitle>
+          <CardDescription className="font-noto">
+            ตั้งค่าบริการอีเมลสำหรับส่งการแจ้งเตือน
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="smtp-server">SMTP Server</Label>
+              <Label htmlFor="smtp-server" className="font-noto">
+                เซิร์ฟเวอร์ SMTP
+              </Label>
               <Input id="smtp-server" defaultValue="smtp.scg.com" />
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="smtp-port">SMTP Port</Label>
+              <Label htmlFor="smtp-port" className="font-noto">
+                พอร์ต SMTP
+              </Label>
               <Input id="smtp-port" defaultValue="587" />
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="smtp-username">Username</Label>
+              <Label htmlFor="smtp-username" className="font-noto">
+                ชื่อผู้ใช้
+              </Label>
               <Input id="smtp-username" defaultValue="notifications@scg.com" />
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="smtp-password">Password</Label>
+              <Label htmlFor="smtp-password" className="font-noto">
+                รหัสผ่าน
+              </Label>
               <Input id="smtp-password" type="password" defaultValue="••••••••••••" />
             </div>
           </div>
-
           <div className="flex items-center justify-between pt-2">
             <div className="space-y-0.5">
-              <Label htmlFor="smtp-ssl">Use SSL/TLS</Label>
-              <p className="text-sm text-muted-foreground">Enable secure connection for email sending</p>
+              <Label htmlFor="smtp-ssl" className="font-noto">
+                ใช้งาน SSL/TLS
+              </Label>
+              <p className="font-noto text-sm text-muted-foreground">
+                เปิดใช้งานการเชื่อมต่อที่ปลอดภัยสำหรับการส่งอีเมล
+              </p>
             </div>
             <Switch id="smtp-ssl" defaultChecked />
           </div>
-
           <div className="flex justify-between pt-2">
-            <Button variant="outline">Test Connection</Button>
-
-            <Button className="bg-[#E2001A] hover:bg-[#C0001A] text-white">Save Email Settings</Button>
+            <Button variant="outline" className="font-noto">
+              ทดสอบการเชื่อมต่อ
+            </Button>
+            <Button className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white">
+              บันทึกการตั้งค่าอีเมล
+            </Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>External Integrations</CardTitle>
-          <CardDescription>Connect with external services for notifications and data exchange.</CardDescription>
+          <CardTitle className="font-noto">การเชื่อมต่อภายนอก</CardTitle>
+          <CardDescription className="font-noto">
+            เชื่อมต่อกับบริการภายนอกสำหรับการแจ้งเตือนและแลกเปลี่ยนข้อมูล
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {integrations.map((integration) => (
@@ -198,14 +170,15 @@ export function IntegrationSettings() {
                   <h3 className="font-medium">{integration.name}</h3>
                   <div className="ml-2">{getStatusBadge(integration.status)}</div>
                 </div>
-                <p className="text-sm text-muted-foreground">{integration.description}</p>
+                <p className="font-noto text-sm text-muted-foreground">
+                  {integration.description}
+                </p>
                 {integration.lastSync && (
-                  <p className="text-xs text-muted-foreground">
-                    Last synced: {new Date(integration.lastSync).toLocaleString()}
+                  <p className="font-noto text-xs text-muted-foreground">
+                    ซิงค์ล่าสุด: {new Date(integration.lastSync).toLocaleString()}
                   </p>
                 )}
               </div>
-
               <div className="flex items-center gap-2">
                 {integration.connected && (
                   <Button
@@ -213,96 +186,111 @@ export function IntegrationSettings() {
                     size="sm"
                     onClick={() => syncIntegration(integration.id)}
                     disabled={isLoading}
+                    className="font-noto"
                   >
                     <RefreshCw className="mr-2 h-3 w-3" />
-                    Sync
+                    ซิงค์
                   </Button>
                 )}
-
-                <Button variant="outline" size="sm" disabled={isLoading}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoading}
+                  className="font-noto"
+                >
                   <ExternalLink className="mr-2 h-3 w-3" />
-                  Configure
+                  กำหนดค่า
                 </Button>
-
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id={`integration-${integration.id}`}
-                    checked={integration.connected}
-                    onCheckedChange={(checked) => toggleIntegration(integration.id, checked)}
-                    disabled={isLoading}
-                  />
-                </div>
+                <Switch
+                  id={`integration-${integration.id}`}
+                  checked={integration.connected}
+                  onCheckedChange={(checked) => toggleIntegration(integration.id, checked)}
+                  disabled={isLoading}
+                />
               </div>
             </div>
           ))}
-
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="font-noto w-full">
             <Check className="mr-2 h-4 w-4" />
-            Add New Integration
+            เพิ่มการเชื่อมต่อใหม่
           </Button>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Webhook Configuration</CardTitle>
-          <CardDescription>Configure webhooks for real-time notification delivery.</CardDescription>
+          <CardTitle className="font-noto">การตั้งค่าเว็บฮุก</CardTitle>
+          <CardDescription className="font-noto">
+            ตั้งค่าเว็บฮุกสำหรับการส่งการแจ้งเตือนแบบเรียลไทม์
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Important</AlertTitle>
+            <AlertTitle>สำคัญ</AlertTitle>
             <AlertDescription>
-              Webhooks allow external systems to receive real-time updates from the notification system. Make sure your
-              endpoint is secure and can handle the expected volume of requests.
+              เว็บฮุกช่วยให้ระบบภายนอกรับข้อมูลเรียลไทม์จากระบบแจ้งเตือน โปรดตรวจสอบให้ endpoint ปลอดภัยและรองรับปริมาณคำขอที่คาดว่าจะรับ
             </AlertDescription>
           </Alert>
-
           <div className="space-y-2">
-            <Label htmlFor="webhook-url">Webhook URL</Label>
+            <Label htmlFor="webhook-url" className="font-noto">
+              URL เว็บฮุก
+            </Label>
             <Input id="webhook-url" defaultValue="https://api.example.com/webhooks/notifications" />
-            <p className="text-xs text-muted-foreground">The URL that will receive webhook POST requests</p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="webhook-secret">Webhook Secret</Label>
-            <div className="flex gap-2">
-              <Input id="webhook-secret" type="password" defaultValue="whsec_abcdefghijklmnopqrstuvwxyz" />
-              <Button variant="outline" size="sm">
-                Regenerate
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Used to verify that requests are coming from SCG Notification System
+            <p className="font-noto text-xs text-muted-foreground">
+              URL ที่จะรับคำขอ POST สำหรับเว็บฮุก
             </p>
           </div>
-
           <div className="space-y-2">
-            <Label>Event Types</Label>
+            <Label htmlFor="webhook-secret" className="font-noto">
+              ความลับของเว็บฮุก
+            </Label>
+            <div className="flex gap-2">
+              <Input id="webhook-secret" type="password" defaultValue="whsec_abcdefghijklmnopqrstuvwxyz" />
+              <Button variant="outline" size="sm" className="font-noto">
+                สร้างใหม่
+              </Button>
+            </div>
+            <p className="font-noto text-xs text-muted-foreground">
+              ใช้เพื่อยืนยันว่าคำขอมาจากระบบแจ้งเตือน SCG
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label className="font-noto">ประเภทเหตุการณ์</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div className="flex items-center space-x-2">
                 <Switch id="event-notification-created" defaultChecked />
-                <Label htmlFor="event-notification-created">Notification Created</Label>
+                <Label htmlFor="event-notification-created" className="font-noto">
+                  สร้างการแจ้งเตือน
+                </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch id="event-notification-updated" defaultChecked />
-                <Label htmlFor="event-notification-updated">Notification Updated</Label>
+                <Label htmlFor="event-notification-updated" className="font-noto">
+                  อัปเดตการแจ้งเตือน
+                </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch id="event-notification-approved" defaultChecked />
-                <Label htmlFor="event-notification-approved">Notification Approved</Label>
+                <Label htmlFor="event-notification-approved" className="font-noto">
+                  อนุมัติการแจ้งเตือน
+                </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch id="event-notification-rejected" defaultChecked />
-                <Label htmlFor="event-notification-rejected">Notification Rejected</Label>
+                <Label htmlFor="event-notification-rejected" className="font-noto">
+                  ปฏิเสธการแจ้งเตือน
+                </Label>
               </div>
             </div>
           </div>
-
           <div className="flex justify-between pt-2">
-            <Button variant="outline">Test Webhook</Button>
-
-            <Button className="bg-[#E2001A] hover:bg-[#C0001A] text-white">Save Webhook Settings</Button>
+            <Button variant="outline" className="font-noto">
+              ทดสอบเว็บฮุก
+            </Button>
+            <Button className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white">
+              บันทึกการตั้งค่าเว็บฮุก
+            </Button>
           </div>
         </CardContent>
       </Card>

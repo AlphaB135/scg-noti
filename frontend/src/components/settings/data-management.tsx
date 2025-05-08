@@ -27,15 +27,13 @@ export function DataManagement() {
     setExportProgress(0)
 
     try {
-      // Simulate export progress
       for (let i = 0; i <= 100; i += 10) {
         setExportProgress(i)
         await simulateApiDelay(300)
       }
 
-      toast.success("Data exported successfully")
+      toast.success("ส่งออกข้อมูลสำเร็จ")
 
-      // Simulate download
       setTimeout(() => {
         const link = document.createElement("a")
         link.href = "#"
@@ -45,7 +43,7 @@ export function DataManagement() {
         document.body.removeChild(link)
       }, 500)
     } catch (error) {
-      toast.error("Failed to export data")
+      toast.error("ไม่สามารถส่งออกข้อมูลได้")
       console.error(error)
     } finally {
       setIsExporting(false)
@@ -58,15 +56,14 @@ export function DataManagement() {
     setImportProgress(0)
 
     try {
-      // Simulate import progress
       for (let i = 0; i <= 100; i += 5) {
         setImportProgress(i)
         await simulateApiDelay(200)
       }
 
-      toast.success("Data imported successfully")
+      toast.success("นำเข้าข้อมูลสำเร็จ")
     } catch (error) {
-      toast.error("Failed to import data")
+      toast.error("ไม่สามารถนำเข้าข้อมูลได้")
       console.error(error)
     } finally {
       setIsImporting(false)
@@ -78,11 +75,10 @@ export function DataManagement() {
     setIsLoading(true)
 
     try {
-      // Simulate API call
       await simulateApiDelay(2000)
-      toast.success("Data purged successfully")
+      toast.success("ล้างข้อมูลสำเร็จ")
     } catch (error) {
-      toast.error("Failed to purge data")
+      toast.error("ไม่สามารถล้างข้อมูลได้")
       console.error(error)
     } finally {
       setIsLoading(false)
@@ -93,75 +89,73 @@ export function DataManagement() {
     <div className="space-y-6">
       <Tabs defaultValue="export" className="space-y-4">
         <TabsList className="grid grid-cols-3 gap-2">
-          <TabsTrigger value="export">Export Data</TabsTrigger>
-          <TabsTrigger value="import">Import Data</TabsTrigger>
-          <TabsTrigger value="purge">Purge Data</TabsTrigger>
+          <TabsTrigger value="export" className="font-noto">ส่งออกข้อมูล</TabsTrigger>
+          <TabsTrigger value="import" className="font-noto">นำเข้าข้อมูล</TabsTrigger>
+          <TabsTrigger value="purge" className="font-noto">ล้างข้อมูล</TabsTrigger>
         </TabsList>
 
         <TabsContent value="export" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Export Data</CardTitle>
-              <CardDescription>Export your notification data for backup or migration.</CardDescription>
+              <CardTitle className="font-noto">ส่งออกข้อมูล</CardTitle>
+              <CardDescription className="font-noto">ส่งออกข้อมูลแจ้งเตือนเพื่อสำรองหรือย้ายระบบ</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="export-format">Export Format</Label>
+                <Label htmlFor="export-format" className="font-noto">รูปแบบไฟล์</Label>
                 <Select value={exportFormat} onValueChange={setExportFormat}>
                   <SelectTrigger id="export-format">
-                    <SelectValue placeholder="Select format" />
+                    <SelectValue placeholder="เลือกประเภทไฟล์" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="json">JSON</SelectItem>
-                    <SelectItem value="csv">CSV</SelectItem>
-                    <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                    <SelectItem value="json" className="font-noto">JSON</SelectItem>
+                    <SelectItem value="csv" className="font-noto">CSV</SelectItem>
+                    <SelectItem value="xlsx" className="font-noto">Excel (XLSX)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>Data to Export</Label>
+                <Label className="font-noto">ข้อมูลที่จะส่งออก</Label>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox id="export-notifications" defaultChecked />
-                    <Label htmlFor="export-notifications">Notifications</Label>
+                    <Label htmlFor="export-notifications" className="font-noto">แจ้งเตือน</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="export-approvals" defaultChecked />
-                    <Label htmlFor="export-approvals">Approval Logs</Label>
+                    <Label htmlFor="export-approvals" className="font-noto">บันทึกการอนุมัติ</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="export-users" defaultChecked />
-                    <Label htmlFor="export-users">User Data</Label>
+                    <Label htmlFor="export-users" className="font-noto">ข้อมูลผู้ใช้</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="export-settings" />
-                    <Label htmlFor="export-settings">System Settings</Label>
+                    <Label htmlFor="export-settings" className="font-noto">การตั้งค่าระบบ</Label>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Date Range</Label>
+                <Label className="font-noto">ช่วงวันที่</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label htmlFor="export-start-date" className="text-xs">
-                      Start Date
-                    </Label>
+                    <Label htmlFor="export-start-date" className="font-noto text-xs">วันที่เริ่มต้น</Label>
                     <div className="relative">
                       <Calendar className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="export-start-date"
                         type="date"
                         className="pl-8"
-                        defaultValue={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
+                        defaultValue={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+                          .toISOString()
+                          .split("T")[0]}
                       />
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="export-end-date" className="text-xs">
-                      End Date
-                    </Label>
+                    <Label htmlFor="export-end-date" className="font-noto text-xs">วันที่สิ้นสุด</Label>
                     <div className="relative">
                       <Calendar className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -178,8 +172,8 @@ export function DataManagement() {
               {isExporting && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label>Export Progress</Label>
-                    <span className="text-sm">{exportProgress}%</span>
+                    <Label className="font-noto">ความคืบหน้าการส่งออก</Label>
+                    <span className="font-noto text-sm">{exportProgress}%</span>
                   </div>
                   <Progress value={exportProgress} className="h-2" />
                 </div>
@@ -189,10 +183,10 @@ export function DataManagement() {
               <Button
                 onClick={handleExport}
                 disabled={isExporting}
-                className="bg-[#E2001A] hover:bg-[#C0001A] text-white"
+                className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white"
               >
                 <ArrowDownToLine className="mr-2 h-4 w-4" />
-                {isExporting ? "Exporting..." : "Export Data"}
+                {isExporting ? "กำลังส่งออก..." : "ส่งออกข้อมูล"}
               </Button>
             </CardFooter>
           </Card>
@@ -201,45 +195,40 @@ export function DataManagement() {
         <TabsContent value="import" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Import Data</CardTitle>
-              <CardDescription>Import notification data from a file.</CardDescription>
+              <CardTitle className="font-noto">นำเข้าข้อมูล</CardTitle>
+              <CardDescription className="font-noto">นำเข้าข้อมูลแจ้งเตือนจากไฟล์</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert>
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Important</AlertTitle>
-                <AlertDescription>
-                  Importing data will merge with existing data. Make sure your import file is in the correct format.
+                <AlertTitle className="font-noto">สำคัญ</AlertTitle>
+                <AlertDescription className="font-noto">
+                  การนำเข้าข้อมูลจะผสานกับข้อมูลเดิม โปรดตรวจสอบว่าไฟล์ของคุณอยู่ในรูปแบบที่ถูกต้อง
                 </AlertDescription>
               </Alert>
 
               <div className="space-y-2">
-                <Label htmlFor="import-file">Import File</Label>
+                <Label htmlFor="import-file" className="font-noto">ไฟล์นำเข้า</Label>
                 <Input id="import-file" type="file" />
-                <p className="text-xs text-muted-foreground">Supported formats: JSON, CSV, XLSX</p>
+                <p className="font-noto text-xs text-muted-foreground">รองรับ: JSON, CSV, XLSX</p>
               </div>
 
               <div className="space-y-2">
-                <Label>Import Options</Label>
+                <Label className="font-noto">ตัวเลือกการนำเข้า</Label>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox id="import-overwrite" />
-                    <Label htmlFor="import-overwrite">Overwrite existing data</Label>
+                    <Label htmlFor="import-overwrite" className="font-noto">เขียนทับข้อมูลเดิม</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="import-validate" defaultChecked />
-                    <Label htmlFor="import-validate">Validate before importing</Label>
+                    <Label htmlFor="import-validate" className="font-noto">ตรวจสอบก่อนนำเข้า</Label>
                   </div>
                 </div>
               </div>
 
               {isImporting && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label>Import Progress</Label>
-                    <span className="text-sm">{importProgress}%</span>
-                  </div>
-                  <Progress value={importProgress} className="h-2" />
+                <div className="space-y-2">...
                 </div>
               )}
             </CardContent>
@@ -247,10 +236,10 @@ export function DataManagement() {
               <Button
                 onClick={handleImport}
                 disabled={isImporting}
-                className="bg-[#E2001A] hover:bg-[#C0001A] text-white"
+                className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white"
               >
                 <ArrowUpFromLine className="mr-2 h-4 w-4" />
-                {isImporting ? "Importing..." : "Import Data"}
+                {isImporting ? "กำลังนำเข้า..." : "นำเข้าข้อมูล"}
               </Button>
             </CardFooter>
           </Card>
@@ -259,62 +248,54 @@ export function DataManagement() {
         <TabsContent value="purge" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Purge Data</CardTitle>
-              <CardDescription>Permanently delete old or unnecessary data.</CardDescription>
+              <CardTitle className="font-noto">ล้างข้อมูล</CardTitle>
+              <CardDescription className="font-noto">ลบข้อมูลเก่าหรือไม่จำเป็นถาวร</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Warning</AlertTitle>
-                <AlertDescription>
-                  This action is irreversible. Purged data cannot be recovered. Consider exporting a backup before
-                  proceeding.
+                <AlertTitle className="font-noto">คำเตือน</AlertTitle>
+                <AlertDescription className="font-noto">
+                  การล้างข้อมูลไม่สามารถกู้คืนได้ ควรส่งออกข้อมูลสำรองก่อนดำเนินการ
                 </AlertDescription>
               </Alert>
 
               <div className="space-y-2">
-                <Label>Data to Purge</Label>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="purge-notifications" />
-                    <Label htmlFor="purge-notifications">Notifications</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="purge-approvals" />
-                    <Label htmlFor="purge-approvals">Approval Logs</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="purge-activity" />
-                    <Label htmlFor="purge-activity">Activity Logs</Label>
-                  </div>
+                <Label className="font-noto">ข้อมูลที่จะล้าง</Label>
+                <div className="space-y-2">...
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="purge-older-than">Purge Data Older Than</Label>
+                <Label htmlFor="purge-older-than" className="font-noto">ล้างข้อมูลเก่าเกิน</Label>
                 <Select defaultValue="90">
                   <SelectTrigger id="purge-older-than">
-                    <SelectValue placeholder="Select time period" />
+                    <SelectValue placeholder="เลือกช่วงเวลา" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="30">30 days</SelectItem>
-                    <SelectItem value="90">90 days</SelectItem>
-                    <SelectItem value="180">6 months</SelectItem>
-                    <SelectItem value="365">1 year</SelectItem>
-                    <SelectItem value="all">All data</SelectItem>
+                    <SelectItem value="30" className="font-noto">30 วัน</SelectItem>
+                    <SelectItem value="90" className="font-noto">90 วัน</SelectItem>
+                    <SelectItem value="180" className="font-noto">6 เดือน</SelectItem>
+                    <SelectItem value="365" className="font-noto">1 ปี</SelectItem>
+                    <SelectItem value="all" className="font-noto">ทั้งหมด</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="purge-confirmation">Type "PURGE" to confirm</Label>
+                <Label htmlFor="purge-confirmation" className="font-noto">พิมพ์ "PURGE" เพื่อยืนยัน</Label>
                 <Input id="purge-confirmation" placeholder="PURGE" />
               </div>
             </CardContent>
             <CardFooter className="flex justify-end">
-              <Button variant="destructive" onClick={handlePurgeData} disabled={isLoading}>
+              <Button
+                variant="destructive"
+                onClick={handlePurgeData}
+                disabled={isLoading}
+                className="font-noto"
+              >
                 <Trash2 className="mr-2 h-4 w-4" />
-                {isLoading ? "Purging..." : "Purge Data"}
+                {isLoading ? "กำลังล้าง..." : "ล้างข้อมูล"}
               </Button>
             </CardFooter>
           </Card>

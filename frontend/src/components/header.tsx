@@ -1,4 +1,5 @@
-// src/components/Header.tsx
+"use client"
+
 import { useState } from "react"
 import { useLocation } from "react-router-dom"
 import { Bell, Menu, Search, User } from "lucide-react"
@@ -20,12 +21,12 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
 
   const getPageTitle = () => {
-    if (pathname.startsWith("/dashboard")) return "Dashboard"
-    if (pathname.startsWith("/notifications")) return "Notifications"
-    if (pathname.startsWith("/approvals")) return "Approvals"
-    if (pathname.startsWith("/rpa")) return "RPA Trigger"
-    if (pathname.startsWith("/settings")) return "Settings"
-    return "SCG Notification System"
+    if (pathname.startsWith("/dashboard")) return "แดชบอร์ด"
+    if (pathname.startsWith("/notifications")) return "การแจ้งเตือน"
+    if (pathname.startsWith("/approvals")) return "การอนุมัติ"
+    if (pathname.startsWith("/rpa")) return "ทริกเกอร์ RPA"
+    if (pathname.startsWith("/settings")) return "การตั้งค่า"
+    return "ระบบแจ้งเตือน SCG"
   }
 
   return (
@@ -34,9 +35,9 @@ export function Header() {
         <div className="flex items-center gap-4">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" size="icon" className="md:hidden font-noto">
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
+                <span className="sr-only font-noto">สลับเมนู</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0">
@@ -52,39 +53,39 @@ export function Header() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
                 type="search"
-                placeholder="Search..."
+                placeholder="ค้นหา..."
                 className="w-64 pl-8 h-9"
                 autoFocus
                 onBlur={() => setSearchOpen(false)}
               />
             </div>
           ) : (
-            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)}>
+            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} className="font-noto">
               <Search className="h-5 w-5" />
-              <span className="sr-only">Search</span>
+              <span className="sr-only font-noto">ค้นหา</span>
             </Button>
           )}
 
-          <Button variant="ghost" size="icon" className="relative">
+          <Button variant="ghost" size="icon" className="relative font-noto">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-[#E2001A] rounded-full" />
-            <span className="sr-only">Notifications</span>
+            <span className="sr-only font-noto">การแจ้งเตือน</span>
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button variant="ghost" size="icon" className="rounded-full font-noto">
                 <User className="h-5 w-5" />
-                <span className="sr-only">User menu</span>
+                <span className="sr-only font-noto">เมนูผู้ใช้</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel className="font-noto">บัญชีของฉัน</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem className="font-noto">โปรไฟล์</DropdownMenuItem>
+              <DropdownMenuItem className="font-noto">การตั้งค่า</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem className="font-noto">ออกจากระบบ</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

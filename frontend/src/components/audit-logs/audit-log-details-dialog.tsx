@@ -15,53 +15,53 @@ export function AuditLogDetailsDialog({ log, open, onOpenChange }: AuditLogDetai
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Audit Log Details</DialogTitle>
+          <DialogTitle className="font-noto">รายละเอียดบันทึกตรวจสอบ</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">ID</h3>
-              <p className="text-sm font-mono break-all">{log.id}</p>
+              <h3 className="font-noto text-sm font-medium text-muted-foreground">รหัส</h3>
+              <p className="font-noto text-sm font-mono break-all">{log.id}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Timestamp</h3>
-              <p className="text-sm">{formatDateTime(log.timestamp)}</p>
+              <h3 className="font-noto text-sm font-medium text-muted-foreground">เวลาบันทึก</h3>
+              <p className="font-noto text-sm">{formatDateTime(log.timestamp)}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">User ID</h3>
-              <p className="text-sm font-mono break-all">{log.userId}</p>
+              <h3 className="font-noto text-sm font-medium text-muted-foreground">รหัสผู้ใช้</h3>
+              <p className="font-noto text-sm font-mono break-all">{log.userId}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Action</h3>
-              <p className="text-sm">{log.action}</p>
+              <h3 className="font-noto text-sm font-medium text-muted-foreground">การกระทำ</h3>
+              <p className="font-noto text-sm">{log.action}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">IP Address</h3>
-              <p className="text-sm">{log.ipAddress}</p>
+              <h3 className="font-noto text-sm font-medium text-muted-foreground">ที่อยู่ IP</h3>
+              <p className="font-noto text-sm">{log.ipAddress}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Status Code</h3>
-              <p className="text-sm">{log.statusCode}</p>
+              <h3 className="font-noto text-sm font-medium text-muted-foreground">รหัสสถานะ</h3>
+              <p className="font-noto text-sm">{log.statusCode}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Session ID</h3>
-              <p className="text-sm font-mono break-all">{log.sessionId}</p>
+              <h3 className="font-noto text-sm font-medium text-muted-foreground">รหัสเซสชัน</h3>
+              <p className="font-noto text-sm font-mono break-all">{log.sessionId}</p>
             </div>
           </div>
 
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground">Target Resource</h3>
-            <p className="text-sm font-mono break-all">{log.targetResource}</p>
+            <h3 className="font-noto text-sm font-medium text-muted-foreground">ทรัพยากรเป้าหมาย</h3>
+            <p className="font-noto text-sm font-mono break-all">{log.targetResource}</p>
           </div>
 
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground">User Agent</h3>
-            <p className="text-sm break-all">{log.userAgent}</p>
+            <h3 className="font-noto text-sm font-medium text-muted-foreground">ตัวแทนผู้ใช้</h3>
+            <p className="font-noto text-sm break-all">{log.userAgent}</p>
           </div>
 
           {log.details && (
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Additional Details</h3>
+              <h3 className="font-noto text-sm font-medium text-muted-foreground">รายละเอียดเพิ่มเติม</h3>
               <pre className="text-xs bg-gray-50 p-2 rounded-md overflow-auto max-h-[200px] mt-1">
                 {JSON.stringify(log.details, null, 2)}
               </pre>

@@ -30,7 +30,7 @@ export function AuditLogTable() {
       setLogs(response.logs)
       setTotalPages(response.totalPages)
     } catch (error) {
-      toast.error("Failed to load audit logs")
+      toast.error("ไม่สามารถโหลดบันทึกการตรวจสอบได้")
       console.error(error)
     } finally {
       setLoading(false)
@@ -80,13 +80,13 @@ export function AuditLogTable() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Timestamp</TableHead>
-                <TableHead>User ID</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Target Resource</TableHead>
-                <TableHead>IP Address</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Details</TableHead>
+                <TableHead className="font-noto">เวลา</TableHead>
+                <TableHead className="font-noto">รหัสผู้ใช้</TableHead>
+                <TableHead className="font-noto">การกระทำ</TableHead>
+                <TableHead className="font-noto">ทรัพยากรเป้าหมาย</TableHead>
+                <TableHead className="font-noto">ที่อยู่ IP</TableHead>
+                <TableHead className="font-noto">สถานะ</TableHead>
+                <TableHead className="font-noto text-right">รายละเอียด</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -119,25 +119,36 @@ export function AuditLogTable() {
               ) : logs.length > 0 ? (
                 logs.map((log) => (
                   <TableRow key={log.id}>
-                    <TableCell className="font-medium">{formatDateTime(log.timestamp)}</TableCell>
-                    <TableCell>{log.userId}</TableCell>
+                    <TableCell className="font-noto font-medium">
+                      {formatDateTime(log.timestamp)}
+                    </TableCell>
+                    <TableCell className="font-noto">{log.userId}</TableCell>
                     <TableCell>{getActionBadge(log.action)}</TableCell>
-                    <TableCell className="max-w-[200px] truncate" title={log.targetResource}>
+                    <TableCell
+                      className="font-noto max-w-[200px] truncate"
+                      title={log.targetResource}
+                    >
                       {log.targetResource}
                     </TableCell>
-                    <TableCell>{log.ipAddress}</TableCell>
+                    <TableCell className="font-noto">{log.ipAddress}</TableCell>
                     <TableCell>{getStatusBadge(log.statusCode)}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => handleViewDetails(log)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleViewDetails(log)}
+                        className="font-noto"
+                      >
                         <Eye className="h-4 w-4" />
+                        <span className="sr-only font-noto">ดูรายละเอียด</span>
                       </Button>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-6">
-                    No audit logs found
+                  <TableCell colSpan={7} className="text-center py-6 font-noto">
+                    ไม่พบบันทึกการตรวจสอบ
                   </TableCell>
                 </TableRow>
               )}
@@ -146,8 +157,8 @@ export function AuditLogTable() {
         </div>
 
         <div className="flex items-center justify-between px-4 py-4 border-t">
-          <div className="text-sm text-muted-foreground">
-            Showing page {currentPage} of {totalPages}
+          <div className="text-sm text-muted-foreground font-noto">
+            แสดงหน้า {currentPage} จาก {totalPages}
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -155,24 +166,32 @@ export function AuditLogTable() {
               size="sm"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1 || loading}
+              className="font-noto"
             >
               <ChevronLeft className="h-4 w-4" />
-              Previous
+              ก่อนหน้า
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages || loading}
+              className="font-noto"
             >
-              Next
+              ถัดไป
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </Card>
 
-      {selectedLog && <AuditLogDetailsDialog log={selectedLog} open={showDetails} onOpenChange={setShowDetails} />}
+      {selectedLog && (
+        <AuditLogDetailsDialog
+          log={selectedLog}
+          open={showDetails}
+          onOpenChange={setShowDetails}
+        />
+      )}
     </>
   )
 }

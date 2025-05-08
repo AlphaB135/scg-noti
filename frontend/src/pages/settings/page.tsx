@@ -16,7 +16,7 @@ export default function SettingsPage() {
         {/* Top header */}
         <Header />
 
-        {/* Page content */}
+        {/* Page content: flex-1 + overflow-y-auto */}
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
           <SettingsHeader />
           <SettingsTabs />

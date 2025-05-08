@@ -1,4 +1,9 @@
 /* src/index.css */
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -38,10 +43,32 @@
   }
 
   .dark {
-    /* dark theme vars… */
+    /* dark theme overrides */
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
-    /* …etc… */
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 0 100% 45%;
+    /* sidebar overrides */
+    --sidebar: 240 10% 3.9%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-background: 240 10% 3.9%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 0 100% 45%;
   }
 }
 
@@ -54,12 +81,16 @@
 
 /* 3) Custom utilities */
 @layer utilities {
-  /* Utility to apply the border color from --border */
+  /* background from --background */
+  .bg-background {
+    background-color: hsl(var(--background));
+  }
+  /* text color from --foreground */
+  .text-foreground {
+    color: hsl(var(--foreground));
+  }
+  /* border color from --border */
   .border-border {
     border-color: hsl(var(--border));
   }
-
-  /* If you want every element to have 1px solid border:
-     (optional—only if desired) */
-  
 }

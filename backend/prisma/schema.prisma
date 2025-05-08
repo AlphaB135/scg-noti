@@ -10,22 +10,21 @@ datasource db {
 
 // USER + PROFILE
 model User {
-  id                String     @id @default(uuid()) @db.UniqueIdentifier
-  email             String     @unique @db.NVarChar(160)
-  passwordHash      String     @db.NVarChar(255)
-  role              String     @db.VarChar(20) // e.g. "EMPLOYEE", "ADMIN", "SUPERADMIN", "AUDITOR"
-  status            String     @default("ACTIVE") @db.VarChar(10) // e.g. "ACTIVE", "LOCKED", "DISABLED"
-  lastLoginAt       DateTime?  @db.DateTime2
-  lastLoginIp       String?    @db.VarChar(45)
-  loginFailCount    Int        @default(0)
-  twoFaSecret       String?    @db.NVarChar(64)
-  deviceFingerprint String?    @db.NVarChar(128)
-  createdAt         DateTime   @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
-  updatedAt         DateTime   @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
-  essions           Session[]
-  approvals         Approval[]
+  id                String    @id @default(uuid()) @db.UniqueIdentifier
+  email             String    @unique @db.NVarChar(160)
+  passwordHash      String    @db.NVarChar(255)
+  role              String    @db.VarChar(20) // e.g. "EMPLOYEE", "ADMIN", "SUPERADMIN", "AUDITOR"
+  status            String    @default("ACTIVE") @db.VarChar(10) // e.g. "ACTIVE", "LOCKED", "DISABLED"
+  lastLoginAt       DateTime? @db.DateTime2
+  lastLoginIp       String?   @db.VarChar(45)
+  loginFailCount    Int       @default(0)
+  twoFaSecret       String?   @db.NVarChar(64)
+  deviceFingerprint String?   @db.NVarChar(128)
+  createdAt         DateTime  @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
+  updatedAt         DateTime  @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
 
-  // Profiles
+  sessions         Session[]
+  approvals        Approval[]
   employeeProfile  EmployeeProfile?
   adminProfile     AdminProfile?
   notificationPref UserNotificationPref?
@@ -33,6 +32,7 @@ model User {
   securityLogs     SecurityLog[]
 }
 
+// Profiles
 model EmployeeProfile {
   userId          String  @id @db.UniqueIdentifier
   user            User    @relation(fields: [userId], references: [id])
@@ -136,10 +136,11 @@ model WebhookConfig {
   eventRejected Boolean             @default(false)
 }
 
+// Session
 model Session {
   id          String   @id @default(uuid())
-  user        User     @relation(fields: [userId], references: [id])
   userId      String   @db.UniqueIdentifier
+  user        User     @relation(fields: [userId], references: [id])
   fingerprint String
   createdAt   DateTime @default(now())
   expiresAt   DateTime
@@ -148,36 +149,57 @@ model Session {
   @@index([expiresAt])
 }
 
-/// โมเดลสำหรับเก็บ Notification
+// Notification & Approval
 model Notification {
-  id        String     @id @default(uuid()) @db.UniqueIdentifier
-  title     String     @db.NVarChar(255)
-  message   String     @db.NVarChar(2000)
-  scheduledAt DateTime?
-  status    String     @db.VarChar(20) // e.g. "PENDING", "APPROVED", "REJECTED"
-  createdAt DateTime   @default(now()) @db.DateTime2
-  updatedAt DateTime   @updatedAt @db.DateTime2
-  approvals Approval[]
-  // ถ้าต้องการ relation:
-  // userId      String   @db.UniqueIdentifier
-  // user        User     @relation(fields: [userId], references: [id])
+  id                 String    @id @default(uuid()) @db.UniqueIdentifier
+  title              String    @db.NVarChar(255)
+  message            String    @db.NVarChar(2000)
+  scheduledAt        DateTime?
+  status             String    @db.VarChar(20)
+  type               String    @db.VarChar(20) // SYSTEM / TODO / REMINDER
+  category           String?   @db.NVarChar(80)
+  link               String?   @db.NVarChar(255)
+  urgencyDays        Int       @default(0)
+  repeatIntervalDays Int       @default(0)
+  dueDate            DateTime?
+  createdBy          String    @db.UniqueIdentifier
+  createdAt          DateTime  @default(now()) @db.DateTime2
+  updatedAt          DateTime  @updatedAt @db.DateTime2
+
+  approvals   Approval[]
+  recipients  Recipient[]
+  attachments NotificationAttachment[]
 
   @@index([status])
 }
 
-/// โมเดลสำหรับเก็บ Approval (ตอบกลับ Notification)
 model Approval {
   id             String       @id @default(uuid()) @db.UniqueIdentifier
   notificationId String       @db.UniqueIdentifier
   notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
-
-  userId String @db.UniqueIdentifier
-  user   User   @relation(fields: [userId], references: [id])
-
-  response  String   @db.VarChar(20)
-  comment   String?  @db.NVarChar(1000)
-  createdAt DateTime @default(now()) @db.DateTime2
+  userId         String       @db.UniqueIdentifier
+  user           User         @relation(fields: [userId], references: [id])
+  response       String       @db.VarChar(20)
+  comment        String?      @db.NVarChar(1000)
+  createdAt      DateTime     @default(now()) @db.DateTime2
 
   @@index([notificationId])
   @@index([userId])
+}
+
+model Recipient {
+  id             String       @id @default(uuid())
+  notificationId String       @db.UniqueIdentifier
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  type           String       @db.VarChar(20) // ALL / GROUP / USER
+  userId         String?      @db.UniqueIdentifier
+}
+
+model NotificationAttachment {
+  id             String       @id @default(uuid())
+  notificationId String       @db.UniqueIdentifier
+  fileName       String       @db.NVarChar(255)
+  fileUrl        String       @db.NVarChar(255)
+  mimeType       String       @db.NVarChar(100)
+  Notification   Notification @relation(fields: [notificationId], references: [id])
 }

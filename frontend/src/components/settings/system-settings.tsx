@@ -4,17 +4,37 @@ import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { simulateApiDelay } from "@/lib/mock-data"
 
 const systemSettingsSchema = z.object({
-  systemName: z.string().min(2, { message: "System name must be at least 2 characters." }),
+  systemName: z.string().min(2, { message: "กรุณากรอกชื่อระบบอย่างน้อย 2 ตัวอักษร" }),
   defaultLanguage: z.string(),
   timezone: z.string(),
   dateFormat: z.string(),
@@ -27,8 +47,8 @@ const systemSettingsSchema = z.object({
 type SystemSettingsValues = z.infer<typeof systemSettingsSchema>
 
 const defaultValues: SystemSettingsValues = {
-  systemName: "SCG Notification System",
-  defaultLanguage: "en-US",
+  systemName: "SCG ระบบแจ้งเตือน",
+  defaultLanguage: "th-TH",
   timezone: "Asia/Bangkok",
   dateFormat: "DD/MM/YYYY",
   timeFormat: "24h",
@@ -49,11 +69,10 @@ export function SystemSettings() {
     setIsLoading(true)
 
     try {
-      // Simulate API call
       await simulateApiDelay(1000)
-      toast.success("System settings updated successfully")
+      toast.success("บันทึกการตั้งค่าสำเร็จ")
     } catch (error) {
-      toast.error("Failed to update system settings")
+      toast.error("ไม่สามารถบันทึกการตั้งค่าได้")
       console.error(error)
     } finally {
       setIsLoading(false)
@@ -61,11 +80,11 @@ export function SystemSettings() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-noto">
       <Card>
         <CardHeader>
-          <CardTitle>System Configuration</CardTitle>
-          <CardDescription>Configure global system settings and defaults.</CardDescription>
+          <CardTitle>การกำหนดค่าระบบ</CardTitle>
+          <CardDescription>ตั้งค่าระบบและค่าพื้นฐานโดยรวม</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -75,11 +94,13 @@ export function SystemSettings() {
                 name="systemName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>System Name</FormLabel>
+                    <FormLabel>ชื่อระบบ</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                    <FormDescription>This name will appear in the browser title and emails.</FormDescription>
+                    <FormDescription>
+                      ชื่อนี้จะแสดงในหัวเบราว์เซอร์และอีเมล
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -91,18 +112,18 @@ export function SystemSettings() {
                   name="defaultLanguage"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Default Language</FormLabel>
+                      <FormLabel>ภาษาพื้นฐาน</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select language" />
+                            <SelectValue placeholder="เลือกภาษา" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="en-US">English (US)</SelectItem>
-                          <SelectItem value="th-TH">Thai</SelectItem>
-                          <SelectItem value="zh-CN">Chinese (Simplified)</SelectItem>
-                          <SelectItem value="ja-JP">Japanese</SelectItem>
+                          <SelectItem value="en-US">อังกฤษ (US)</SelectItem>
+                          <SelectItem value="th-TH">ไทย</SelectItem>
+                          <SelectItem value="zh-CN">จีน (ตัวย่อ)</SelectItem>
+                          <SelectItem value="ja-JP">ญี่ปุ่น</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -115,19 +136,19 @@ export function SystemSettings() {
                   name="timezone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Timezone</FormLabel>
+                      <FormLabel>เขตเวลา</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select timezone" />
+                            <SelectValue placeholder="เลือกเขตเวลา" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Asia/Bangkok">Bangkok (GMT+7)</SelectItem>
-                          <SelectItem value="Asia/Singapore">Singapore (GMT+8)</SelectItem>
-                          <SelectItem value="Asia/Tokyo">Tokyo (GMT+9)</SelectItem>
-                          <SelectItem value="Europe/London">London (GMT+0)</SelectItem>
-                          <SelectItem value="America/New_York">New York (GMT-5)</SelectItem>
+                          <SelectItem value="Asia/Bangkok">กรุงเทพฯ (GMT+7)</SelectItem>
+                          <SelectItem value="Asia/Singapore">สิงคโปร์ (GMT+8)</SelectItem>
+                          <SelectItem value="Asia/Tokyo">โตเกียว (GMT+9)</SelectItem>
+                          <SelectItem value="Europe/London">ลอนดอน (GMT+0)</SelectItem>
+                          <SelectItem value="America/New_York">นิวยอร์ก (GMT-5)</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -140,11 +161,11 @@ export function SystemSettings() {
                   name="dateFormat"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date Format</FormLabel>
+                      <FormLabel>รูปแบบวันที่</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select date format" />
+                            <SelectValue placeholder="เลือกรูปแบบวันที่" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -164,16 +185,16 @@ export function SystemSettings() {
                   name="timeFormat"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Time Format</FormLabel>
+                      <FormLabel>รูปแบบเวลา</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select time format" />
+                            <SelectValue placeholder="เลือกรูปแบบเวลา" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="12h">12-hour (AM/PM)</SelectItem>
-                          <SelectItem value="24h">24-hour</SelectItem>
+                          <SelectItem value="12h">12 ชั่วโมง (AM/PM)</SelectItem>
+                          <SelectItem value="24h">24 ชั่วโมง</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -186,7 +207,7 @@ export function SystemSettings() {
                   name="autoLogout"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Auto Logout (minutes)</FormLabel>
+                      <FormLabel>ออกจากระบบอัตโนมัติ (นาที)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -196,7 +217,9 @@ export function SystemSettings() {
                           onChange={(e) => field.onChange(Number.parseInt(e.target.value))}
                         />
                       </FormControl>
-                      <FormDescription>Time of inactivity before automatic logout (5-120 minutes).</FormDescription>
+                      <FormDescription>
+                        เวลาที่ไม่มีการใช้งานก่อนจะออกจากระบบอัตโนมัติ (5–120 นาที)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -210,8 +233,10 @@ export function SystemSettings() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
-                        <FormLabel>Enable Audit Logging</FormLabel>
-                        <FormDescription>Log all user actions for security and compliance.</FormDescription>
+                        <FormLabel>เปิดใช้งานการบันทึกกิจกรรม</FormLabel>
+                        <FormDescription>
+                          บันทึกกิจกรรมของผู้ใช้ทั้งหมดเพื่อความปลอดภัยและการตรวจสอบย้อนหลัง
+                        </FormDescription>
                       </div>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -226,8 +251,10 @@ export function SystemSettings() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
-                        <FormLabel>Enable Analytics</FormLabel>
-                        <FormDescription>Collect anonymous usage data to improve the system.</FormDescription>
+                        <FormLabel>เปิดใช้งานระบบวิเคราะห์ข้อมูล</FormLabel>
+                        <FormDescription>
+                          เก็บข้อมูลการใช้งานแบบไม่ระบุตัวตน เพื่อปรับปรุงระบบให้ดียิ่งขึ้น
+                        </FormDescription>
                       </div>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -238,8 +265,12 @@ export function SystemSettings() {
               </div>
 
               <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={isLoading} className="bg-[#E2001A] hover:bg-[#C0001A] text-white">
-                  {isLoading ? "Saving..." : "Save Settings"}
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-[#E2001A] hover:bg-[#C0001A] text-white"
+                >
+                  {isLoading ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
                 </Button>
               </div>
             </form>

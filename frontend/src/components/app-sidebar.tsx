@@ -1,4 +1,3 @@
-// frontend/src/components/ui/Button.tsx
 "use client"
 
 import * as React from "react"
@@ -16,7 +15,6 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-/** 👉 Button (merged) **/
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-4 [&_svg]:w-4",
   {
@@ -63,19 +61,18 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-/** 👉 AppSidebar (merged) **/
 const sidebarLinks = [
-  { name: "Dashboard",    href: "/dashboard",    icon: LayoutDashboard },
-  { name: "Notifications",href: "/notifications",icon: Bell           },
-  { name: "Approvals",     href: "/approvals",    icon: CheckSquare    },
-  { name: "RPA Trigger",   href: "/rpa",          icon: Play           },
+  { name: "แดชบอร์ด",    href: "/dashboard",    icon: LayoutDashboard },
+  { name: "การแจ้งเตือน", href: "/notifications", icon: Bell            },
+  { name: "การอนุมัติ",   href: "/approvals",    icon: CheckSquare     },
+  { name: "ทริกเกอร์ RPA", href: "/rpa",         icon: Play            },
   {
-    name: "Audit Logs",
+    name: "บันทึกตรวจสอบ",
     href: "/audit-logs",
     icon: ClipboardList,
     adminOnly: true,
   },
-  { name: "Settings",      href: "/settings",     icon: Settings       },
+  { name: "การตั้งค่า",     href: "/settings",     icon: Settings        },
 ]
 
 export function AppSidebar() {
@@ -83,24 +80,17 @@ export function AppSidebar() {
   const isAdmin = true // replace with real auth check
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200">
-      {/* logo */}
+    <aside className="hidden md:flex flex-col h-screen overflow-hidden w-64 bg-white border-r border-gray-200 font-noto">
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center">
           <div className="w-8 h-8 rounded bg-[#E2001A] flex items-center justify-center text-white font-bold">
             SCG
           </div>
-          <span className="ml-2 text-lg font-semibold">Notification System</span>
+          <span className="ml-2 text-lg font-semibold font-noto">ระบบแจ้งเตือน</span>
         </div>
       </div>
 
-      {/* links */}
-      <nav
-       className="flex-1 overflow-y-auto py-6 px-3 space-y-1"
-       style={{ maxHeight: 'calc(100vh - 64px - 64px)' }}
-      /* 64px = ความสูงของ logo div + ความสูงของ logout div */
-     > 
-    //แก้้้้
+      <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
         {sidebarLinks.map((link) => {
           if (link.adminOnly && !isAdmin) return null
           const isActive = pathname === link.href
@@ -110,7 +100,7 @@ export function AppSidebar() {
               key={link.href}
               to={link.href}
               className={cn(
-                "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors font-noto",
                 isActive
                   ? "bg-[#E2001A]/10 text-[#E2001A]"
                   : "text-gray-700 hover:bg-gray-100"
@@ -128,11 +118,10 @@ export function AppSidebar() {
         })}
       </nav>
 
-      {/* logout */}
       <div className="p-4 border-t border-gray-200">
-        <Button variant="outline" className="w-full justify-start text-gray-700">
+        <Button variant="outline" className="w-full justify-start text-gray-700 font-noto">
           <LogOut className="mr-2" />
-          Logout
+          ออกจากระบบ
         </Button>
       </div>
     </aside>
