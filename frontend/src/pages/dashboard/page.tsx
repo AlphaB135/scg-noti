@@ -332,7 +332,7 @@ export default function AdminNotificationPage() {
 
       {/* ===== MOBILE HEADER ===== */}
       {/* ส่วนหัวสำหรับมือถือพร้อมปุ่มแฮมเบอร์เกอร์ */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-red-700 text-white flex items-center justify-between px-4 py-4 shadow z-50">
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-gradient-to-b from-red-800 to-red-900 text-white flex items-center justify-between px-4 py-4 shadow z-50">
         <div className="font-bold text-lg">SCG Admin</div>
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-semibold">
@@ -353,7 +353,7 @@ export default function AdminNotificationPage() {
       {/* ===== MOBILE MENU ===== */}
       {/* เมนูสำหรับมือถือที่แสดงเมื่อกดปุ่มแฮมเบอร์เกอร์ */}
       {isMenuOpen && (
-        <div className="md:hidden fixed top-14 left-0 w-64 h-full bg-red-700 text-white z-40 shadow-lg p-3 overflow-y-auto">
+        <div className="md:hidden fixed top-14 left-0 w-64 h-full bg-gradient-to-b from-red-800 to-red-900 text-white z-40 shadow-lg p-3 overflow-y-auto">
           <nav className="space-y-1">{renderMenuItems()}</nav>
 
           <button className="mt-6 w-full flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200">
