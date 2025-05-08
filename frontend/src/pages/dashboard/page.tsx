@@ -257,10 +257,10 @@ export default function AdminNotificationPage() {
           Notifications
         </summary>
         <div className="ml-4 mt-2 space-y-1">
-          <Link to="/notifications" className="block rounded-md px-3 py-2 font-bold hover:bg-red-800/70">
+          <Link to="/dashboard" className="block rounded-md px-3 py-2 font-bold hover:bg-red-800/70">
             Reminder
           </Link>
-          <Link to="/mangereminder" className="block rounded-md px-3 py-2 hover:bg-red-800/70">
+          <Link to="/manage" className="block rounded-md px-3 py-2 hover:bg-red-800/70">
             Manage Reminder
           </Link>
         </div>
@@ -304,12 +304,12 @@ export default function AdminNotificationPage() {
             </summary>
             <div className="ml-4 mt-2 space-y-1">
               <Link
-                to="/notifications"
+                to="/dashboard"
                 className="block rounded-md px-3 py-2 font-bold hover:bg-white/5 transition-colors"
               >
                 Reminder
               </Link>
-              <Link to="/mangereminder" className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors">
+              <Link to="/manage" className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors">
                 Manage&nbsp;Reminder
               </Link>
             </div>
@@ -609,7 +609,7 @@ export default function AdminNotificationPage() {
                     cornerRadius={50}
                     dataKey="value"
                     stroke="none"
-                    fill="#ef4444"
+                    fill="#96231e"
                   />
 
                   {/* Tooltip */}
@@ -628,7 +628,7 @@ export default function AdminNotificationPage() {
               {/* Legend */}
               <div className="mt-4 flex justify-center gap-8 text-sm font-medium text-gray-700">
                 <div className="flex items-center gap-2">
-                  <span className="block h-3 w-3 rounded-full bg-red-500" />
+                  <span className="block h-3 w-3 rounded-full bg-gradient-to-b from-red-800 to-red-900" />
                   เสร็จแล้ว
                 </div>
                 <div className="flex items-center gap-2">
