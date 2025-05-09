@@ -16,6 +16,8 @@ import {
   Trash2,
   Filter,
   Search,
+  Settings,
+  CheckCircle,
 } from "lucide-react";
 import {
   Card,
@@ -321,33 +323,48 @@ export default function ManageReminder() {
 
   const renderMenuItems = () => (
     <>
-      <details className="group" open>
-        <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-red-800 font-bold cursor-pointer">
-          <Bell className="h-5 w-5" />
-          Notifications
+                    <details className="group" open>
+            <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
+              <Bell className="h-5 w-5" />
+              ระบบการแจ้งเตือน
+            </summary>
+            <div className="ml-4 mt-2 space-y-1">
+              <Link
+                to="/dashboard"
+                className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors"
+              >
+                เตือนความจำ
+              </Link>
+              <Link to="/manage" className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
+                ตั้งค่าการแจ้งเตือน
+              </Link>
+              <Link
+            to="/"
+            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+              ประวัติการดำเนินการ
+          </Link>
+            </div>
+          </details>
+
+          <details className="group" open>
+        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
+          <CheckCircle className="h-5 w-5" />
+          แอดมิน
         </summary>
         <div className="ml-4 mt-2 space-y-1">
-          <Link
-            to="/dashboard"
-            className="block rounded-md px-3 py-2 hover:bg-red-800/70"
-          >
-            Reminder
-          </Link>
-          <Link
-            to="/manage"
-            className="block rounded-md px-3 py-2 font-bold hover:bg-red-800/70"
-          >
-            Manage Reminder
+          <Link to="/audit-logs" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+            ประวัติการดำเนินการพนักงาน
           </Link>
         </div>
       </details>
 
       <Link
-        to="/approveals"
-        className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-red-800/70"
-      >
-        <FileText className="h-5 w-5" /> ประวัติการอนุมัติ
-      </Link>
+            to="/settings"
+            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+          >
+            <Settings className="h-5 w-5" />
+            การตั้งค่า
+          </Link>
     </>
   );
 
@@ -370,67 +387,77 @@ export default function ManageReminder() {
           <details className="group" open>
             <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
               <Bell className="h-5 w-5" />
-              Notifications
+              ระบบการแจ้งเตือน
             </summary>
             <div className="ml-4 mt-2 space-y-1">
               <Link
                 to="/dashboard"
                 className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors"
               >
-                Reminder
+                เตือนความจำ
+              </Link>
+              <Link to="/manage" className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
+                ตั้งค่าการแจ้งเตือน
               </Link>
               <Link
-                to="/manage"
-                className="block rounded-md px-3 py-2 font-bold hover:bg-white/5 transition-colors"
-              >
-                Manage&nbsp;Reminder
-              </Link>
+            to="/"
+            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+              ประวัติการดำเนินการ
+          </Link>
             </div>
           </details>
 
-          <Link
-            to="/approveals"
+          <details className="group" open>
+        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
+          <CheckCircle className="h-5 w-5" />
+          แอดมิน
+        </summary>
+        <div className="ml-4 mt-2 space-y-1">
+          <Link to="/audit-logs" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+            ประวัติการดำเนินการพนักงาน
+          </Link>
+        </div>
+      </details>
+
+      <Link
+            to="/settings"
             className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
           >
-            <FileText className="h-5 w-5" />
-            ประวัติการอนุมัติ&nbsp;
+            <Settings className="h-5 w-5" />
+            การตั้งค่า
           </Link>
         </nav>
 
         <button className="m-6 flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200">
           <LogOut className="mr-2 h-5 w-5" />
-          Logout
+          ออกจากระบบ
         </button>
       </aside>
 
-      {/* Hamburger Header (Mobile) */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-red-700 text-white flex items-center justify-between px-4 py-4 shadow z-50">
+      {/* ===== MOBILE HEADER ===== */}
+      {/* ส่วนหัวสำหรับมือถือพร้อมปุ่มแฮมเบอร์เกอร์ */}
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-gradient-to-b from-red-800 to-red-900 text-white flex items-center justify-between px-4 py-4 shadow z-50">
         <div className="font-bold text-lg">SCG Admin</div>
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="focus:outline-none"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d={
-                isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"
-              }
-            />
-          </svg>
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-semibold">
+            SG
+          </div>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="focus:outline-none">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* ===== MOBILE MENU ===== */}
+      {/* เมนูสำหรับมือถือที่แสดงเมื่อกดปุ่มแฮมเบอร์เกอร์ */}
       {isMenuOpen && (
-        <div className="md:hidden fixed top-14 left-0 w-64 h-full bg-red-700 text-white z-40 shadow-lg p-3 overflow-y-auto">
+        <div className="md:hidden fixed top-14 left-0 w-64 h-full bg-gradient-to-b from-red-800 to-red-900 text-white z-40 shadow-lg p-3 overflow-y-auto">
           <nav className="space-y-1">{renderMenuItems()}</nav>
 
           <button className="mt-6 w-full flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200">
@@ -449,7 +476,7 @@ export default function ManageReminder() {
               <div className="flex justify-between items-center">
                 <div>
                   <CardTitle className="text-xl font-bold">
-                    จัดการการแจ้งเตือน
+                    ตั้งค่าการแจ้งเตือน
                   </CardTitle>
                   <CardDescription>
                     สร้าง แก้ไข และลบการแจ้งเตือนต่างๆ

@@ -1,23 +1,10 @@
-// เพิ่มคอมเม้นต์ที่บรรทัดแรก
 "use client"
 
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { PieChart, Pie, Tooltip } from "recharts"
-import {
-  Bell,
-  Calendar,
-  Clock,
-  DollarSign,
-  Home,
-  LogOut,
-  Users,
-  CheckCircle2,
-  AlertCircle,
-  FileText,
-  AlertTriangle,
-} from "lucide-react"
+import { Bell, Calendar, Clock, DollarSign, Home, LogOut, Users, CheckCircle2, AlertCircle, FileText, AlertTriangle, Settings, CheckCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MonthCalendar } from "@/components/month-calendar"
 import { AnimatePresence } from "framer-motion"
@@ -65,33 +52,28 @@ export default function AdminNotificationPage() {
 
   // ===== TASK STATISTICS =====
   // นับจำนวนงานตามประเภทต่างๆ
+  // แก้ไขการนับจำนวนงานด่วน ไม่รวมงานเลยกำหนด
   const urgentTodayCount = tasks.filter(
-    (t) => ["most_urgent", "urgent", "today", "overdue"].includes(t.priority) && !t.done,
+    (t) => ["most_urgent", "urgent", "today"].includes(t.priority) && !t.done,
   ).length
 
+  // แก้ไขการนับจำนวนงานอื่นๆ ไม่รวมงานเลยกำหนด
   const otherPendingCount = tasks.filter(
-    (t) => !["most_urgent", "urgent", "today"].includes(t.priority) && !t.done,
+    (t) => !["most_urgent", "urgent", "today", "overdue"].includes(t.priority) && !t.done,
   ).length
 
   const completedCount = tasks.filter((t) => t.done).length
 
-  // Add a new variable to count overdue tasks after the existing task count variables
+  // นับจำนวนงานเลยกำหนด
   const overdueCount = tasks.filter((t) => t.priority === "overdue" && !t.done).length
 
-  // Update the notifications object to include overdue tasks
+  // อัพเดทข้อมูลการแจ้งเตือน
   const notifications = {
     urgentToday: urgentTodayCount, // งานด่วนวันนี้
     overdue: overdueCount, // งานเลยกำหนด
     other: otherPendingCount, // งานอื่นๆ
     done: completedCount, // งานที่เสร็จแล้ว
   }
-
-  // ข้อมูลการแจ้งเตือนสำหรับแสดงในการ์ด
-  // const notifications = {
-  //   urgentToday: urgentTodayCount, // งานด่วนวันนี้
-  //   other: otherPendingCount, // งานอื่นๆ
-  //   done: completedCount, // งานที่เสร็จแล้ว
-  // }
 
   // ข้อมูลสำหรับแสดงความคืบหน้าในกราฟวงกลม
   const completedTasks = tasks.filter((t) => t.done).length
@@ -251,24 +233,49 @@ export default function AdminNotificationPage() {
   // แสดงรายการเมนูในแถบด้านข้าง
   const renderMenuItems = () => (
     <>
-      <details className="group" open>
-        <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-red-800 font-bold cursor-pointer">
-          <Bell className="h-5 w-5" />
-          Notifications
+          <details className="group" open>
+            <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
+              <Bell className="h-5 w-5" />
+              ระบบการแจ้งเตือน
+            </summary>
+            <div className="ml-4 mt-2 space-y-1">
+              <Link
+                to="/dashboard"
+                className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer"
+              >
+                เตือนความจำ
+              </Link>
+              <Link to="/manage" className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors">
+                ตั้งค่าการแจ้งเตือน
+              </Link>
+              <Link
+            to="/dashboard"
+            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+              ประวัติการดำเนินการ
+          </Link>
+            </div>
+          </details>
+
+
+          <details className="group" open>
+        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
+          <CheckCircle className="h-5 w-5" />
+          แอดมิน
         </summary>
         <div className="ml-4 mt-2 space-y-1">
-          <Link to="/dashboard" className="block rounded-md px-3 py-2 font-bold hover:bg-red-800/70">
-            Reminder
-          </Link>
-          <Link to="/manage" className="block rounded-md px-3 py-2 hover:bg-red-800/70">
-            Manage Reminder
+          <Link to="/audit-logs" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+            ประวัติการดำเนินการพนักงาน
           </Link>
         </div>
       </details>
 
-      <Link to="/approveals" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-red-800/70">
-        <FileText className="h-5 w-5" /> ประวัติการอนุมัติ
-      </Link>
+      <Link
+            to="/settings"
+            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+          >
+            <Settings className="h-5 w-5" />
+            การตั้งค่า
+          </Link>
     </>
   )
 
@@ -300,33 +307,51 @@ export default function AdminNotificationPage() {
           <details className="group" open>
             <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
               <Bell className="h-5 w-5" />
-              Notifications
+              ระบบการแจ้งเตือน
             </summary>
             <div className="ml-4 mt-2 space-y-1">
               <Link
                 to="/dashboard"
-                className="block rounded-md px-3 py-2 font-bold hover:bg-white/5 transition-colors"
+                className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer"
               >
-                Reminder
+                เตือนความจำ
               </Link>
               <Link to="/manage" className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors">
-                Manage&nbsp;Reminder
+                ตั้งค่าการแจ้งเตือน
               </Link>
+              <Link
+            to="/dashboard"
+            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+              ประวัติการดำเนินการ
+          </Link>
             </div>
           </details>
 
-          <Link
-            to="/approveals"
+      <details className="group" open>
+        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
+          <CheckCircle className="h-5 w-5" />
+          แอดมิน
+        </summary>
+        <div className="ml-4 mt-2 space-y-1">
+          <Link to="/audit-logs" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+            ประวัติการดำเนินการพนักงาน
+          </Link>
+        </div>
+      </details>
+
+      <Link
+            to="/settings"
             className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
           >
-            <FileText className="h-5 w-5" />
-            ประวัติการอนุมัติ&nbsp;
+            <Settings className="h-5 w-5" />
+            การตั้งค่า
           </Link>
         </nav>
+        
 
         <button className="m-6 flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200">
           <LogOut className="mr-2 h-5 w-5" />
-          Logout
+          ออกจากระบบ
         </button>
       </aside>
 
@@ -454,7 +479,7 @@ export default function AdminNotificationPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-red-700">{notifications.overdue} งาน</p>
-                  <p className="text-sm text-red-600">ที่เลยกำหนดแล้ว</p>
+                  <p className="text-sm text-red-600">งานที่เลยกำหนดแล้ว</p>
                 </div>
               </div>
               <div className="mt-3">
@@ -487,7 +512,7 @@ export default function AdminNotificationPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-orange-700">{notifications.urgentToday} งาน</p>
-                  <p className="text-sm text-orange-600">ที่ต้องทำด่วนวันนี้</p>
+                  <p className="text-sm text-orange-600">งานที่ต้องทำด่วน</p>
                 </div>
               </div>
               <div className="mt-3">
@@ -642,17 +667,17 @@ export default function AdminNotificationPage() {
           {/* ===== TO-DO LIST ===== */}
           {/* รายการงานที่ต้องทำ */}
           <section className="w-full md:w-2/3 rounded-[20px] border border-gray-100 bg-white shadow-sm backdrop-blur-sm shadow-xl ring-1 ring-black/5 transition hover:scale-[1.02] transition duration-300 shadow-md">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
+            <div className="p-6 ">
+              <div className="flex justify-between items-center mb-4 ">
                 <h2 className="text-lg font-bold text-gray-800">สิ่งที่ต้องทำ</h2>
-                <Link to="/mangereminder" className="flex items-center gap-1 text-sm text-red-700 hover:text-red-800">
+                <Link to="/manage" className="flex items-center gap-1 text-sm text-red-700 hover:text-red-800">
                   <Bell className="h-4 w-4" />
                   จัดการการแจ้งเตือน
                 </Link>
               </div>
 
               {/* ===== FILTER TABS ===== */}
-              {/* แท็บสำหรับกรองประเภทงาน */}
+              {/* แท็บสำหรับกรองประเภทงาน - แก้ไขลำดับให้งานเลยกำหนดอยู่ก่อนงานด่วน */}
               <div className="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
                 <button
                   onClick={() => setActiveFilter("all")}
@@ -665,16 +690,6 @@ export default function AdminNotificationPage() {
                   ทั้งหมด
                 </button>
                 <button
-                  onClick={() => setActiveFilter("urgent")}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                    activeFilter === "urgent"
-                      ? "bg-orange-50 text-orange-700"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                >
-                  งานด่วน
-                </button>
-                <button
                   onClick={() => setActiveFilter("overdue")}
                   className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                     activeFilter === "overdue"
@@ -683,6 +698,16 @@ export default function AdminNotificationPage() {
                   }`}
                 >
                   เลยกำหนด
+                </button>
+                <button
+                  onClick={() => setActiveFilter("urgent")}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                    activeFilter === "urgent"
+                      ? "bg-orange-50 text-orange-700"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                >
+                  งานด่วน
                 </button>
                 <button
                   onClick={() => setActiveFilter("normal")}
@@ -709,94 +734,14 @@ export default function AdminNotificationPage() {
               {/* ===== TASK LIST ===== */}
               {/* รายการงานที่แสดงตามการกรอง */}
               <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                {/* แสดงงานด่วนเมื่อกรอง all หรือ urgent */}
-                {(activeFilter === "all" || activeFilter === "urgent") && (
-                  <>
-                    {tasks.filter((t) => ["today", "urgent", "overdue"].includes(t.priority) && !t.done).length > 0 ? (
-                      <>
-                        {activeFilter === "all" && (
-                          <h3 className="text-sm font-semibold text-red-700 mb-2 flex items-center">
-                            <AlertCircle className="h-4 w-4 mr-1" /> งานด่วน
-                          </h3>
-                        )}
-                        {tasks
-                          .filter((t) => ["today", "urgent", "overdue"].includes(t.priority) && !t.done)
-                          .map((task, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2 p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={task.done}
-                                onChange={() => handleToggleTaskDone(task.id)}
-                                className="h-5 w-5 text-red-700 rounded-md"
-                              />
-                              <div className="flex-1">
-                                <div className="flex justify-between items-start">
-                                  <p
-                                    className={`text-sm font-medium ${
-                                      task.done ? "line-through text-gray-400" : "text-gray-800"
-                                    }`}
-                                  >
-                                    {task.title}
-                                  </p>
-                                  <span className="rounded-full bg-orange-100 px-2 py-1 text-xs text-orange-700 font-medium">
-                                  {task.priority === "urgent"
-                                    ? "กำลังจะมาถึง"
-                                    : task.priority === "today"
-                                    ? "วันนี้"
-                                    : task.priority === "overdue"
-                                    ? "เลยกำหนด"
-                                    : "อื่นๆ"}
-                                </span>
-                                </div>
-                                <p className="text-xs text-gray-500">{task.details}</p>
-                                <div className="flex justify-between items-center mt-1">
-                                  <span className="text-xs text-gray-500 flex items-center gap-1">
-                                    <Calendar className="h-3.5 w-3.5" /> กำหนด: {task.dueDate}
-                                  </span>
-                                  <div className="flex gap-1">
-                                    <button
-                                      onClick={() => setEditTask(task)}
-                                      className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-100 rounded border border-gray-200"
-                                    >
-                                      แก้ไข
-                                    </button>
-                                    <Link
-                                      to="/mangereminder"
-                                      className="text-xs px-3 py-1.5 text-red-700 hover:bg-blue-50 rounded-lg border border-gray-200 transition-colors flex items-center gap-1"
-                                    >
-                                      จัดการ
-                                    </Link>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                      </>
-                    ) : (
-                      activeFilter === "urgent" && (
-                        <div className="text-center py-6 text-gray-500">
-                          <div className="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-full bg-gray-100">
-                            <CheckCircle2 className="w-6 h-6 text-gray-400" />
-                          </div>
-                          <p className="text-sm">ไม่มีงานด่วนที่ต้องทำ</p>
-                        </div>
-                      )
-                    )}
-                  </>
-                )}
-
-                {/* Add a section to display overdue tasks in the task list
-                // In the TASK LIST section, add this after the urgent tasks section */}
+                {/* แสดงงานเลยกำหนดเมื่อกรอง all หรือ overdue */}
                 {(activeFilter === "all" || activeFilter === "overdue") && (
                   <>
                     {tasks.filter((t) => t.priority === "overdue" && !t.done).length > 0 ? (
                       <>
                         {activeFilter === "all" && (
-                          <h3 className="text-sm font-semibold text-orange-700 mb-2 flex items-center">
-                            <AlertCircle className="h-4 w-4 mr-1" /> งานเลยกำหนด
+                          <h3 className="text-sm font-semibold text-red-700 mb-2 flex items-center">
+                            <AlertTriangle className="h-4 w-4 mr-1" /> งานเลยกำหนด
                           </h3>
                         )}
                         {tasks
@@ -810,7 +755,7 @@ export default function AdminNotificationPage() {
                                 type="checkbox"
                                 checked={task.done}
                                 onChange={() => handleToggleTaskDone(task.id)}
-                                className="h-5 w-5 text-orange-600 rounded-md"
+                                className="h-5 w-5 text-red-700 rounded-md"
                               />
                               <div className="flex-1">
                                 <div className="flex justify-between items-start">
@@ -837,12 +782,6 @@ export default function AdminNotificationPage() {
                                     >
                                       แก้ไข
                                     </button>
-                                    <Link
-                                      to="/mangereminder"
-                                      className="text-xs px-3 py-1.5 text-orange-700 hover:bg-orange-50 rounded-lg border border-gray-200 transition-colors flex items-center gap-1"
-                                    >
-                                      จัดการ
-                                    </Link>
                                   </div>
                                 </div>
                               </div>
@@ -856,6 +795,73 @@ export default function AdminNotificationPage() {
                             <CheckCircle2 className="w-6 h-6 text-gray-400" />
                           </div>
                           <p className="text-sm">ไม่มีงานที่เลยกำหนด</p>
+                        </div>
+                      )
+                    )}
+                  </>
+                )}
+
+                {/* แสดงงานด่วนเมื่อกรอง all หรือ urgent */}
+                {(activeFilter === "all" || activeFilter === "urgent") && (
+                  <>
+                    {tasks.filter((t) => ["today", "urgent"].includes(t.priority) && !t.done).length > 0 ? (
+                      <>
+                        {activeFilter === "all" && (
+                          <h3 className="text-sm font-semibold text-orange-700 mb-2 flex items-center">
+                            <AlertCircle className="h-4 w-4 mr-1" /> งานด่วน
+                          </h3>
+                        )}
+                        {tasks
+                          .filter((t) => ["today", "urgent"].includes(t.priority) && !t.done)
+                          .map((task, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2 p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={task.done}
+                                onChange={() => handleToggleTaskDone(task.id)}
+                                className="h-5 w-5 text-orange-600 rounded-md"
+                              />
+                              <div className="flex-1">
+                                <div className="flex justify-between items-start">
+                                  <p
+                                    className={`text-sm font-medium ${
+                                      task.done ? "line-through text-gray-400" : "text-gray-800"
+                                    }`}
+                                  >
+                                    {task.title}
+                                  </p>
+                                  <span className="rounded-full bg-orange-100 px-2 py-1 text-xs text-orange-700 font-medium">
+                                    {task.priority === "urgent" ? "กำลังจะมาถึง" : "วันนี้"}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-500">{task.details}</p>
+                                <div className="flex justify-between items-center mt-1">
+                                  <span className="text-xs text-gray-500 flex items-center gap-1">
+                                    <Calendar className="h-3.5 w-3.5" /> กำหนด: {task.dueDate}
+                                  </span>
+                                  <div className="flex gap-1">
+                                    <button
+                                      onClick={() => setEditTask(task)}
+                                      className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-100 rounded border border-gray-200"
+                                    >
+                                      แก้ไข
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </>
+                    ) : (
+                      activeFilter === "urgent" && (
+                        <div className="text-center py-6 text-gray-500">
+                          <div className="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-full bg-gray-100">
+                            <CheckCircle2 className="w-6 h-6 text-gray-400" />
+                          </div>
+                          <p className="text-sm">ไม่มีงานด่วนที่ต้องทำ</p>
                         </div>
                       )
                     )}
@@ -1064,7 +1070,7 @@ export default function AdminNotificationPage() {
                   <h2 className="text-xl font-semibold text-gray-800">รายการแจ้งเตือนทั้งหมด</h2>
                   <div className="flex items-center gap-3">
                     <Link
-                      to="/mangereminder"
+                      to="/manage"
                       className="flex items-center gap-2 bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                     >
                       <Bell className="h-4 w-4" />
@@ -1083,7 +1089,7 @@ export default function AdminNotificationPage() {
                 </div>
 
                 {/* ===== MODAL TABS ===== */}
-                {/* แท็บในโมดัล */}
+                {/* แท็บในโมดัล - แก้ไขลำดับให้งานเลยกำหนดอยู่ก่อนงานด่วน และเปลี่ยนชื่อ "งานปกติ" เป็น "งานอื่นๆ" */}
                 <div className="px-6 pt-4 border-b border-gray-100">
                   <div className="flex items-center gap-2 overflow-x-auto pb-2">
                     <button
@@ -1097,24 +1103,24 @@ export default function AdminNotificationPage() {
                       ทั้งหมด
                     </button>
                     <button
-                      onClick={() => setModalActiveFilter("urgent")}
+                      onClick={() => setModalActiveFilter("overdue")}
                       className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                        modalActiveFilter === "urgent"
+                        modalActiveFilter === "overdue"
                           ? "bg-red-50 text-red-700"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       }`}
                     >
-                      งานด่วน
+                      เลยกำหนด
                     </button>
                     <button
-                      onClick={() => setModalActiveFilter("overdue")}
+                      onClick={() => setModalActiveFilter("urgent")}
                       className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                        modalActiveFilter === "overdue"
+                        modalActiveFilter === "urgent"
                           ? "bg-orange-50 text-orange-700"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       }`}
                     >
-                      เลยกำหนด
+                      งานด่วน
                     </button>
                     <button
                       onClick={() => setModalActiveFilter("normal")}
@@ -1124,7 +1130,7 @@ export default function AdminNotificationPage() {
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       }`}
                     >
-                      งานปกติ
+                      งานอื่นๆ
                     </button>
                     <button
                       onClick={() => setModalActiveFilter("completed")}
@@ -1142,13 +1148,12 @@ export default function AdminNotificationPage() {
                 {/* ===== MODAL CONTENT ===== */}
                 {/* เนื้อหาในโมดัล */}
                 <div className="overflow-y-auto p-6 max-h-[calc(85vh-120px)] space-y-6">
-                  {/* Add a new section for overdue tasks in the modal content
-                  // Inside the <div className="overflow-y-auto p-6 max-h-[calc(85vh-120px)] space-y-6"> in the modal content */}
+                  {/* งานเลยกำหนด - แสดงก่อนงานด่วน */}
                   {(modalActiveFilter === "all" || modalActiveFilter === "overdue") && (
                     <div id="section-overdue" className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                       <div className="bg-gradient-to-r from-red-700 to-red-800 text-white px-5 py-3 flex justify-between items-center">
                         <div className="flex items-center">
-                          <AlertCircle className="h-5 w-5 mr-2" />
+                          <AlertTriangle className="h-5 w-5 mr-2" />
                           <h3 className="font-medium">งานเลยกำหนด</h3>
                         </div>
                         <span className="text-xs bg-white/20 px-2.5 py-1 rounded-full">
@@ -1168,13 +1173,13 @@ export default function AdminNotificationPage() {
                                       type="checkbox"
                                       checked={task.done}
                                       onChange={() => handleToggleTaskDone(task.id)}
-                                      className="h-4 w-4 text-orange-600 rounded border-gray-300 focus:ring-orange-600"
+                                      className="h-4 w-4 text-red-600 rounded border-gray-300 focus:ring-red-600"
                                     />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-start">
                                       <h4 className="font-semibold text-gray-900 truncate pr-2">{task.title}</h4>
-                                      <span className="text-xs font-medium text-orange-700 bg-orange-50 px-2.5 py-1 rounded-full whitespace-nowrap">
+                                      <span className="text-xs font-medium text-red-700 bg-red-50 px-2.5 py-1 rounded-full whitespace-nowrap">
                                         เลยกำหนด
                                       </span>
                                     </div>
@@ -1190,12 +1195,6 @@ export default function AdminNotificationPage() {
                                         >
                                           แก้ไข
                                         </button>
-                                        <Link
-                                          to="/mangereminder"
-                                          className="text-xs px-3 py-1.5 text-orange-700 hover:bg-orange-50 rounded-lg border border-gray-200 transition-colors flex items-center gap-1"
-                                        >
-                                          จัดการ
-                                        </Link>
                                       </div>
                                     </div>
                                   </div>
@@ -1221,7 +1220,7 @@ export default function AdminNotificationPage() {
                       <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-5 py-3 flex justify-between items-center">
                         <div className="flex items-center">
                           <AlertCircle className="h-5 w-5 mr-2" />
-                          <h3 className="font-medium">งานด่วนวันนี้</h3>
+                          <h3 className="font-medium">งานด่วน</h3>
                         </div>
                         <span className="text-xs bg-white/20 px-2.5 py-1 rounded-full">
                           {tasks.filter((t) => ["today", "urgent"].includes(t.priority) && !t.done).length} งาน
@@ -1240,14 +1239,14 @@ export default function AdminNotificationPage() {
                                       type="checkbox"
                                       checked={task.done}
                                       onChange={() => handleToggleTaskDone(task.id)}
-                                      className="h-4 w-4 text-red-700 rounded border-gray-300 focus:ring-red-700"
+                                      className="h-4 w-4 text-orange-600 rounded border-gray-300 focus:ring-orange-600"
                                     />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-start">
                                       <h4 className="font-semibold text-gray-900 truncate pr-2">{task.title}</h4>
-                                      <span className="text-xs font-medium text-red-700 bg-red-50 px-2.5 py-1 rounded-full whitespace-nowrap">
-                                        {task.priority === "urgent" ? "ด่วน" : "วันนี้"}
+                                      <span className="text-xs font-medium text-orange-700 bg-orange-50 px-2.5 py-1 rounded-full whitespace-nowrap">
+                                        {task.priority === "urgent" ? "ใกล้ถึง" : "วันนี้"}
                                       </span>
                                     </div>
                                     <p className="mt-1 text-sm text-gray-600">{task.details}</p>
@@ -1262,12 +1261,6 @@ export default function AdminNotificationPage() {
                                         >
                                           แก้ไข
                                         </button>
-                                        <Link
-                                          to="/mangereminder"
-                                          className="text-xs px-3 py-1.5 text-red-700 hover:bg-red-50 rounded-lg border border-gray-200 transition-colors flex items-center gap-1"
-                                        >
-                                          จัดการ
-                                        </Link>
                                       </div>
                                     </div>
                                   </div>
@@ -1296,14 +1289,14 @@ export default function AdminNotificationPage() {
                           <h3 className="font-medium">งานอื่นๆ</h3>
                         </div>
                         <span className="text-xs bg-white/20 px-2.5 py-1 rounded-full">
-                          {tasks.filter((t) => !["today", "urgent"].includes(t.priority) && !t.done).length} งาน
+                          {tasks.filter((t) => !["today", "urgent", "overdue"].includes(t.priority) && !t.done).length} งาน
                         </span>
                       </div>
 
                       <div className="bg-white divide-y divide-gray-100">
-                        {tasks.filter((t) => !["today", "urgent"].includes(t.priority) && !t.done).length > 0 ? (
+                        {tasks.filter((t) => !["today", "urgent", "overdue"].includes(t.priority) && !t.done).length > 0 ? (
                           tasks
-                            .filter((t) => !["today", "urgent"].includes(t.priority) && !t.done)
+                            .filter((t) => !["today", "urgent", "overdue"].includes(t.priority) && !t.done)
                             .map((task, i) => (
                               <div key={i} className="p-4 hover:bg-gray-50 transition-colors">
                                 <div className="flex items-start gap-3">
@@ -1319,7 +1312,7 @@ export default function AdminNotificationPage() {
                                     <div className="flex justify-between items-start">
                                       <h4 className="font-semibold text-gray-900 truncate pr-2">{task.title}</h4>
                                       <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full whitespace-nowrap">
-                                        ปกติ
+                                        งานอื่นๆ
                                       </span>
                                     </div>
                                     <p className="mt-1 text-sm text-gray-600">{task.details}</p>
@@ -1334,12 +1327,6 @@ export default function AdminNotificationPage() {
                                         >
                                           แก้ไข
                                         </button>
-                                        <Link
-                                          to="/mangereminder"
-                                          className="text-xs px-3 py-1.5 text-blue-700 hover:bg-blue-50 rounded-lg border border-gray-200 transition-colors flex items-center gap-1"
-                                        >
-                                          จัดการ
-                                        </Link>
                                       </div>
                                     </div>
                                   </div>
@@ -1401,12 +1388,12 @@ export default function AdminNotificationPage() {
                                       <p className="text-xs text-gray-400 flex items-center gap-1">
                                         <Calendar className="h-3.5 w-3.5" /> กำหนด: {task.dueDate}
                                       </p>
-                                      <Link
-                                        to="/mangereminder"
+                                      <button
+                                        onClick={() => setEditTask(task)}
                                         className="text-xs px-3 py-1.5 text-gray-500 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors flex items-center gap-1"
                                       >
                                         ดูรายละเอียด
-                                      </Link>
+                                      </button>
                                     </div>
                                   </div>
                                 </div>
@@ -1480,11 +1467,7 @@ export default function AdminNotificationPage() {
         {/* ส่วนแสดงปฏิทินงาน */}
         <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:scale-[1.02] duration-300">
           <Card>
-            <CardHeader>
-              <CardTitle>ปฏิทินงาน</CardTitle>
-              <CardDescription>ปฏิทินแสดงงานทั้งหมดในเดือนนี้</CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <MonthCalendar tasks={tasks} />
             </CardContent>
           </Card>
