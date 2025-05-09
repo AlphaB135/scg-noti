@@ -4,8 +4,18 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { PieChart, Pie, Tooltip } from "recharts"
-import { Bell, Calendar, Clock, DollarSign, Home, LogOut, Users, CheckCircle2, AlertCircle, FileText, AlertTriangle, Settings, CheckCircle } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Bell,
+  Calendar,
+  Clock,
+  LogOut,
+  CheckCircle2,
+  AlertCircle,
+  AlertTriangle,
+  Settings,
+  CheckCircle,
+} from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MonthCalendar } from "@/components/month-calendar"
 import { AnimatePresence } from "framer-motion"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -24,6 +34,13 @@ export default function AdminNotificationPage() {
   const [editTask, setEditTask] = useState(null) // เก็บข้อมูลงานที่กำลังแก้ไข
   const [activeFilter, setActiveFilter] = useState("all") // ตัวกรองสำหรับแสดงงานตามประเภท
   const [modalActiveFilter, setModalActiveFilter] = useState("all") // ตัวกรองสำหรับแสดงงานในโมดัล
+  const [isRescheduleDialogOpen, setIsRescheduleDialogOpen] = useState(false)
+  const [isReopenDialogOpen, setIsReopenDialogOpen] = useState(false)
+  const [taskToReschedule, setTaskToReschedule] = useState(null)
+  const [taskToReopen, setTaskToReopen] = useState(null)
+  const [rescheduleReason, setRescheduleReason] = useState("")
+  const [reopenReason, setReopenReason] = useState("")
+  const [newDueDate, setNewDueDate] = useState("")
 
   // ===== TASK MANAGEMENT FUNCTIONS =====
   // บันทึกการแก้ไขงาน
@@ -48,6 +65,54 @@ export default function AdminNotificationPage() {
     if (diffInDays === 0) return { ...task, priority: "today" }
     if (diffInDays <= 2) return { ...task, priority: "urgent" }
     return { ...task, priority: "pending" }
+  }
+
+  // Function to handle rescheduling a task
+  const handleRescheduleTask = () => {
+    if (!taskToReschedule || !rescheduleReason.trim() || !newDueDate) return
+
+    const updatedTask = {
+      ...taskToReschedule,
+      dueDate: newDueDate,
+      rescheduleReason,
+      rescheduleDate: new Date().toISOString(),
+    }
+
+    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)))
+    setTaskToReschedule(null)
+    setRescheduleReason("")
+    setNewDueDate("")
+    setIsRescheduleDialogOpen(false)
+  }
+
+  // Function to handle reopening a completed task
+  const handleReopenTask = () => {
+    if (!taskToReopen || !reopenReason.trim()) return
+
+    const updatedTask = {
+      ...taskToReopen,
+      done: false,
+      reopenReason,
+      reopenDate: new Date().toISOString(),
+    }
+
+    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)))
+    setTaskToReopen(null)
+    setReopenReason("")
+    setIsReopenDialogOpen(false)
+  }
+
+  // Function to open the reschedule dialog
+  const openRescheduleDialog = (task) => {
+    setTaskToReschedule(task)
+    setNewDueDate(task.dueDate)
+    setIsRescheduleDialogOpen(true)
+  }
+
+  // Function to open the reopen dialog
+  const openReopenDialog = (task) => {
+    setTaskToReopen(task)
+    setIsReopenDialogOpen(true)
   }
 
   // ===== TASK STATISTICS =====
@@ -226,6 +291,15 @@ export default function AdminNotificationPage() {
 
   // สลับสถานะงานเสร็จ/ไม่เสร็จ
   const handleToggleTaskDone = (id) => {
+    const task = tasks.find((t) => t.id === id)
+
+    // If the task is done and we're trying to mark it as not done, show the reopen dialog
+    if (task && task.done) {
+      openReopenDialog(task)
+      return
+    }
+
+    // Otherwise, just toggle the done status
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
   }
 
@@ -233,49 +307,49 @@ export default function AdminNotificationPage() {
   // แสดงรายการเมนูในแถบด้านข้าง
   const renderMenuItems = () => (
     <>
-          <details className="group" open>
-            <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
-              <Bell className="h-5 w-5" />
-              ระบบการแจ้งเตือน
-            </summary>
-            <div className="ml-4 mt-2 space-y-1">
-              <Link
-                to="/dashboard"
-                className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer"
-              >
-                เตือนความจำ
-              </Link>
-              <Link to="/manage" className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors">
-                ตั้งค่าการแจ้งเตือน
-              </Link>
-              <Link
+      <details className="group" open>
+        <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
+          <Bell className="h-5 w-5" />
+          ระบบการแจ้งเตือน
+        </summary>
+        <div className="ml-4 mt-2 space-y-1">
+          <Link
             to="/dashboard"
-            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-              ประวัติการดำเนินการ
+            className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer"
+          >
+            เตือนความจำ
           </Link>
-            </div>
-          </details>
+          <Link to="/manage" className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors">
+            ตั้งค่าการแจ้งเตือน
+          </Link>
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+          >
+            ประวัติการดำเนินการ
+          </Link>
+        </div>
+      </details>
 
-
-          <details className="group" open>
+      <details className="group">
         <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
           <CheckCircle className="h-5 w-5" />
           แอดมิน
         </summary>
         <div className="ml-4 mt-2 space-y-1">
-          <Link to="/audit-logs" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+          <Link
+            to="/audit-logs"
+            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+          >
             ประวัติการดำเนินการพนักงาน
           </Link>
         </div>
       </details>
 
-      <Link
-            to="/settings"
-            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
-          >
-            <Settings className="h-5 w-5" />
-            การตั้งค่า
-          </Link>
+      <Link to="/settings" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+        <Settings className="h-5 w-5" />
+        การตั้งค่า
+      </Link>
     </>
   )
 
@@ -320,26 +394,30 @@ export default function AdminNotificationPage() {
                 ตั้งค่าการแจ้งเตือน
               </Link>
               <Link
-            to="/dashboard"
-            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-              ประวัติการดำเนินการ
-          </Link>
+                to="/auditperson"
+                className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+              >
+                ประวัติการดำเนินการ
+              </Link>
             </div>
           </details>
 
-      <details className="group" open>
-        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
-          <CheckCircle className="h-5 w-5" />
-          แอดมิน
-        </summary>
-        <div className="ml-4 mt-2 space-y-1">
-          <Link to="/audit-logs" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-            ประวัติการดำเนินการพนักงาน
-          </Link>
-        </div>
-      </details>
+          <details className="group">
+            <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
+              <CheckCircle className="h-5 w-5" />
+              แอดมิน
+            </summary>
+            <div className="ml-4 mt-2 space-y-1">
+              <Link
+                to="/audit-logs"
+                className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+              >
+                ประวัติการดำเนินการพนักงาน
+              </Link>
+            </div>
+          </details>
 
-      <Link
+          <Link
             to="/settings"
             className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
           >
@@ -347,7 +425,6 @@ export default function AdminNotificationPage() {
             การตั้งค่า
           </Link>
         </nav>
-        
 
         <button className="m-6 flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200">
           <LogOut className="mr-2 h-5 w-5" />
@@ -782,6 +859,15 @@ export default function AdminNotificationPage() {
                                     >
                                       แก้ไข
                                     </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        openRescheduleDialog(task)
+                                      }}
+                                      className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-100 rounded border border-gray-200"
+                                    >
+                                      เลื่อนกำหนด
+                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -848,6 +934,15 @@ export default function AdminNotificationPage() {
                                       className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-100 rounded border border-gray-200"
                                     >
                                       แก้ไข
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        openRescheduleDialog(task)
+                                      }}
+                                      className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-100 rounded border border-gray-200"
+                                    >
+                                      เลื่อนกำหนด
                                     </button>
                                   </div>
                                 </div>
@@ -916,6 +1011,15 @@ export default function AdminNotificationPage() {
                                       className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-100 rounded border border-gray-200"
                                     >
                                       แก้ไข
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        openRescheduleDialog(task)
+                                      }}
+                                      className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-100 rounded border border-gray-200"
+                                    >
+                                      เลื่อนกำหนด
                                     </button>
                                   </div>
                                 </div>
@@ -1195,6 +1299,15 @@ export default function AdminNotificationPage() {
                                         >
                                           แก้ไข
                                         </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            openRescheduleDialog(task)
+                                          }}
+                                          className="text-xs px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors flex items-center gap-1"
+                                        >
+                                          เลื่อนกำหนด
+                                        </button>
                                       </div>
                                     </div>
                                   </div>
@@ -1261,6 +1374,15 @@ export default function AdminNotificationPage() {
                                         >
                                           แก้ไข
                                         </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            openRescheduleDialog(task)
+                                          }}
+                                          className="text-xs px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors flex items-center gap-1"
+                                        >
+                                          เลื่อนกำหนด
+                                        </button>
                                       </div>
                                     </div>
                                   </div>
@@ -1289,12 +1411,14 @@ export default function AdminNotificationPage() {
                           <h3 className="font-medium">งานอื่นๆ</h3>
                         </div>
                         <span className="text-xs bg-white/20 px-2.5 py-1 rounded-full">
-                          {tasks.filter((t) => !["today", "urgent", "overdue"].includes(t.priority) && !t.done).length} งาน
+                          {tasks.filter((t) => !["today", "urgent", "overdue"].includes(t.priority) && !t.done).length}{" "}
+                          งาน
                         </span>
                       </div>
 
                       <div className="bg-white divide-y divide-gray-100">
-                        {tasks.filter((t) => !["today", "urgent", "overdue"].includes(t.priority) && !t.done).length > 0 ? (
+                        {tasks.filter((t) => !["today", "urgent", "overdue"].includes(t.priority) && !t.done).length >
+                        0 ? (
                           tasks
                             .filter((t) => !["today", "urgent", "overdue"].includes(t.priority) && !t.done)
                             .map((task, i) => (
@@ -1326,6 +1450,15 @@ export default function AdminNotificationPage() {
                                           className="text-xs px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors flex items-center gap-1"
                                         >
                                           แก้ไข
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            openRescheduleDialog(task)
+                                          }}
+                                          className="text-xs px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors flex items-center gap-1"
+                                        >
+                                          เลื่อนกำหนด
                                         </button>
                                       </div>
                                     </div>
@@ -1473,6 +1606,89 @@ export default function AdminNotificationPage() {
           </Card>
         </div>
       </main>
+      {/* ===== RESCHEDULE TASK DIALOG ===== */}
+      <Dialog open={isRescheduleDialogOpen} onOpenChange={setIsRescheduleDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] rounded-[20px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl">เลื่อนกำหนดการ</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">งาน: {taskToReschedule?.title}</label>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">วันที่กำหนดเดิม: {taskToReschedule?.dueDate}</label>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">วันที่กำหนดใหม่</label>
+              <Input
+                type="date"
+                value={newDueDate}
+                onChange={(e) => setNewDueDate(e.target.value)}
+                className="rounded-lg"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">เหตุผลในการเลื่อนกำหนด</label>
+              <Textarea
+                value={rescheduleReason}
+                onChange={(e) => setRescheduleReason(e.target.value)}
+                placeholder="ระบุเหตุผลในการเลื่อนกำหนด"
+                className="rounded-lg min-h-[100px]"
+                required
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => setIsRescheduleDialogOpen(false)} className="rounded-lg">
+              ยกเลิก
+            </Button>
+            <Button
+              className="bg-red-700 hover:bg-red-800 text-white rounded-lg"
+              onClick={handleRescheduleTask}
+              disabled={!rescheduleReason.trim() || !newDueDate}
+            >
+              บันทึกการเปลี่ยนแปลง
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== REOPEN TASK DIALOG ===== */}
+      <Dialog open={isReopenDialogOpen} onOpenChange={setIsReopenDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] rounded-[20px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl">เปิดงานที่เสร็จสิ้นแล้ว</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">งาน: {taskToReopen?.title}</label>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">เหตุผลในการเปิดงานใหม่</label>
+              <Textarea
+                value={reopenReason}
+                onChange={(e) => setReopenReason(e.target.value)}
+                placeholder="ระบุเหตุผลในการเปิดงานใหม่"
+                className="rounded-lg min-h-[100px]"
+                required
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => setIsReopenDialogOpen(false)} className="rounded-lg">
+              ยกเลิก
+            </Button>
+            <Button
+              className="bg-red-700 hover:bg-red-800 text-white rounded-lg"
+              onClick={handleReopenTask}
+              disabled={!reopenReason.trim()}
+            >
+              เปิดงานใหม่
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

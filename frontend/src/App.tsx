@@ -9,6 +9,7 @@ import { useState } from 'react'
  import Audit from './pages/audit-logs/page'
  import Settings from './pages/settings/page'
  import Manage from './pages/manage_reminder/page'
+ import AuditPerson from './pages/audit-logs-person/page'
 
  function App() {
   // ไม่สนใจค่าปัจจุบัน แค่ต้องการ setter อย่างเดียว
@@ -26,6 +27,7 @@ import { useState } from 'react'
          <Route path="/audit-logs" element={<Audit/>} />
         <Route path="/settings" element={<Settings/>} />
         <Route path="/manage" element={<Manage/>} />
+        <Route path="/auditperson" element={<AuditPerson/>} />
        </Routes>
      </Router>
    )

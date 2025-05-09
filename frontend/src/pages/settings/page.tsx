@@ -87,15 +87,15 @@ export default function SettingsPage() {
         </div>
 
         <nav className="flex-1 space-y-1 px-2 pb-6 overflow-y-auto">
-          <details className="group" open>
-            <summary className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors cursor-pointer">
+          <details className="group">
+            <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
               <Bell className="h-5 w-5" />
               ระบบการแจ้งเตือน
             </summary>
             <div className="ml-4 mt-2 space-y-1">
               <Link
                 to="/dashboard"
-                className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors cursor-pointer"
+                className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors"
               >
                 เตือนความจำ
               </Link>
@@ -110,8 +110,8 @@ export default function SettingsPage() {
             </div>
           </details>
 
-      <details className="group" open>
-        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+      <details className="group">
+        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
           <CheckCircle className="h-5 w-5" />
           แอดมิน
         </summary>
@@ -161,16 +161,15 @@ export default function SettingsPage() {
       {isMenuOpen && (
         <div className="md:hidden fixed top-14 left-0 w-64 h-full bg-gradient-to-b from-red-800 to-red-900 text-white z-40 shadow-lg p-3 overflow-y-auto">
           <nav className="space-y-1">
-          <details className="group" open>
-            <summary className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors cursor-pointer">
+          <details className="group">
+            <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
               <Bell className="h-5 w-5" />
               ระบบการแจ้งเตือน
             </summary>
             <div className="ml-4 mt-2 space-y-1">
               <Link
                 to="/dashboard"
-                className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors cursor-pointer"
-              >
+                className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors">
                 เตือนความจำ
               </Link>
               <Link to="/manage" className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors">
@@ -184,8 +183,8 @@ export default function SettingsPage() {
             </div>
           </details>
 
-      <details className="group" open>
-        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+      <details className="group">
+        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
           <CheckCircle className="h-5 w-5" />
           แอดมิน
         </summary>

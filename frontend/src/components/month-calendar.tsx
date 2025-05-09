@@ -31,6 +31,10 @@ export function MonthCalendar({ tasks }) {
   })
   const [draggedTask, setDraggedTask] = useState(null)
   const [allTasks, setAllTasks] = useState(tasks)
+  const [isRescheduleDialogOpen, setIsRescheduleDialogOpen] = useState(false)
+  const [taskToReschedule, setTaskToReschedule] = useState(null)
+  const [rescheduleReason, setRescheduleReason] = useState("")
+  const [newDueDate, setNewDueDate] = useState("")
 
   // Sync tasks prop with internal state
   useEffect(() => {
@@ -157,16 +161,37 @@ export function MonthCalendar({ tasks }) {
     e.preventDefault()
     if (!draggedTask) return
 
+    // If the target date is different from the original date, show the reschedule dialog
+    if (draggedTask.originalDate !== targetDate) {
+      setTaskToReschedule(draggedTask)
+      setNewDueDate(targetDate)
+      setIsRescheduleDialogOpen(true)
+    }
+
+    setDraggedTask(null)
+  }
+
+  const handleRescheduleTask = () => {
+    if (!taskToReschedule || !rescheduleReason.trim() || !newDueDate) return
+
     // Create a new array with the updated task
     const updatedTasks = allTasks.map((task) => {
-      if (task.id === draggedTask.id) {
-        return { ...task, dueDate: targetDate }
+      if (task.id === taskToReschedule.id) {
+        return {
+          ...task,
+          dueDate: newDueDate,
+          rescheduleReason,
+          rescheduleDate: new Date().toISOString(),
+        }
       }
       return task
     })
 
     setAllTasks(updatedTasks)
-    setDraggedTask(null)
+    setTaskToReschedule(null)
+    setRescheduleReason("")
+    setNewDueDate("")
+    setIsRescheduleDialogOpen(false)
   }
 
   const handleAddTask = () => {
@@ -431,6 +456,53 @@ export function MonthCalendar({ tasks }) {
             </Button>
             <Button onClick={handleAddTask} className="bg-red-700 hover:bg-red-800">
               เพิ่มงาน
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reschedule task dialog */}
+      <Dialog open={isRescheduleDialogOpen} onOpenChange={setIsRescheduleDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] w-[calc(100%-2rem)] rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-red-700" />
+              <span>เลื่อนกำหนดการ</span>
+            </DialogTitle>
+            <DialogDescription>
+              เลื่อนกำหนดการจากวันที่ {formatDate(taskToReschedule?.originalDate || "")} เป็นวันที่{" "}
+              {formatDate(newDueDate || "")}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">งาน</label>
+              <div className="p-2 border rounded-md bg-gray-50">{taskToReschedule?.title}</div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">เหตุผลในการเลื่อนกำหนด</label>
+              <Textarea
+                value={rescheduleReason}
+                onChange={(e) => setRescheduleReason(e.target.value)}
+                placeholder="ระบุเหตุผลในการเลื่อนกำหนด"
+                rows={3}
+                required
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsRescheduleDialogOpen(false)}>
+              ยกเลิก
+            </Button>
+            <Button
+              onClick={handleRescheduleTask}
+              className="bg-red-700 hover:bg-red-800"
+              disabled={!rescheduleReason.trim()}
+            >
+              บันทึกการเปลี่ยนแปลง
             </Button>
           </DialogFooter>
         </DialogContent>

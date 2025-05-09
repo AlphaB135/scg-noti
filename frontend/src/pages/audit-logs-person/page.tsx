@@ -26,6 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 // ประเภทของการดำเนินการ
 type ActionType =
@@ -49,7 +50,7 @@ interface AuditLog {
   newValue?: string
 }
 
-export default function AuditLogsPage() {
+export default function UserActivityLogsPage() {
   // ===== STATE MANAGEMENT =====
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -58,6 +59,13 @@ export default function AuditLogsPage() {
   const [filterDate, setFilterDate] = useState<string>("all")
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
   const [tasks, setTasks] = useState([])
+  const [currentUser, setCurrentUser] = useState({
+    id: "user1",
+    name: "Shogun",
+    role: "ผู้จัดการโครงการ",
+    avatar: "/placeholder.svg?height=40&width=40",
+    department: "Developer",
+  })
 
   // ===== MOCK DATA LOADING =====
   useEffect(() => {
@@ -155,7 +163,7 @@ export default function AuditLogsPage() {
 
     setTasks(mockTasks)
 
-    // สร้างข้อมูลประวัติการดำเนินการตัวอย่าง
+    // สร้างข้อมูลประวัติการดำเนินการตัวอย่าง - เฉพาะของผู้ใช้ปัจจุบัน (สมชาย ใจดี)
     const mockAuditLogs: AuditLog[] = [
       // วันนี้
       {
@@ -163,107 +171,69 @@ export default function AuditLogsPage() {
         taskId: 1,
         taskTitle: "สรุปรายงานผลประกอบการ",
         actionType: "task_created",
-        actionBy: "โชกุน สุดหล่อ",
+        actionBy: "สมชาย ใจดี",
         actionDate: `${todayStr}T09:15:00`,
         details: "สร้างงานใหม่",
       },
-      {
-        id: "log2",
-        taskId: 2,
-        taskTitle: "ปฐมนิเทศพนักงานใหม่",
-        actionType: "task_updated",
-        actionBy: "แบงค์ คาร์แคร์",
-        actionDate: `${todayStr}T10:30:00`,
-        details: "แก้ไขรายละเอียดงาน",
-        oldValue: "เริ่มปฐมนิเทศ",
-        newValue: "เริ่มปฐมนิเทศในวันนี้",
-      },
-      {
-        id: "log3",
-        taskId: 5,
-        taskTitle: "ตรวจสอบระบบเซิร์ฟเวอร์",
-        actionType: "task_postponed",
-        actionBy: "บิว อาสยาม",
-        actionDate: `${todayStr}T11:45:00`,
-        details: "เลื่อนกำหนดส่งงาน",
-        oldValue: "2025-05-08",
-        newValue: "2025-05-09",
-      },
-
-      // เมื่อวาน
-      {
-        id: "log4",
-        taskId: 9,
-        taskTitle: "ส่งรายงานประจำเดือน",
-        actionType: "task_updated",
-        actionBy: "บาส ไม่เป็นสุข",
-        actionDate: `${yesterdayStr}T14:20:00`,
-        details: "เปลี่ยนสถานะเป็นเลยกำหนด",
-      },
-      {
-        id: "log5",
-        taskId: 10,
-        taskTitle: "ตรวจสอบงบประมาณไตรมาส",
-        actionType: "task_updated",
-        actionBy: "พี่พีท ซีเนียร์จำเป็น",
-        actionDate: `${yesterdayStr}T15:10:00`,
-        details: "เปลี่ยนสถานะเป็นเลยกำหนด",
-      },
-      {
-        id: "log6",
-        taskId: 8,
-        taskTitle: "จัดทำงบประมาณไตรมาสใหม่",
-        actionType: "task_created",
-        actionBy: "พี่พีท ซีเนียร์จำเป็น",
-        actionDate: `${yesterdayStr}T16:30:00`,
-        details: "สร้างงานใหม่",
-      },
-
       // 2 วันที่แล้ว
       {
         id: "log7",
         taskId: 3,
         taskTitle: "เตรียมเอกสารประชุม",
         actionType: "task_created",
-        actionBy: "โชกุน สุดหล่อ",
+        actionBy: "สมชาย ใจดี",
         actionDate: `${twoDaysAgoStr}T09:00:00`,
         details: "สร้างงานใหม่",
-      },
-      {
-        id: "log8",
-        taskId: 4,
-        taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
-        actionType: "task_created",
-        actionBy: "แบงค์ คาร์แคร์",
-        actionDate: `${twoDaysAgoStr}T10:15:00`,
-        details: "สร้างงานใหม่",
-      },
-      {
-        id: "log9",
-        taskId: 7,
-        taskTitle: "วางแผนอบรมประจำเดือน",
-        actionType: "task_postponed",
-        actionBy: "บาส ไม่เป็นสุข",
-        actionDate: `${twoDaysAgoStr}T13:45:00`,
-        details: "เลื่อนกำหนดส่งงานจากวันที่ 15 พ.ค. ไปเป็นวันที่ 17 พ.ค.",
-      },
-      {
-        id: "log10",
-        taskId: 6,
-        taskTitle: "อัปโหลดข้อมูลเข้าระบบ",
-        actionType: "task_completed",
-        actionBy: "บิว อาสยาม",
-        actionDate: `${twoDaysAgoStr}T16:20:00`,
-        details: "ทำงานเสร็จแล้ว",
       },
       {
         id: "log11",
         taskId: 6,
         taskTitle: "อัปโหลดข้อมูลเข้าระบบ",
         actionType: "task_reopened",
-        actionBy: "โชกุน สุดหล่อ",
+        actionBy: "สมชาย ใจดี",
         actionDate: `${twoDaysAgoStr}T17:30:00`,
         details: "เปิดงานใหม่เนื่องจากข้อมูลไม่ครบถ้วน",
+      },
+      // เพิ่มข้อมูลเพิ่มเติมเพื่อให้มีประวัติมากขึ้น
+      {
+        id: "log12",
+        taskId: 9,
+        taskTitle: "ส่งรายงานประจำเดือน",
+        actionType: "task_postponed",
+        actionBy: "สมชาย ใจดี",
+        actionDate: `${yesterdayStr}T10:15:00`,
+        details: "เลื่อนกำหนดส่งงานจากวันที่ 3 พ.ค. ไปเป็นวันที่ 5 พ.ค.",
+        oldValue: "2025-05-03",
+        newValue: "2025-05-05",
+      },
+      {
+        id: "log13",
+        taskId: 2,
+        taskTitle: "ปฐมนิเทศพนักงานใหม่",
+        actionType: "task_updated",
+        actionBy: "สมชาย ใจดี",
+        actionDate: `${yesterdayStr}T14:30:00`,
+        details: "แก้ไขรายละเอียดงาน",
+        oldValue: "เตรียมการปฐมนิเทศ",
+        newValue: "เริ่มปฐมนิเทศในวันนี้",
+      },
+      {
+        id: "log14",
+        taskId: 4,
+        taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
+        actionType: "task_completed",
+        actionBy: "สมชาย ใจดี",
+        actionDate: `${yesterdayStr}T16:45:00`,
+        details: "ทำงานเสร็จแล้ว",
+      },
+      {
+        id: "log15",
+        taskId: 4,
+        taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
+        actionType: "task_reopened",
+        actionBy: "สมชาย ใจดี",
+        actionDate: `${todayStr}T08:30:00`,
+        details: "เปิดงานใหม่เนื่องจากต้องสั่งซื้อเพิ่มเติม",
       },
     ]
 
@@ -370,7 +340,6 @@ export default function AuditLogsPage() {
     // กรองตามคำค้นหา
     const matchesSearch =
       log.taskTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.actionBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (log.details && log.details.toLowerCase().includes(searchQuery.toLowerCase()))
 
     // กรองตามประเภทการดำเนินการ
@@ -424,43 +393,40 @@ export default function AuditLogsPage() {
   // แสดงรายการเมนูในแถบด้านข้าง
   const renderMenuItems = () => (
     <>
-                <details className="group" open>
-            <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
-              <Bell className="h-5 w-5" />
-              ระบบการแจ้งเตือน
-            </summary>
-            <div className="ml-4 mt-2 space-y-1">
-              <Link to="/dashboard" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-                เตือนความจำ
-              </Link>
-              <Link to="/manage" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-                ตั้งค่าการแจ้งเตือน
-              </Link>
-              <Link to="/auditperson" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-                ประวัติการดำเนินการ
-              </Link>
-            </div>
-          </details>
-
-          <details className="group" open>
+      <details className="group" open>
         <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
+          <Bell className="h-5 w-5" />
+          ระบบการแจ้งเตือน
+        </summary>
+        <div className="ml-4 mt-2 space-y-1">
+          <Link to="/dashboard" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+            เตือนความจำ
+          </Link>
+          <Link to="/manage" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+            ตั้งค่าการแจ้งเตือน
+          </Link>
+          <Link to="/auditperson" className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/10 font-bold">
+            ประวัติการดำเนินการ
+          </Link>
+        </div>
+      </details>
+
+      <details className="group">
+        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
           <CheckCircle className="h-5 w-5" />
           แอดมิน
         </summary>
         <div className="ml-4 mt-2 space-y-1">
-          <Link to="/dashboard" className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/10 font-bold">
+          <Link to="/audit-logs" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
             ประวัติการดำเนินการพนักงาน
           </Link>
         </div>
       </details>
 
-      <Link
-            to="/settings"
-            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
-          >
-            <Settings className="h-5 w-5" />
-            การตั้งค่า
-          </Link>
+      <Link to="/settings" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+        <Settings className="h-5 w-5" />
+        การตั้งค่า
+      </Link>
     </>
   )
 
@@ -480,8 +446,8 @@ export default function AuditLogsPage() {
         </div>
 
         <nav className="flex-1 space-y-1 px-2 pb-6 overflow-y-auto">
-          <details className="group">
-            <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
+          <details className="group" open>
+            <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
               <Bell className="h-5 w-5" />
               ระบบการแจ้งเตือน
             </summary>
@@ -492,25 +458,28 @@ export default function AuditLogsPage() {
               <Link to="/manage" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
                 ตั้งค่าการแจ้งเตือน
               </Link>
-              <Link to="/auditperson" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+              <Link
+                to="/auditperson"
+                className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/10 font-bold"
+              >
                 ประวัติการดำเนินการ
               </Link>
             </div>
           </details>
 
-          <details className="group" open>
-        <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
-          <CheckCircle className="h-5 w-5" />
-          แอดมิน
-        </summary>
-        <div className="ml-4 mt-2 space-y-1">
-          <Link to="/audit-logs" className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/10 font-bold">
-            ประวัติการดำเนินการพนักงาน
-          </Link>
-        </div>
-      </details>
+          <details className="group">
+            <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
+              <CheckCircle className="h-5 w-5" />
+              แอดมิน
+            </summary>
+            <div className="ml-4 mt-2 space-y-1">
+              <Link to="/audit-logs" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+                ประวัติการดำเนินการพนักงาน
+              </Link>
+            </div>
+          </details>
 
-      <Link
+          <Link
             to="/settings"
             className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
           >
@@ -565,8 +534,8 @@ export default function AuditLogsPage() {
         <header className="hidden md:block fixed top-0 left-0 right-0 z-40 bg-white border-b shadow-sm">
           <div className="flex items-center justify-between px-6 py-4 ml-64">
             <div>
-              <h1 className="text-xl font-bold text-gray-800">ประวัติการดำเนินการ</h1>
-              <p className="text-sm text-gray-500">ติดตามการเปลี่ยนแปลงและการดำเนินการของงาน</p>
+              <h1 className="text-xl font-bold text-gray-800">ประวัติการดำเนินการของคุณ</h1>
+              <p className="text-sm text-gray-500">ติดตามการเปลี่ยนแปลงและการดำเนินการของงานที่คุณทำ</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right text-sm text-gray-600">
@@ -601,8 +570,8 @@ export default function AuditLogsPage() {
           <div className="flex flex-col px-4 py-3">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-lg font-bold text-gray-800">ประวัติการดำเนินการ</h1>
-                <p className="text-xs text-gray-500">ติดตามการเปลี่ยนแปลงและการดำเนินการของงาน</p>
+                <h1 className="text-lg font-bold text-gray-800">ประวัติการดำเนินการของคุณ</h1>
+                <p className="text-xs text-gray-500">ติดตามการเปลี่ยนแปลงและการดำเนินการของงานที่คุณทำ</p>
               </div>
               <div className="text-right text-sm text-gray-600">
                 <div className="font-bold text-sm">
@@ -617,6 +586,48 @@ export default function AuditLogsPage() {
             </div>
           </div>
         </header>
+
+        {/* ===== USER PROFILE SECTION ===== */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <Avatar className="h-16 w-16 border-2 border-red-100">
+                <AvatarImage src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.name} />
+                <AvatarFallback className="bg-red-100 text-red-800 text-lg">
+                  {currentUser.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-center md:text-left">
+                <h2 className="text-xl font-bold text-gray-800">{currentUser.name}</h2>
+                <p className="text-gray-500">
+                  {currentUser.role} • {currentUser.department}
+                </p>
+              </div>
+              <div className="flex-1"></div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-2xl font-bold text-gray-800">{auditLogs.length}</p>
+                  <p className="text-sm text-gray-500">การดำเนินการทั้งหมด</p>
+                </div>
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <p className="text-2xl font-bold text-green-700">
+                    {auditLogs.filter((log) => log.actionType === "task_completed").length}
+                  </p>
+                  <p className="text-sm text-gray-500">งานที่เสร็จสิ้น</p>
+                </div>
+                <div className="p-3 bg-blue-50 rounded-lg hidden md:block">
+                  <p className="text-2xl font-bold text-blue-700">
+                    {auditLogs.filter((log) => log.actionType === "task_created").length}
+                  </p>
+                  <p className="text-sm text-gray-500">งานที่สร้าง</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* ===== AUDIT LOGS CONTENT ===== */}
         <div className="mt-4">
@@ -634,7 +645,7 @@ export default function AuditLogsPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="ค้นหาตามชื่องาน, ผู้ดำเนินการ..."
+                    placeholder="ค้นหาตามชื่องาน, รายละเอียด..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -674,18 +685,20 @@ export default function AuditLogsPage() {
           </Card>
 
           {/* ===== STATISTICS SECTION ===== */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base font-medium text-gray-700">การดำเนินการทั้งหมด</CardTitle>
+                <CardTitle className="text-base font-medium text-gray-700">สร้างงานใหม่</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center">
                   <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full mr-3">
-                    <History className="text-blue-600 w-5 h-5" />
+                    <FileText className="text-blue-600 w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-gray-800">{auditLogs.length}</p>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {auditLogs.filter((log) => log.actionType === "task_created").length}
+                    </p>
                     <p className="text-sm text-gray-500">รายการ</p>
                   </div>
                 </div>
@@ -704,6 +717,25 @@ export default function AuditLogsPage() {
                   <div>
                     <p className="text-2xl font-bold text-gray-800">
                       {auditLogs.filter((log) => log.actionType === "task_completed").length}
+                    </p>
+                    <p className="text-sm text-gray-500">รายการ</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-medium text-gray-700">งานที่แก้ไข</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <div className="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full mr-3">
+                    <Edit className="text-purple-600 w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {auditLogs.filter((log) => log.actionType === "task_updated").length}
                     </p>
                     <p className="text-sm text-gray-500">รายการ</p>
                   </div>
@@ -780,12 +812,27 @@ export default function AuditLogsPage() {
                                       })}
                                     </span>
                                   </div>
-                                  <div className="text-sm font-medium text-gray-700">ดำเนินการโดย: {log.actionBy}</div>
                                 </div>
 
                                 <h4 className="text-base font-semibold text-gray-800 mb-1">{log.taskTitle}</h4>
 
                                 <p className="text-sm text-gray-600">{log.details}</p>
+
+                                {/* แสดงค่าเก่าและค่าใหม่ถ้ามี */}
+                                {(log.oldValue || log.newValue) && (
+                                  <div className="mt-2 text-sm">
+                                    {log.oldValue && (
+                                      <div className="text-gray-500">
+                                        <span className="font-medium">ค่าเดิม:</span> {log.oldValue}
+                                      </div>
+                                    )}
+                                    {log.newValue && (
+                                      <div className="text-gray-500">
+                                        <span className="font-medium">ค่าใหม่:</span> {log.newValue}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </CardContent>
                             </Card>
                           </div>
@@ -823,9 +870,6 @@ export default function AuditLogsPage() {
                               การดำเนินการ
                             </th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              ผู้ดำเนินการ
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               รายละเอียด
                             </th>
                           </tr>
@@ -845,7 +889,6 @@ export default function AuditLogsPage() {
                                   </span>
                                 </Badge>
                               </td>
-                              <td className="px-4 py-3 text-sm text-gray-500">{log.actionBy}</td>
                               <td className="px-4 py-3 text-sm text-gray-500">{log.details}</td>
                             </tr>
                           ))}

@@ -339,14 +339,14 @@ export default function ManageReminder() {
                 ตั้งค่าการแจ้งเตือน
               </Link>
               <Link
-            to="/"
+            to="/auditperson"
             className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
               ประวัติการดำเนินการ
           </Link>
             </div>
           </details>
 
-          <details className="group" open>
+          <details className="group">
         <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
           <CheckCircle className="h-5 w-5" />
           แอดมิน
@@ -400,14 +400,14 @@ export default function ManageReminder() {
                 ตั้งค่าการแจ้งเตือน
               </Link>
               <Link
-            to="/"
+            to="/auditperson"
             className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
               ประวัติการดำเนินการ
           </Link>
             </div>
           </details>
 
-          <details className="group" open>
+          <details className="group">
         <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
           <CheckCircle className="h-5 w-5" />
           แอดมิน
