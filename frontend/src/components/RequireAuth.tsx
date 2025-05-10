@@ -1,11 +1,11 @@
 // 📁 frontend/src/components/RequireAuth.tsx
 
-import React, { useState, useEffect } from 'react'
+import React, { ReactElement, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import axios from '@/axiosConfig'  // Axios instance ที่มี interceptor ติดตั้งแล้ว
 
 interface RequireAuthProps {
-  children: React.ReactElement
+  children: ReactElement
 }
 
 export function RequireAuth({ children }: RequireAuthProps) {
@@ -13,14 +13,21 @@ export function RequireAuth({ children }: RequireAuthProps) {
   const navigate = useNavigate()
 
   useEffect(() => {
-    axios
-      .get('/api/auth/me', { withCredentials: true })
-      .then(() => setChecking(false))
-      .catch(() => navigate('/login', { replace: true }))
+    ;(async () => {
+      try {
+        // เรียกตรวจสอบสิทธิ์ — ถ้า 401 จะข้าม interceptor ของ /me และถูกโยนขึ้นมา catch
+        await axios.get('/api/auth/me')
+        setChecking(false)
+      } catch {
+        // ถ้ายัง 401 จริง ๆ ให้ดีดกลับไปหน้า login
+        navigate('/login', { replace: true })
+      }
+    })()
   }, [navigate])
 
   if (checking) {
     return <div>กำลังตรวจสอบสิทธิ์...</div>
   }
+
   return children
 }

@@ -1,17 +1,26 @@
 // 📁 frontend/src/App.tsx
-import { useState } from 'react'
+
+import React, { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+
+// ––– Public pages
 import LoginPage from './pages/LoginPage'
+
+// ––– Protected pages
 import DashboardPage from './pages/dashboard/page'
 import NotificationPage from './pages/notifications/page'
 import Rpa from './pages/rpa/page'
 import Approvals from './pages/approvals/page'
 import Audit from './pages/audit-logs/page'
 import Settings from './pages/settings/page'
+
+// **ตรงนี้ต้อง import ให้ตรงกับไฟล์ของคุณ**
+// สมมติโฟลเดอร์ชื่อ manage_reminder/page.tsx และ default export เป็น component ชื่อ Manage
 import Manage from './pages/manage_reminder/page'
+
 import AuditPerson from './pages/audit-logs-person/page'
 
-// ← เพิ่มบรรทัดนี้
+// HOC ตรวจสอบสิทธิ์
 import { RequireAuth } from './components/RequireAuth'
 
 function App() {
@@ -20,11 +29,11 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* public routes */}
+        {/* Public */}
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage setRole={setRole} />} />
 
-        {/* protected routes */}
+        {/* Protected */}
         <Route
           path="/dashboard"
           element={

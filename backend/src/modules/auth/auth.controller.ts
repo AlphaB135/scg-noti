@@ -2,8 +2,18 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
 import { JWT_SECRET } from '../../config/env'
 import { prisma } from '../../config/prismaClient'
+
+// Helper เพื่อคืน options เดียวกันทั้ง access & refresh cookies
+const cookieOptions = (maxAge: number) => ({
+  httpOnly: true,
+  sameSite: 'Strict',
+  secure: process.env.NODE_ENV === 'production',
+  maxAge,
+  path: '/',
+})
 
 // Login handler
 export async function login(req: Request, res: Response): Promise<void> {
@@ -44,9 +54,18 @@ export async function login(req: Request, res: Response): Promise<void> {
       data: { userId: user.id, fingerprint, expiresAt },
     })
 
-    // เซ็น JWT โดยเก็บแค่ sessionId
+    // เซ็น Access JWT (15m)
     const token = jwt.sign({ sessionId: session.id }, JWT_SECRET!, {
       expiresIn: '15m',
+    })
+
+    // สร้าง Refresh Token (7 วัน)
+    const rawRefresh = crypto.randomBytes(64).toString('hex')
+    const hashedRefresh = crypto.createHash('sha256').update(rawRefresh).digest('hex')
+    const refreshExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    await prisma.session.update({
+      where: { id: session.id },
+      data: { refreshToken: hashedRefresh, refreshExpires },
     })
 
     console.log(
@@ -58,21 +77,14 @@ export async function login(req: Request, res: Response): Promise<void> {
       session.id
     )
 
-    // ตั้ง cookie บน same-site เดียวกัน
+    // เซ็ต Cookies ทั้งสองตัว
     res
-      .cookie('token', token, {
-        httpOnly: true,
-        sameSite: 'Strict',           // ปลอดภัยที่สุดบนโดเมนเดียวกัน
-        secure: true,                 // บังคับ HTTPS ทุกสภาพแวดล้อม
-        maxAge: 15 * 60 * 1000,       // 15 นาที
-        path: '/',                    // ให้ใช้ได้ทุก path
-      })
+      .cookie('token', token, cookieOptions(15 * 60 * 1000))
+      .cookie('refreshToken', rawRefresh, cookieOptions(7 * 24 * 60 * 60 * 1000))
       .json({ ok: true, role: user.role })
-    return
   } catch (err) {
     console.error('❌ [LOGIN ERROR]', err)
     res.status(500).json({ message: 'เกิดข้อผิดพลาดในฝั่งเซิร์ฟเวอร์' })
-    return
   }
 }
 
@@ -82,7 +94,6 @@ export async function logout(req: Request, res: Response): Promise<void> {
   if (token) {
     try {
       const { sessionId } = jwt.verify(token, JWT_SECRET!) as any
-      // ลบ session ใน DB
       await prisma.session.delete({ where: { id: sessionId } })
     } catch (er) {
       console.error('❌ [LOGOUT ERROR]', er)
@@ -90,19 +101,13 @@ export async function logout(req: Request, res: Response): Promise<void> {
   }
 
   console.log('🔓 Logged out session')
-  // ล้างคุกกี้ด้วย options เดียวกัน
   res
-    .clearCookie('token', {
-      httpOnly: true,
-      sameSite: 'Strict',
-      secure: true,
-      path: '/',
-    })
+    .clearCookie('token', { ...cookieOptions(0) })
+    .clearCookie('refreshToken', { ...cookieOptions(0) })
     .json({ ok: true })
-  return
 }
 
-// Me handler (ไม่เปลี่ยนแปลง)
+// Me handler
 export async function me(req: Request, res: Response): Promise<void> {
   console.log('📥 [ME] req.user:', req.user)
   const userId = (req.user as any)?.id
@@ -124,5 +129,46 @@ export async function me(req: Request, res: Response): Promise<void> {
 
   console.log('✅ [ME] returning user:', user.employeeProfile!.employeeCode)
   res.json({ user })
-  return
+}
+
+// Refresh token handler
+export async function refresh(req: Request, res: Response): Promise<void> {
+  try {
+    const raw = req.cookies?.refreshToken as string | undefined
+    if (!raw) {
+      return res.status(401).json({ message: 'No refresh token' })
+    }
+
+    const hashed = crypto.createHash('sha256').update(raw).digest('hex')
+    const session = await prisma.session.findFirst({
+      where: { refreshToken: hashed },
+      include: { user: true },
+    })
+
+    if (!session || !session.refreshExpires || session.refreshExpires < new Date()) {
+      res.clearCookie('token', { ...cookieOptions(0) })
+      res.clearCookie('refreshToken', { ...cookieOptions(0) })
+      return res.status(401).json({ message: 'Invalid or expired refresh token' })
+    }
+
+    // issue new tokens
+    const newAccess = jwt.sign({ sessionId: session.id }, JWT_SECRET!, {
+      expiresIn: '15m',
+    })
+    const newRaw = crypto.randomBytes(64).toString('hex')
+    const newHashed = crypto.createHash('sha256').update(newRaw).digest('hex')
+    const newExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    await prisma.session.update({
+      where: { id: session.id },
+      data: { refreshToken: newHashed, refreshExpires: newExpires },
+    })
+
+    res
+      .cookie('token', newAccess, cookieOptions(15 * 60 * 1000))
+      .cookie('refreshToken', newRaw, cookieOptions(7 * 24 * 60 * 60 * 1000))
+      .json({ ok: true })
+  } catch (err) {
+    console.error('❌ [REFRESH ERROR]', err)
+    res.status(500).json({ message: 'Server error' })
+  }
 }

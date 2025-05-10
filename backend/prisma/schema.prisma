@@ -144,6 +144,8 @@ model Session {
   fingerprint String
   createdAt   DateTime @default(now())
   expiresAt   DateTime
+  refreshToken   String?   @db.NVarChar(255)
+  refreshExpires DateTime? @db.DateTime2
 
   @@index([userId])
   @@index([expiresAt])

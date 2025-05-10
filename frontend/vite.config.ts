@@ -1,4 +1,3 @@
-// frontend/vite.config.ts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'url'
@@ -6,11 +5,9 @@ import { fileURLToPath, URL } from 'url'
 export default defineConfig({
   plugins: [
     react(),
-  
   ],
   resolve: {
     alias: {
-      // ให้ @ ชี้ไปที่โฟลเดอร์ src ของโปรเจกต์
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
@@ -20,6 +17,15 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
+        // รีไรท์ Domain ของ Set-Cookie header
+        // ให้กลายเป็นโฮสต์เดียวกับ frontend (ไม่กำหนด domain)
+        cookieDomainRewrite: {
+          '*': ''
+        },
+        // (ถ้าต้องการ) รีไรท์ path ในคุกกี้ให้ครอบคลุมทุก path
+        cookiePathRewrite: {
+          '^/api': ''
+        },
       },
     },
   },
