@@ -37,12 +37,14 @@ export async function login(req: Request, res: Response): Promise<void> {
       return
     }
 
+    // สร้าง session ใน DB
     const fingerprint = `${req.ip}|${req.headers['user-agent']}`
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000) // 15 นาที
     const session = await prisma.session.create({
       data: { userId: user.id, fingerprint, expiresAt },
     })
 
+    // เซ็น JWT โดยเก็บแค่ sessionId
     const token = jwt.sign({ sessionId: session.id }, JWT_SECRET!, {
       expiresIn: '15m',
     })
@@ -56,9 +58,15 @@ export async function login(req: Request, res: Response): Promise<void> {
       session.id
     )
 
-    // ส่ง cookie และ JSON ตอบกลับ
+    // ตั้ง cookie บน same-site เดียวกัน
     res
-      .cookie('token', token, { httpOnly: true, sameSite: 'strict' })
+      .cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'Strict',           // ปลอดภัยที่สุดบนโดเมนเดียวกัน
+        secure: true,                 // บังคับ HTTPS ทุกสภาพแวดล้อม
+        maxAge: 15 * 60 * 1000,       // 15 นาที
+        path: '/',                    // ให้ใช้ได้ทุก path
+      })
       .json({ ok: true, role: user.role })
     return
   } catch (err) {
@@ -74,6 +82,7 @@ export async function logout(req: Request, res: Response): Promise<void> {
   if (token) {
     try {
       const { sessionId } = jwt.verify(token, JWT_SECRET!) as any
+      // ลบ session ใน DB
       await prisma.session.delete({ where: { id: sessionId } })
     } catch (er) {
       console.error('❌ [LOGOUT ERROR]', er)
@@ -81,11 +90,19 @@ export async function logout(req: Request, res: Response): Promise<void> {
   }
 
   console.log('🔓 Logged out session')
-  res.clearCookie('token').json({ ok: true })
+  // ล้างคุกกี้ด้วย options เดียวกัน
+  res
+    .clearCookie('token', {
+      httpOnly: true,
+      sameSite: 'Strict',
+      secure: true,
+      path: '/',
+    })
+    .json({ ok: true })
   return
 }
 
-// Me handler
+// Me handler (ไม่เปลี่ยนแปลง)
 export async function me(req: Request, res: Response): Promise<void> {
   console.log('📥 [ME] req.user:', req.user)
   const userId = (req.user as any)?.id

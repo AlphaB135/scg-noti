@@ -2,7 +2,8 @@
 
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import axios from "axios"
 import { PieChart, Pie, Tooltip } from "recharts"
 import {
   Bell,
@@ -362,6 +363,21 @@ export default function AdminNotificationPage() {
     return () => clearInterval(timer)
   }, [])
 
+  const navigate = useNavigate()
+
+const handleLogout = async () => {
+  try {
+    await axios.post(
+      '/api/auth/logout',
+      {},
+      { withCredentials: true }
+    )
+    navigate('/login')
+  } catch (err) {
+    console.error('Logout failed', err)
+  }
+}
+
   return (
     <div className="flex min-h-screen bg-white font-noto">
       {/* ===== SIDEBAR (DESKTOP) ===== */}
@@ -426,10 +442,13 @@ export default function AdminNotificationPage() {
           </Link>
         </nav>
 
-        <button className="m-6 flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200">
-          <LogOut className="mr-2 h-5 w-5" />
-          ออกจากระบบ
-        </button>
+         <button
+   onClick={handleLogout}
+   className="m-6 flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200"
+ >
+   <LogOut className="mr-2 h-5 w-5" />
+  ออกจากระบบ
+ </button>
       </aside>
 
       {/* ===== MOBILE HEADER ===== */}
@@ -458,10 +477,13 @@ export default function AdminNotificationPage() {
         <div className="md:hidden fixed top-14 left-0 w-64 h-full bg-gradient-to-b from-red-800 to-red-900 text-white z-40 shadow-lg p-3 overflow-y-auto">
           <nav className="space-y-1">{renderMenuItems()}</nav>
 
-          <button className="mt-6 w-full flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200">
-            <LogOut className="mr-2 h-5 w-5" />
-            Logout
-          </button>
+           <button
+   onClick={handleLogout}
+  className="mt-6 w-full flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200"
+ >
+    <LogOut className="mr-2 h-5 w-5" />
+    Logout
+  </button>
         </div>
       )}
 
