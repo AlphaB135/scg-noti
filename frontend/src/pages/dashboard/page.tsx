@@ -1,7 +1,7 @@
-"use client"
-
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react"
+"use client"
+/* eslint-disable no-unused-vars */
+import { useEffect, useState  } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import axios from "axios"
 import { PieChart, Pie, Tooltip } from "recharts"
@@ -24,11 +24,23 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
+// ---------- TYPE หลังย้ายออกมา ------------
+type Task = {
+  id: string
+  title: string
+  details: string
+  dueDate?: string
+  priority: 'today' | 'urgent' | 'overdue' | 'pending'
+ done: boolean
+}
+
+
 
 export default function AdminNotificationPage() {
   // ===== STATE MANAGEMENT =====
   // สถานะหลักสำหรับจัดการข้อมูลและ UI
-  const [tasks, setTasks] = useState([]) // เก็บรายการงานทั้งหมด
+ 
+const [tasks, setTasks] = useState<Task[]>([]) // เก็บรายการงานทั้งหมด
   const [isMenuOpen, setIsMenuOpen] = useState(false) // ควบคุมการเปิด/ปิดเมนูบนมือถือ
   const [currentTime, setCurrentTime] = useState(new Date()) // เก็บเวลาปัจจุบัน
   const [expandTodo, setExpandTodo] = useState(false) // ควบคุมการแสดง modal รายการงานแบบเต็มจอ
@@ -42,6 +54,44 @@ export default function AdminNotificationPage() {
   const [rescheduleReason, setRescheduleReason] = useState("")
   const [reopenReason, setReopenReason] = useState("")
   const [newDueDate, setNewDueDate] = useState("")
+
+  useEffect(() => {
+  // 📁 frontend/src/pages/notifications/page.tsx (หรือไฟล์ที่เรียก fetchNotifications)
+const fetchNotifications = async () => {
+  try {
+    const { data } = await axios.get('/api/notifications', {
+      withCredentials: true,
+      // (ถ้าต้องการ) pagination ก็ใส่ params: { page: 1, size: 200 }
+    })
+
+    // ——————————————
+    // ตรวจสอบจำนวนจริง และ ดูตัวอย่าง 5 รายการแรก
+    console.log('🔔 Received notifications:', data.length)
+    console.log('🔔 Sample notification:', data.slice(0, 5))
+    // ——————————————
+
+    const mappedTasks: Task[] = data.map(rawTask => {
+      const task = {
+        id: rawTask.id,
+        title: rawTask.title,
+        details: rawTask.message,
+        // ถ้าใน API field ชื่อ scheduledAt ให้ split อันนี้ ถ้า dueDate ให้แก้เป็น rawTask.dueDate
+        dueDate: rawTask.scheduledAt?.split('T')[0],
+        done: rawTask.status === 'DONE',
+        priority: 'pending' as const,
+      }
+
+      return updateTaskPriority(task)
+    })
+
+    setTasks(mappedTasks)
+  } catch (err) {
+    console.error('Failed to fetch notifications:', err)
+  }
+}
+
+    fetchNotifications()
+  }, []) // Empty deps array = run once on mount
 
   // ===== TASK MANAGEMENT FUNCTIONS =====
   // บันทึกการแก้ไขงาน
@@ -118,141 +168,35 @@ export default function AdminNotificationPage() {
 
   // ===== TASK STATISTICS =====
   // นับจำนวนงานตามประเภทต่างๆ
-  // แก้ไขการนับจำนวนงานด่วน ไม่รวมงานเลยกำหนด
-  const urgentTodayCount = tasks.filter(
-    (t) => ["most_urgent", "urgent", "today"].includes(t.priority) && !t.done,
-  ).length
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
 
-  // แก้ไขการนับจำนวนงานอื่นๆ ไม่รวมงานเลยกำหนด
-  const otherPendingCount = tasks.filter(
-    (t) => !["most_urgent", "urgent", "today", "overdue"].includes(t.priority) && !t.done,
-  ).length
+const tasksInMonth = tasks;
 
-  const completedCount = tasks.filter((t) => t.done).length
-
-  // นับจำนวนงานเลยกำหนด
-  const overdueCount = tasks.filter((t) => t.priority === "overdue" && !t.done).length
+  const totalTasks = tasksInMonth.length;
+  const doneCount = tasksInMonth.filter(t => t.done).length;
+  const incompleteCnt = totalTasks - doneCount;
+  const urgentTodayCount = tasksInMonth.filter(
+    t => ["today", "urgent"].includes(t.priority) && !t.done
+  ).length;
+  const overdueCount = tasksInMonth.filter(
+    t => t.priority === "overdue" && !t.done
+  ).length;
+  const otherPendingCount = tasksInMonth.filter(
+    t => !["today", "urgent", "overdue"].includes(t.priority) && !t.done
+  ).length;
+  const progressPercent = totalTasks
+    ? Math.round((doneCount / totalTasks) * 100)
+    : 0;
 
   // อัพเดทข้อมูลการแจ้งเตือน
   const notifications = {
-    urgentToday: urgentTodayCount, // งานด่วนวันนี้
-    overdue: overdueCount, // งานเลยกำหนด
-    other: otherPendingCount, // งานอื่นๆ
-    done: completedCount, // งานที่เสร็จแล้ว
-  }
-
-  // ข้อมูลสำหรับแสดงความคืบหน้าในกราฟวงกลม
-  const completedTasks = tasks.filter((t) => t.done).length
-  const incompleteTasks = tasks.length - completedTasks
-  const totalTasks = tasks.length
-  const progressData = {
-    completed: totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100),
-    incomplete: totalTasks - completedTasks,
-  }
-
-  /* ===== SIDE EFFECTS ===== */
-  // โหลดข้อมูลตัวอย่างเมื่อคอมโพเนนต์ถูกโหลด
-  useEffect(() => {
-    const todayStr = new Date().toISOString().split("T")[0]
-
-    const mockData = [
-      // ✅ งานวันนี้
-      {
-        id: 1,
-        title: "สรุปรายงานผลประกอบการ",
-        details: "จัดทำรายงานภายในวันนี้",
-        dueDate: todayStr,
-        priority: "today",
-        done: false,
-      },
-      {
-        id: 2,
-        title: "ปฐมนิเทศพนักงานใหม่",
-        details: "เริ่มปฐมนิเทศในวันนี้",
-        dueDate: todayStr,
-        priority: "today",
-        done: false,
-      },
-
-      // 🔴 งานด่วน (เหลือ 1-2 วัน)
-      {
-        id: 3,
-        title: "เตรียมเอกสารประชุม",
-        details: "ส่งภายใน 8 พ.ค.",
-        dueDate: "2025-05-08",
-        priority: "urgent",
-        done: false,
-      },
-      {
-        id: 4,
-        title: "สั่งซื้ออุปกรณ์สำนักงาน",
-        details: "จัดซื้อภายใน 9 พ.ค.",
-        dueDate: "2025-05-09",
-        priority: "urgent",
-        done: false,
-      },
-      {
-        id: 5,
-        title: "ตรวจสอบระบบเซิร์ฟเวอร์",
-        details: "ดำเนินการก่อน 9 พ.ค.",
-        dueDate: "2025-05-09",
-        priority: "urgent",
-        done: false,
-      },
-      {
-        id: 6,
-        title: "อัปโหลดข้อมูลเข้าระบบ",
-        details: "ส่งภายใน 10 พ.ค.",
-        dueDate: "2025-05-10",
-        priority: "urgent",
-        done: false,
-      },
-
-      // 🟡 งานอื่นๆ (ทั่วไปของเดือน พ.ค.)
-      {
-        id: 7,
-        title: "วางแผนอบรมประจำเดือน",
-        details: "ดำเนินการภายใน 17 พ.ค.",
-        dueDate: "2025-05-17",
-        priority: "pending",
-        done: false,
-      },
-      {
-        id: 8,
-        title: "จัดทำงบประมาณไตรมาสใหม่",
-        details: "ส่งภายใน 18 พ.ค.",
-        dueDate: "2025-05-18",
-        priority: "pending",
-        done: false,
-      },
-      // Add a new section for overdue tasks in the tasks state initialization
-      // Inside the useEffect where mockData is defined, add these overdue tasks:
-      {
-        id: 9,
-        title: "ส่งรายงานประจำเดือน",
-        details: "ควรส่งภายใน 5 พ.ค.",
-        dueDate: "2025-05-05",
-        priority: "overdue",
-        done: false,
-      },
-      {
-        id: 10,
-        title: "ตรวจสอบงบประมาณไตรมาส",
-        details: "ควรเสร็จภายใน 6 พ.ค.",
-        dueDate: "2025-05-06",
-        priority: "overdue",
-        done: false,
-      },
-    ]
-
-    setTasks(mockData)
-  }, [])
-
-  // ===== CHART DATA =====
-  // ข้อมูลสำหรับกราฟวงกลม
-  const doneCount = tasks.filter((t) => t.done).length
-  const notDoneCount = tasks.filter((t) => !t.done).length
-  const COLORS = ["#22c55e", "#e5e7eb"] // สีเขียวสำหรับงานที่เสร็จแล้ว, สีเทาสำหรับงานที่ยังไม่เสร็จ
+    urgentToday: urgentTodayCount,
+    overdue: overdueCount,
+    other: otherPendingCount,
+    done: doneCount,
+  };
 
   // ===== HELPER FUNCTIONS =====
   // แปลงเดือนเป็นภาษาไทย
@@ -291,18 +235,26 @@ export default function AdminNotificationPage() {
   }
 
   // สลับสถานะงานเสร็จ/ไม่เสร็จ
-  const handleToggleTaskDone = (id) => {
-    const task = tasks.find((t) => t.id === id)
+ const handleToggleTaskDone = async (id: string) => {
+  const target = tasks.find(t => t.id === id)
+  if (!target) return
 
-    // If the task is done and we're trying to mark it as not done, show the reopen dialog
-    if (task && task.done) {
-      openReopenDialog(task)
-      return
-    }
+  // ถ้า tick งานเสร็จแล้ว → reopen dialog เหมือนเดิม
+  if (target.done) { openReopenDialog(target); return }
 
-    // Otherwise, just toggle the done status
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
+  try {
+    await axios.patch(`/api/notifications/${id}`, {
+      status: 'DONE',
+    }, { withCredentials: true })
+
+    setTasks(prev => prev.map(t =>
+      t.id === id ? { ...t, done: true, priority: 'pending' } : t
+    ))
+  } catch (e) {
+    console.error('update status fail', e)
   }
+}
+
 
   // ===== SIDEBAR MENU ITEMS =====
   // แสดงรายการเมนูในแถบด้านข้าง
@@ -708,7 +660,7 @@ const handleLogout = async () => {
                 <PieChart width={200} height={200} className="mx-auto">
                   {/* ✅ วาดสีเทาก่อน (พื้นหลัง) */}
                   <Pie
-                    data={[{ name: "ยังไม่เสร็จ", value: incompleteTasks }]}
+                    data={[{ name: "ยังไม่เสร็จ", value: incompleteCnt }]}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -723,13 +675,13 @@ const handleLogout = async () => {
 
                   {/* ✅ วาดวงเขียวซ้อนทับหลังสุด (ความคืบหน้า) */}
                   <Pie
-                    data={[{ name: "เสร็จแล้ว", value: completedTasks }]}
+                    data={[{ name: "เสร็จแล้ว", value: doneCount }]}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
                     outerRadius={80}
                     startAngle={90}
-                    endAngle={90 - (360 * completedTasks) / totalTasks}
+                    endAngle={90 - (360 * doneCount) / (totalTasks || 1)}
                     cornerRadius={50}
                     dataKey="value"
                     stroke="none"
@@ -742,9 +694,9 @@ const handleLogout = async () => {
 
                 {/* Center label */}
                 <div className="absolute flex flex-col items-center justify-center">
-                  <span className="text-3xl font-bold text-gray-900 drop-shadow-sm">{progressData.completed}%</span>
-                  <span className="mt-1 text-xs font-medium text-gray-500">
-                    {doneCount} จาก {doneCount + notDoneCount} งาน
+                  <span className="text-3xl font-bold">{progressPercent}%</span>
+                  <span className="mt-1 text-xs">
+                    {doneCount} จาก {totalTasks} งาน
                   </span>
                 </div>
               </div>

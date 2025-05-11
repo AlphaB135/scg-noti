@@ -1,7 +1,7 @@
 // 📁 backend/src/routes/index.ts
 import { Router } from 'express'
 import { login, logout, me } from '../modules/auth/auth.controller'
-import { jwtGuard } from '../modules/auth/jwtGuard'
+import { verifyToken } from '../middleware/authMiddleware' 
 import dashboardRouter from './dashboard'
 import notificationsRouter from './notifications'
 /* import approvalsRouter from './approvals'
@@ -15,17 +15,15 @@ const router = Router()
 // Public: login
 router.post('/auth/login', login)
 // Protected: logout & clear session
-router.post('/auth/logout', jwtGuard, logout)
+router.post('/auth/logout', verifyToken, logout)
 // Protected: current user info
-router.get('/me', jwtGuard, me)
+router.get('/me', verifyToken, me)
 
 // ─── Dashboard (overview) ───────────────────────────────────────────────────────
-router.use('/dashboard', jwtGuard, dashboardRouter)
+router.use('/dashboard', verifyToken, dashboardRouter)
 
 // ─── Notifications ─────────────────────────────────────────────────────────────
-router.use('/notifications', jwtGuard, notificationsRouter)
-
-// ─── Approvals ─────────────────────────────────────────────────────────────────
+router.use('/notifications', verifyToken, notificationsRouter)// ─── Approvals ─────────────────────────────────────────────────────────────────
 /* router.use('/approvals', jwtGuard, approvalsRouter)
 
 // ─── RPA Trigger ────────────────────────────────────────────────────────────────

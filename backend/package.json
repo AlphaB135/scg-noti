@@ -4,20 +4,24 @@
   "description": "SCG NOTI – Secure Backend",
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm exec ts-node-dev --respawn --transpile-only src/server.ts",
-    "migrate": "prisma migrate dev --name init",
-    "generate": "prisma generate",
-    "seed": "ts-node prisma/seed.ts",
-    "seed:logs": "ts-node prisma/seed-security-log.ts",
-    "studio": "prisma studio"
+    "dev":       "pnpm exec ts-node-dev --respawn --transpile-only src/server.ts",
+    "migrate":   "prisma migrate dev --name init",
+    "generate":  "prisma generate",
+
+    "seed":        "pnpm run seed:all",                 
+    "seed:all":    "ts-node --transpile-only prisma/seed-all.ts",
+    "seed:users":  "ts-node --transpile-only prisma/seed.ts",
+    "seed:logs":   "ts-node --transpile-only prisma/seed-security-log.ts",
+    "seed:noti":   "ts-node --transpile-only prisma/seed-notifications.ts",
+
+    "studio":   "prisma studio"
   },
+
+
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node --transpile-only prisma/seed-all.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.9.0",
+
   "dependencies": {
     "@prisma/client": "^6.7.0",
     "bcrypt": "^5.1.1",

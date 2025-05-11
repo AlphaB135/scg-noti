@@ -1,5 +1,5 @@
 // 📁 backend/src/modules/notification/notification.service.ts
-import { prisma } from '../../../prisma'   // ปรับ path ตามโครงการคุณ
+import { prisma } from '../../prisma'
 import type { ListQueryOpts } from './notification.dto'
 
 export async function list(opts: ListQueryOpts) {
@@ -7,8 +7,7 @@ export async function list(opts: ListQueryOpts) {
     skip: opts.skip,
     take: opts.take,
     orderBy: { scheduledAt: 'asc' },
-    // ถ้ามีเงื่อนไขอื่น เช่น recipientId ให้ใส่ใน where
-    // where: { recipientId: opts.userId },
+    // ถ้าต้องกรองตามผู้ใช้งาน: where: { recipientId: opts.userId },
   })
 }
 
@@ -28,7 +27,7 @@ export async function reschedule(
   return prisma.notification.update({
     where: { id },
     data: {
-      dueDate: new Date(dueDate),
+      scheduledAt: new Date(dueDate),
       rescheduleReason: reason,
       rescheduledBy: { connect: { id: userId } },
       rescheduledAt: new Date(),
