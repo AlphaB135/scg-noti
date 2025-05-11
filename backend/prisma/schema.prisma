@@ -157,13 +157,14 @@ model Notification {
   title              String    @db.NVarChar(255)
   message            String    @db.NVarChar(2000)
   scheduledAt        DateTime?
-  status             String    @db.VarChar(20)
+  status      String @default("PENDING") @db.VarChar(20) 
   type               String    @db.VarChar(20) // SYSTEM / TODO / REMINDER
   category           String?   @db.NVarChar(80)
   link               String?   @db.NVarChar(255)
   urgencyDays        Int       @default(0)
   repeatIntervalDays Int       @default(0)
   dueDate            DateTime?
+ 
   createdBy          String    @db.UniqueIdentifier
   createdAt          DateTime  @default(now()) @db.DateTime2
   updatedAt          DateTime  @updatedAt @db.DateTime2
@@ -196,6 +197,8 @@ model Recipient {
   type           String       @db.VarChar(20) // ALL / GROUP / USER
   userId         String?      @db.UniqueIdentifier
 }
+
+
 
 model NotificationAttachment {
   id             String       @id @default(uuid())
