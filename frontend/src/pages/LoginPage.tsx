@@ -85,15 +85,17 @@ export default function LoginPage() {
         }`}
       >
         {/* SCG Logo */}
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-full bg-[#E2001A] flex items-center justify-center">
-            <span className="text-white font-bold text-xl">SCG</span>
-          </div>
-        </div>
+      <div className="flex justify-center mb-6">
+  <img
+    src="https://www.watsadupedia.com/images/2/2c/Scg.png"
+    alt="SCG Logo"
+    className="w-22 h-20 object-contain"
+  />
+</div>
 
         {/* Title */}
         <h1 className="text-xl font-semibold text-center text-gray-800 mb-8">
-          Welcome to SCG Notification System
+          SCG Notification System
         </h1>
 
         {/* General error */}
@@ -169,7 +171,7 @@ export default function LoginPage() {
           disabled={loading}
           className="w-full bg-[#E2001A] text-white py-2 rounded-lg hover:bg-[#E2001A]/90 transition duration-200 active:scale-95 disabled:opacity-50"
         >
-          {loading ? "Logging in..." : "เข้าสู่ระบบ"}
+          {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
         </button>
 
         {/* Footer */}
