@@ -29,7 +29,8 @@ def random_monthly_date(year: int, month: int, day_back: int) -> datetime:
     nxt   = datetime(year + (month == 12), (month % 12) + 1, 1)
     last  = nxt - timedelta(days=1)
     target_day = max(1, last.day - day_back)
-    return datetime(year, month, target_day, random.randint(0, 23), random.randint(0, 59))
+    return datetime(year, month, target_day,
+                    random.randint(0, 23), random.randint(0, 59))
 
 # ---------------------------------------------------------------------------
 # Notification templates – feel free to tweak / extend
@@ -54,7 +55,13 @@ templates = [
 
 notifications = {"Notification": [], "Recipient": [], "NotificationAttachment": []}
 
+# Templates for mid‑month (13–16)
+mid_month_templates = [
+    {"title": "เตือนติดตามผลงานกลางเดือน", "category": "Review", "link": "/review/midmonth", "urgencyDays": 2},
+]
+
 for month in range(1, 13):              # iterate through Jan‑Dec
+    # -- generate end‑of‑month tasks --
     for tpl in templates:               # every template once per month
         nid = str(uuid.uuid4())
 
@@ -94,6 +101,49 @@ for month in range(1, 13):              # iterate through Jan‑Dec
             "id": str(uuid.uuid4()),
             "notificationId": nid,
             "type": "ALL",   # broadcast
+            "userId": None,
+        })
+
+    # -- generate mid‑month tasks (13–16) --
+    for tpl in mid_month_templates:
+        mid_nid = str(uuid.uuid4())
+
+        # scheduledAt : random day 13–16 at random time
+        scheduled_dt = datetime(YEAR, month, random.randint(13, 16),
+                                random.randint(0, 23), random.randint(0, 59))
+        scheduled_iso = scheduled_dt.isoformat() + "Z"
+
+        # createdAt : 1‑3 days before schedule
+        created_dt  = scheduled_dt - timedelta(days=random.randint(1, 3))
+        created_iso = created_dt.isoformat() + "Z"
+
+        # dueDate : schedule + urgencyDays
+        due_dt   = scheduled_dt + timedelta(days=tpl["urgencyDays"])
+        due_iso  = due_dt.isoformat() + "Z"
+
+        # ---------------- notification row ----------------
+        notifications["Notification"].append({
+            "id": mid_nid,
+            "title": tpl["title"],
+            "message": f"{tpl['title']} ภายในวันที่ {due_iso[:10]}",
+            "scheduledAt": scheduled_iso,
+            "status": "PENDING",
+            "type": "SYSTEM",
+            "category": tpl["category"],
+            "link": tpl["link"],
+            "urgencyDays": tpl["urgencyDays"],
+            "repeatIntervalDays": 30,
+            "dueDate": due_iso,
+            "createdBy": "00000000-0000-0000-0000-000000000000",
+            "createdAt": created_iso,
+            "updatedAt": created_iso,
+        })
+
+        # ---------------- recipient row -------------------
+        notifications["Recipient"].append({
+            "id": str(uuid.uuid4()),
+            "notificationId": mid_nid,
+            "type": "ALL",
             "userId": None,
         })
 
