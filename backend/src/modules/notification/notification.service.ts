@@ -1,13 +1,11 @@
-// 📁 backend/src/modules/notification/notification.service.ts
 import { prisma } from '../../prisma'
-import type { ListQueryOpts } from './notification.dto'
+import type { ListQueryOpts, CreateNotificationInput } from './notification.dto'
 
 export async function list(opts: ListQueryOpts) {
   return prisma.notification.findMany({
     skip: opts.skip,
     take: opts.take,
     orderBy: { scheduledAt: 'asc' },
-    // ถ้าต้องกรองตามผู้ใช้งาน: where: { recipientId: opts.userId },
   })
 }
 
@@ -27,8 +25,6 @@ export async function listCycle(opts: ListQueryOpts) {
   })
 }
 
-
-
 export async function reschedule(
   id: string,
   dueDate: string,
@@ -42,6 +38,23 @@ export async function reschedule(
       rescheduleReason: reason,
       rescheduledBy: { connect: { id: userId } },
       rescheduledAt: new Date(),
+    },
+  })
+}
+
+// ฟังก์ชันสร้างแจ้งเตือนใหม่
+export async function create(input: CreateNotificationInput, userId: string) {
+  return prisma.notification.create({
+    data: {
+      title:              input.title,
+      message:            input.message,
+      scheduledAt:        new Date(input.scheduledAt),
+      type:               input.type,
+      category:           input.category,
+      link:               input.link,
+      urgencyDays:        input.urgencyDays,
+      repeatIntervalDays: input.repeatIntervalDays,
+      createdBy:          userId,            // ตรงนี้เป็น scalar String ตาม Prisma schema
     },
   })
 }

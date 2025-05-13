@@ -5,6 +5,9 @@ import { verifyToken } from '../middleware/authMiddleware'
 
 const router = Router()
 
+// POST /api/notifications — สร้าง notification ใหม่
+router.post('/', verifyToken, ctrl.create)
+
 // GET /api/notifications
 router.get('/', verifyToken, ctrl.list)
 

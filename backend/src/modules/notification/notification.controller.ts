@@ -1,7 +1,7 @@
 // 📁 backend/src/modules/notification/notification.controller.ts
 import { Request, Response, NextFunction } from 'express'
 import * as svc from './notification.service'
-import { listQuerySchema, updateStatusSchema, rescheduleSchema } from './notification.dto'
+import { listQuerySchema, updateStatusSchema, rescheduleSchema, createNotificationSchema  } from './notification.dto'
 
 export async function list(req: Request, res: Response, next: NextFunction) {
   try {
@@ -33,6 +33,22 @@ export async function reschedule(req: Request, res: Response, next: NextFunction
     next(err)
   }
 }
+
+export async function create(req: Request, res: Response, next: NextFunction) {
+  try {
+    // แปลง body ด้วย zod
+    const input = createNotificationSchema.parse(req.body)
+    // ดึง userId จาก middleware verifyToken
+    const userId = (req as any).user?.id
+    if (!userId) return res.status(401).json({ error: 'Missing user ID' })
+
+    const data = await svc.create(input, userId)
+    res.status(201).json(data)
+  } catch (err) {
+    next(err)
+  }
+}
+
 
 export async function listCycle(req: Request, res: Response, next: NextFunction) {
   try {

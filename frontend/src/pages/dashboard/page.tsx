@@ -56,39 +56,42 @@ const [tasks, setTasks] = useState<Task[]>([]) // เก็บรายการ
   const [newDueDate, setNewDueDate] = useState("")
 
   useEffect(() => {
-  // 📁 frontend/src/pages/notifications/page.tsx (หรือไฟล์ที่เรียก fetchNotifications)
-const fetchNotifications = async () => {
-  try {
-    const { data } = await axios.get('/api/notifications', {
-      withCredentials: true,
-      // (ถ้าต้องการ) pagination ก็ใส่ params: { page: 1, size: 200 }
-    })
+    const fetchNotifications = async () => {
+      try {
+        const { data } = await axios.get('/api/notifications', {
+          withCredentials: true,
+        })
 
-    // ——————————————
-    // ตรวจสอบจำนวนจริง และ ดูตัวอย่าง 5 รายการแรก
-    console.log('🔔 Received notifications:', data.length)
-    console.log('🔔 Sample notification:', data.slice(0, 5))
-    // ——————————————
+        // Map raw notifications to Task type
+        const mappedTasks: Task[] = data.map(rawTask => {
+          const task = {
+            id: rawTask.id,
+            title: rawTask.title,  
+            details: rawTask.message,
+            dueDate: rawTask.scheduledAt?.split('T')[0],
+            done: rawTask.status === 'DONE',
+            priority: 'pending' as const,
+          }
+          return updateTaskPriority(task)
+        })
 
-    const mappedTasks: Task[] = data.map(rawTask => {
-      const task = {
-        id: rawTask.id,
-        title: rawTask.title,
-        details: rawTask.message,
-        // ถ้าใน API field ชื่อ scheduledAt ให้ split อันนี้ ถ้า dueDate ให้แก้เป็น rawTask.dueDate
-        dueDate: rawTask.scheduledAt?.split('T')[0],
-        done: rawTask.status === 'DONE',
-        priority: 'pending' as const,
+        // Filter for current month
+        const now = new Date()
+        const currentYear = now.getFullYear()
+        const currentMonth = now.getMonth() + 1
+
+        const tasksInCurrentMonth = mappedTasks.filter(task => {
+          if (!task.dueDate) return false
+          const [taskYear, taskMonth] = task.dueDate.split('-').map(Number)
+          return taskYear === currentYear && taskMonth === currentMonth
+        })
+
+        setTasks(tasksInCurrentMonth)
+
+      } catch (err) {
+        console.error('Failed to fetch notifications:', err)
       }
-
-      return updateTaskPriority(task)
-    })
-
-    setTasks(mappedTasks)
-  } catch (err) {
-    console.error('Failed to fetch notifications:', err)
-  }
-}
+    }
 
     fetchNotifications()
   }, []) // Empty deps array = run once on mount
@@ -114,8 +117,8 @@ const fetchNotifications = async () => {
 
     if (diffInDays < 0) return { ...task, priority: "overdue" } // 👈 เลยกำหนด
     if (diffInDays === 0) return { ...task, priority: "today" }
-    if (diffInDays <= 2) return { ...task, priority: "urgent" }
-    return { ...task, priority: "pending" }
+    if (diffInDays <= 3)   return { ...task, priority: "urgent" }
+return { ...task, priority: "pending" }
   }
 
   // Function to handle rescheduling a task
@@ -168,31 +171,21 @@ const fetchNotifications = async () => {
 
   // ===== TASK STATISTICS =====
   // นับจำนวนงานตามประเภทต่างๆ
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth() + 1;
-
-const tasksInMonth = tasks.filter(t => {
-  if (!t.dueDate) return false;
-  const [y, m] = t.dueDate.split('-').map(Number);
-  return y === currentYear && m === currentMonth;
-});
-
-  const totalTasks = tasksInMonth.length;
-  const doneCount = tasksInMonth.filter(t => t.done).length;
-  const incompleteCnt = totalTasks - doneCount;
-  const urgentTodayCount = tasksInMonth.filter(
+  const totalTasks = tasks.length
+  const doneCount = tasks.filter(t => t.done).length
+  const incompleteCnt = totalTasks - doneCount
+  const urgentTodayCount = tasks.filter(
     t => ["today", "urgent"].includes(t.priority) && !t.done
-  ).length;
-  const overdueCount = tasksInMonth.filter(
+  ).length
+  const overdueCount = tasks.filter(
     t => t.priority === "overdue" && !t.done
-  ).length;
-  const otherPendingCount = tasksInMonth.filter(
+  ).length
+  const otherPendingCount = tasks.filter(
     t => !["today", "urgent", "overdue"].includes(t.priority) && !t.done
-  ).length;
-  const progressPercent = totalTasks
+  ).length
+  const progressPercent = totalTasks 
     ? Math.round((doneCount / totalTasks) * 100)
-    : 0;
+    : 0
 
   // อัพเดทข้อมูลการแจ้งเตือน
   const notifications = {
