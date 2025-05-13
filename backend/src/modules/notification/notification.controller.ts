@@ -33,3 +33,13 @@ export async function reschedule(req: Request, res: Response, next: NextFunction
     next(err)
   }
 }
+
+export async function listCycle(req: Request, res: Response, next: NextFunction) {
+  try {
+    const opts = dto.listQuerySchema.parse(req.query)
+    const data = await svc.listCycle(opts)
+    res.json(data)
+  } catch (err) {
+    next(err)
+  }
+}

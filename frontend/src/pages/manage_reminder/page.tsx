@@ -1,5 +1,5 @@
 "use client";
-
+import axios from 'axios'
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -56,8 +56,9 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function ManageReminder() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [setCurrentTime] = useState(new Date());
-  const [reminders, setReminders] = useState([]);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [reminders, setReminders] = useState<any[]>([]);
+  const [cycleReminders, setCycleReminders] = useState<any[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -77,91 +78,35 @@ export default function ManageReminder() {
   });
 
   useEffect(() => {
-    // Mock data for reminders
-    const mockReminders = [
-      {
-        id: 1,
-        title: "สรุปรายงานผลประกอบการ",
-        type: "report",
-        date: "2025-05-07",
-        frequency: "monthly",
-        status: "incomplete",
-        details: "จัดทำรายงานภายในวันนี้",
-      },
-      {
-        id: 2,
-        title: "ปฐมนิเทศพนักงานใหม่",
-        type: "meeting",
-        date: "2025-05-07",
-        frequency: "no-repeat",
-        status: "incomplete",
-        details: "เริ่มปฐมนิเทศในวันนี้",
-      },
-      {
-        id: 3,
-        title: "เตรียมเอกสารประชุม",
-        type: "document",
-        date: "2025-05-08",
-        frequency: "no-repeat",
-        status: "incomplete",
-        details: "ส่งภายใน 8 พ.ค.",
-      },
-      {
-        id: 4,
-        title: "สั่งซื้ออุปกรณ์สำนักงาน",
-        type: "purchase",
-        date: "2025-05-09",
-        frequency: "monthly",
-        status: "incomplete",
-        details: "จัดซื้อภายใน 9 พ.ค.",
-      },
-      {
-        id: 5,
-        title: "ตรวจสอบระบบเซิร์ฟเวอร์",
-        type: "maintenance",
-        date: "2025-05-09",
-        frequency: "daily",
-        status: "incomplete",
-        details: "ดำเนินการก่อน 9 พ.ค.",
-      },
-      {
-        id: 6,
-        title: "อัปโหลดข้อมูลเข้าระบบ",
-        type: "data",
-        date: "2025-05-10",
-        frequency: "no-repeat",
-        status: "incomplete",
-        details: "ส่งภายใน 10 พ.ค.",
-      },
-      {
-        id: 7,
-        title: "วางแผนอบรมประจำเดือน",
-        type: "training",
-        date: "2025-05-17",
-        frequency: "monthly",
-        status: "incomplete",
-        details: "ดำเนินการภายใน 17 พ.ค.",
-      },
-      {
-        id: 8,
-        title: "จัดทำงบประมาณไตรมาสใหม่",
-        type: "finance",
-        date: "2025-05-18",
-        frequency: "no-repeat",
-        status: "completed",
-        details: "ส่งภายใน 18 พ.ค.",
-      },
-    ];
+    // 2.1) ดึงงาน manual
+    const fetchManualReminders = async () => {
+      try {
+        const { data } = await axios.get('/api/notifications', {
+          withCredentials: true,
+          params: { skip: 0, take: 100 },
+        });
+        setReminders(data);
+      } catch (e) {
+        console.error('Failed to load manual reminders', e);
+      }
+    };
 
-    setReminders(mockReminders);
+    // 2.2) ดึงงาน cycle
+    const fetchCycleReminders = async () => {
+      try {
+        const { data } = await axios.get('/api/notifications/cycles', {
+          withCredentials: true,
+          params: { skip: 0, take: 100 },
+        });
+        setCycleReminders(data);
+      } catch (e) {
+        console.error('Failed to load cycle reminders', e);
+      }
+    };
 
-    // Update time every second
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
+    fetchManualReminders();
+    fetchCycleReminders();
+  }, []);  // รันแค่ครั้งเดียวตอน mount
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -245,14 +190,24 @@ export default function ManageReminder() {
     setCurrentReminder(null);
   };
 
-  // Filter reminders based on search query and filters
-  const filteredReminders = reminders.filter((reminder) => {
-    const matchesSearch = reminder.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || reminder.status === statusFilter;
-    const matchesType = typeFilter === "all" || reminder.type === typeFilter;
+  const mappedCycle = cycleReminders.map(c => ({
+    id:       c.id,
+    title:    c.title,
+    details:  c.message,
+    date:     c.scheduledAt?.split('T')[0],
+    frequency:c.frequency,  // หรือ field จริงของคุณ
+    status:   c.status,
+    type:     c.type,       // ถ้ามี
+  }));
+
+  // รวม manual + cycle
+  const allReminders = [...reminders, ...mappedCycle];
+
+  // กรอง search / filter บน allReminders
+  const filteredReminders = allReminders.filter(reminder => {
+    const matchesSearch = reminder.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || reminder.status === statusFilter;
+    const matchesType   = typeFilter   === "all" || reminder.type   === typeFilter;
     return matchesSearch && matchesStatus && matchesType;
   });
 
@@ -323,30 +278,30 @@ export default function ManageReminder() {
 
   const renderMenuItems = () => (
     <>
-                    <details className="group" open>
-            <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
-              <Bell className="h-5 w-5" />
-              ระบบการแจ้งเตือน
-            </summary>
-            <div className="ml-4 mt-2 space-y-1">
-              <Link
-                to="/dashboard"
-                className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors"
-              >
-                เตือนความจำ
-              </Link>
-              <Link to="/manage" className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
-                ตั้งค่าการแจ้งเตือน
-              </Link>
-              <Link
+      <details className="group" open>
+        <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
+          <Bell className="h-5 w-5" />
+          ระบบการแจ้งเตือน
+        </summary>
+        <div className="ml-4 mt-2 space-y-1">
+          <Link
+            to="/dashboard"
+            className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors"
+          >
+            เตือนความจำ
+          </Link>
+          <Link to="/manage" className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
+            ตั้งค่าการแจ้งเตือน
+          </Link>
+          <Link
             to="/auditperson"
             className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-              ประวัติการดำเนินการ
+            ประวัติการดำเนินการ
           </Link>
-            </div>
-          </details>
+        </div>
+      </details>
 
-          <details className="group">
+      <details className="group">
         <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
           <CheckCircle className="h-5 w-5" />
           แอดมิน
@@ -359,19 +314,18 @@ export default function ManageReminder() {
       </details>
 
       <Link
-            to="/settings"
-            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
-          >
-            <Settings className="h-5 w-5" />
-            การตั้งค่า
-          </Link>
+        to="/settings"
+        className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+      >
+        <Settings className="h-5 w-5" />
+        การตั้งค่า
+      </Link>
     </>
   );
 
   return (
     <div className="flex min-h-screen bg-white font-noto">
       {/* ===== SIDEBAR (DESKTOP) ===== */}
-      {/* แถบด้านข้างสำหรับการนำทางบนหน้าจอขนาดใหญ่ */}
       <aside className="hidden md:flex flex-col w-64 bg-gradient-to-b from-red-800 to-red-900 text-white fixed inset-y-0 z-50">
         <div className="px-6 py-8">
           <img
@@ -384,48 +338,7 @@ export default function ManageReminder() {
         </div>
 
         <nav className="flex-1 space-y-1 px-2 pb-6 overflow-y-auto">
-          <details className="group" open>
-            <summary className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
-              <Bell className="h-5 w-5" />
-              ระบบการแจ้งเตือน
-            </summary>
-            <div className="ml-4 mt-2 space-y-1">
-              <Link
-                to="/dashboard"
-                className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors"
-              >
-                เตือนความจำ
-              </Link>
-              <Link to="/manage" className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
-                ตั้งค่าการแจ้งเตือน
-              </Link>
-              <Link
-            to="/auditperson"
-            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-              ประวัติการดำเนินการ
-          </Link>
-            </div>
-          </details>
-
-          <details className="group">
-        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
-          <CheckCircle className="h-5 w-5" />
-          แอดมิน
-        </summary>
-        <div className="ml-4 mt-2 space-y-1">
-          <Link to="/audit-logs" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-            ประวัติการดำเนินการพนักงาน
-          </Link>
-        </div>
-      </details>
-
-      <Link
-            to="/settings"
-            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
-          >
-            <Settings className="h-5 w-5" />
-            การตั้งค่า
-          </Link>
+          {renderMenuItems()}
         </nav>
 
         <button className="m-6 flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200">
@@ -435,7 +348,6 @@ export default function ManageReminder() {
       </aside>
 
       {/* ===== MOBILE HEADER ===== */}
-      {/* ส่วนหัวสำหรับมือถือพร้อมปุ่มแฮมเบอร์เกอร์ */}
       <div className="md:hidden fixed top-0 left-0 right-0 bg-gradient-to-b from-red-800 to-red-900 text-white flex items-center justify-between px-4 py-4 shadow z-50">
         <div className="font-bold text-lg">SCG Admin</div>
         <div className="flex items-center gap-2">
@@ -455,7 +367,6 @@ export default function ManageReminder() {
       </div>
 
       {/* ===== MOBILE MENU ===== */}
-      {/* เมนูสำหรับมือถือที่แสดงเมื่อกดปุ่มแฮมเบอร์เกอร์ */}
       {isMenuOpen && (
         <div className="md:hidden fixed top-14 left-0 w-64 h-full bg-gradient-to-b from-red-800 to-red-900 text-white z-40 shadow-lg p-3 overflow-y-auto">
           <nav className="space-y-1">{renderMenuItems()}</nav>
@@ -469,7 +380,6 @@ export default function ManageReminder() {
 
       {/* Main Content */}
       <main className="flex-1 md:ml-64 p-6 pt-20 md:pt-6 w-full">
-        {/* Main Content */}
         <div className="mt-0">
           <Card className="border-l-4 border-red-600">
             <CardHeader className="pb-2">

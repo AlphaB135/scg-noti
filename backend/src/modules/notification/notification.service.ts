@@ -18,6 +18,17 @@ export async function updateStatus(id: string, status: string) {
   })
 }
 
+export async function listCycle(opts: ListQueryOpts) {
+  return prisma.notification.findMany({
+    where: { frequency: { not: 'no-repeat' } },
+    skip: opts.skip,
+    take: opts.take,
+    orderBy: { scheduledAt: 'asc' },
+  })
+}
+
+
+
 export async function reschedule(
   id: string,
   dueDate: string,

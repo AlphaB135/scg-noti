@@ -172,7 +172,11 @@ const fetchNotifications = async () => {
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth() + 1;
 
-const tasksInMonth = tasks;
+const tasksInMonth = tasks.filter(t => {
+  if (!t.dueDate) return false;
+  const [y, m] = t.dueDate.split('-').map(Number);
+  return y === currentYear && m === currentMonth;
+});
 
   const totalTasks = tasksInMonth.length;
   const doneCount = tasksInMonth.filter(t => t.done).length;
