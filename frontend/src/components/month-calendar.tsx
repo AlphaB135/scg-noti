@@ -18,7 +18,13 @@ import {
 } from "@/components/ui/dialog"
 import { motion } from "framer-motion"
 
-export function MonthCalendar({ tasks }) {
+export function MonthCalendar({ tasks, onMonthChange }) {
+  // เพิ่ม state สำหรับการแสดงผลบนมือถือ
+  const [isMobileView, setIsMobileView] = useState(false)
+
+  // เพิ่ม state สำหรับการเลือกวันในมุมมองมือถือ
+  const [selectedDay, setSelectedDay] = useState<number | null>(null)
+
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -35,6 +41,8 @@ export function MonthCalendar({ tasks }) {
   const [taskToReschedule, setTaskToReschedule] = useState(null)
   const [rescheduleReason, setRescheduleReason] = useState("")
   const [newDueDate, setNewDueDate] = useState("")
+  const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({})
+  const [editTask, setEditTask] = useState(null)
 
   // Sync tasks prop with internal state
   useEffect(() => {
@@ -43,6 +51,20 @@ export function MonthCalendar({ tasks }) {
 
   const year = currentMonth.getFullYear()
   const month = currentMonth.getMonth()
+
+  // Update the useEffect that notifies about month changes
+  useEffect(() => {
+    // Call the onMonthChange prop if provided
+    if (onMonthChange) {
+      onMonthChange(month + 1, year)
+    }
+
+    // Also dispatch the event for backward compatibility
+    const event = new CustomEvent("calendarMonthChange", {
+      detail: { month: month + 1, year },
+    })
+    window.dispatchEvent(event)
+  }, [month, year, onMonthChange])
 
   // แปลง tasks array เป็น map ตามวันที่
   const taskMap = allTasks.reduce((acc, task) => {
@@ -93,7 +115,35 @@ export function MonthCalendar({ tasks }) {
   const prevMonth = () => setCurrentMonth(new Date(year, month - 1, 1))
   const nextMonth = () => setCurrentMonth(new Date(year, month + 1, 1))
 
+  // เพิ่ม useEffect เพื่อตรวจสอบขนาดหน้าจอ
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobileView(window.innerWidth < 768)
+    }
+
+    // ตรวจสอบครั้งแรก
+    checkIsMobile()
+
+    // ตรวจสอบเมื่อขนาดหน้าจอเปลี่ยน
+    window.addEventListener("resize", checkIsMobile)
+
+    return () => {
+      window.removeEventListener("resize", checkIsMobile)
+    }
+  }, [])
+
+  // เพิ่มฟังก์ชันสำหรับการเลือกวันในมุมมองมือถือ
+  const handleDaySelect = (day: number) => {
+    setSelectedDay(day === selectedDay ? null : day)
+  }
+
+  // แก้ไขฟังก์ชัน handleDayClick เพื่อรองรับมุมมองมือถือ
   const handleDayClick = (day: number) => {
+    if (isMobileView) {
+      handleDaySelect(day)
+      return
+    }
+
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
     setSelectedDate(dateStr)
     setIsDialogOpen(true)
@@ -217,9 +267,24 @@ export function MonthCalendar({ tasks }) {
     setIsAddTaskOpen(true)
   }
 
+  const toggleExpandDay = (e, dateStr) => {
+    e.stopPropagation() // ป้องกันไม่ให้เปิดไดอะล็อก
+    setExpandedDays((prev) => ({
+      ...prev,
+      [dateStr]: !prev[dateStr],
+    }))
+  }
+
+  const openRescheduleDialog = (task) => {
+    setTaskToReschedule(task)
+    setNewDueDate(task.dueDate)
+    setIsRescheduleDialogOpen(true)
+  }
+
+  // แทนที่ return statement ด้วยโค้ดที่มีเงื่อนไขสำหรับมุมมองมือถือ
   return (
-    <div className="w-full ">
-      <div className="flex justify-between items-center mb-6 ">
+    <div className="w-full">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-2xl font-semibold text-gray-900">ปฏิทินงาน</h3>
           <p className="text-sm text-gray-500">ดูงานทั้งหมดสำหรับเดือน {thaiMonths[month]}</p>
@@ -228,110 +293,365 @@ export function MonthCalendar({ tasks }) {
           <Button variant="outline" size="icon" onClick={prevMonth} className="h-8 w-8 md:h-10 md:w-10">
             <ChevronLeft className="h-4 w-4" />
           </Button>
+          <div className="text-sm font-medium">
+            {thaiMonths[month]} {year}
+          </div>
           <Button variant="outline" size="icon" onClick={nextMonth} className="h-8 w-8 md:h-10 md:w-10">
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <Button variant="outline" className="hidden md:flex items-center gap-2 text-sm">
+          <Button
+            variant="outline"
+            className="hidden md:flex items-center gap-2 text-sm"
+            onClick={() => {
+              // Dispatch event to open filter dialog
+              window.dispatchEvent(new CustomEvent("openFilterDialog"))
+            }}
+          >
             <Filter className="h-4 w-4" />
             <span>ตัวกรอง</span>
           </Button>
         </div>
       </div>
 
-      <div className="border rounded-xl overflow-hidden">
-        {/* Calendar header */}
-        <div className="grid grid-cols-7 text-center border-b">
-          {englishDays.map((day, index) => (
-            <div key={index} className="py-2 font-medium text-gray-500">
-              {day}
-            </div>
-          ))}
-        </div>
+      {isMobileView ? (
+        // Mobile Calendar View
+        <div className="rounded-xl border overflow-hidden bg-white">
+          {/* Mobile Month Header */}
+          <div className="grid grid-cols-7 text-center border-b bg-gray-50">
+            {thaiDays.map((day, index) => (
+              <div key={index} className="py-2 text-xs font-medium text-gray-500">
+                {day}
+              </div>
+            ))}
+          </div>
 
-        {/* Calendar grid */}
-        <div className="grid grid-cols-7 grid-rows-5 gap-px bg-gray-100 hovar:bg-gray-50">
-          {/* Empty cells before first day of month */}
-          {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-            <div key={`empty-${i}`} className="min-h-[100px] p-2 bg-white text-gray-300 ">
-              {new Date(year, month, 0).getDate() - firstDayOfMonth + i + 1}
-            </div>
-          ))}
+          {/* Mobile Month Grid - Compact version */}
+          <div className="grid grid-cols-7 gap-1 p-2 bg-white">
+            {/* Empty cells before first day of month */}
+            {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+              <div key={`empty-${i}`} className="aspect-square flex items-center justify-center text-gray-300 text-xs">
+                {new Date(year, month, 0).getDate() - firstDayOfMonth + i + 1}
+              </div>
+            ))}
 
-          {/* Days of current month */}
-          {Array.from({ length: daysInMonth }).map((_, i) => {
-            const day = i + 1
-            const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-            const tasks = getTasksForDate(dateStr)
-            const isToday = new Date().toDateString() === new Date(year, month, day).toDateString()
+            {/* Days of current month */}
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1
+              const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+              const tasks = getTasksForDate(dateStr)
+              const isToday = new Date().toDateString() === new Date(year, month, day).toDateString()
+              const isSelected = selectedDay === day
 
-            return (
-              <div
-                key={`day-${day}`}
-                className={`min-h-[100px] p-2 bg-white ${isToday ? "bg-red-50 border border-red-200" : ""} relative group cursor-pointer `}
-                onClick={() => handleDayClick(day)}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, dateStr)}
-              >
-                <div className="flex justify-between items-start">
-                  <span className={`text-sm font-medium ${isToday ? "text-red-700" : ""}`}>{day}</span>
+              return (
+                <div
+                  key={`day-${day}`}
+                  className={`aspect-square relative flex flex-col items-center justify-center rounded-full 
+                    ${isToday ? "bg-red-50" : ""} 
+                    ${isSelected ? "bg-red-100 ring-2 ring-red-500" : ""}
+                    ${tasks.length > 0 ? "font-semibold" : ""}
+                    transition-all duration-200 ease-in-out`}
+                  onClick={() => handleDayClick(day)}
+                >
+                  <span className={`text-sm ${isToday ? "text-red-700" : ""} ${isSelected ? "text-red-700" : ""}`}>
+                    {day}
+                  </span>
+
+                  {/* Task indicators */}
+                  {tasks.length > 0 && (
+                    <div className="flex gap-0.5 mt-1">
+                      {tasks.length > 3 ? (
+                        <>
+                          <div className="h-1.5 w-1.5 rounded-full bg-red-500"></div>
+                          <div className="h-1.5 w-1.5 rounded-full bg-orange-500"></div>
+                          <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+                        </>
+                      ) : (
+                        tasks
+                          .slice(0, 3)
+                          .map((task, idx) => (
+                            <div
+                              key={idx}
+                              className={`h-1.5 w-1.5 rounded-full ${
+                                task.status === "เลยกำหนด"
+                                  ? "bg-red-500"
+                                  : task.status === "งานด่วน"
+                                    ? "bg-orange-500"
+                                    : task.status === "งานวันนี้"
+                                      ? "bg-yellow-500"
+                                      : task.status === "เสร็จแล้ว"
+                                        ? "bg-green-500"
+                                        : "bg-blue-500"
+                              }`}
+                            ></div>
+                          ))
+                      )}
+                    </div>
+                  )}
                 </div>
+              )
+            })}
 
-                {tasks.length > 0 && (
-                  <div className="mt-2">
-                    {tasks.slice(0, 2).map((task, index) => (
-                      <div
-                        key={index}
-                        className={`mb-1 rounded ${getTaskBgColor(task.status)} px-1.5 py-0.5 text-[10px] font-medium truncate cursor-move`}
-                        title={task.title}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, task, dateStr)}
-                      >
-                        {task.title}
-                      </div>
-                    ))}
-                    {tasks.length > 2 && (
-                      <div className="text-[10px] text-gray-500 font-medium">+ {tasks.length - 2} อื่นๆ</div>
-                    )}
-                  </div>
-                )}
+            {/* Empty cells after last day of month */}
+            {Array.from({ length: 42 - (firstDayOfMonth + daysInMonth) }).map((_, i) => (
+              <div
+                key={`empty-end-${i}`}
+                className="aspect-square flex items-center justify-center text-gray-300 text-xs"
+              >
+                {i + 1}
+              </div>
+            ))}
+          </div>
 
-                {/* Task count badge (bottom right) */}
-                {tasks.length > 0 && (
-                  <div className="absolute bottom-1 right-1 text-[10px] text-gray-500">{tasks.length} งาน</div>
-                )}
-
-                {/* Add task button (visible on hover) */}
+          {/* Mobile Task List for Selected Day */}
+          {selectedDay && (
+            <div className="border-t mt-2">
+              <div className="p-4 bg-gray-50 flex justify-between items-center">
+                <h3 className="font-medium text-gray-800">
+                  {selectedDay} {thaiMonths[month]} {year}
+                </h3>
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    openAddTaskDialog(day)
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => {
+                    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`
+                    setNewTask({ ...newTask, dueDate: dateStr })
+                    setIsAddTaskOpen(true)
                   }}
                 >
-                  <Plus className="h-3 w-3" />
+                  <Plus className="h-4 w-4" />
                 </Button>
               </div>
-            )
-          })}
 
-          {/* Empty cells after last day of month */}
-          {Array.from({ length: 42 - (firstDayOfMonth + daysInMonth) }).map((_, i) => (
-            <div key={`empty-end-${i}`} className="min-h-[100px] p-2 bg-white text-gray-300">
-              {i + 1}
+              <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto">
+                {(() => {
+                  const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`
+                  const tasks = getTasksForDate(dateStr)
+
+                  if (tasks.length === 0) {
+                    return (
+                      <div className="text-center py-6 text-gray-500">
+                        <CalendarIcon className="h-10 w-10 mx-auto text-gray-300 mb-2" />
+                        <p className="text-sm">ไม่มีงานในวันที่เลือก</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-3"
+                          onClick={() => {
+                            setNewTask({ ...newTask, dueDate: dateStr })
+                            setIsAddTaskOpen(true)
+                          }}
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1.5" /> เพิ่มงานใหม่
+                        </Button>
+                      </div>
+                    )
+                  }
+
+                  return tasks.map((task, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg border ${
+                        task.status === "เลยกำหนด"
+                          ? "border-red-200 bg-red-50"
+                          : task.status === "งานด่วน"
+                            ? "border-orange-200 bg-orange-50"
+                            : task.status === "งานวันนี้"
+                              ? "border-yellow-200 bg-yellow-50"
+                              : task.status === "เสร็จแล้ว"
+                                ? "border-green-200 bg-green-50"
+                                : "border-blue-200 bg-blue-50"
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className={`font-medium text-sm ${task.done ? "line-through text-gray-400" : ""}`}>
+                            {task.title}
+                          </h4>
+                          {task.details && (
+                            <p className={`text-xs mt-1 ${task.done ? "text-gray-400" : "text-gray-600"}`}>
+                              {task.details}
+                            </p>
+                          )}
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${getTaskBgColor(task.status)}`}
+                        >
+                          {task.status}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-xs text-gray-500">{task.done ? "เสร็จแล้ว" : "ยังไม่เสร็จ"}</span>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => {
+                              // Set the task for editing
+                              const fullTask = allTasks.find((t) => t.id === task.id)
+                              if (fullTask) {
+                                setEditTask(fullTask)
+                              }
+                            }}
+                          >
+                            {task.done ? "ดูรายละเอียด" : "แก้ไข"}
+                          </Button>
+
+                          {!task.done && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-xs"
+                              onClick={() => {
+                                // Find the full task and open reschedule dialog
+                                const fullTask = allTasks.find((t) => t.id === task.id)
+                                if (fullTask) {
+                                  openRescheduleDialog(fullTask)
+                                }
+                              }}
+                            >
+                              เลื่อนกำหนด
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                })()}
+              </div>
             </div>
-          ))}
+          )}
         </div>
-      </div>
+      ) : (
+        // Desktop Calendar View (Original)
+        <div className="border rounded-xl overflow-hidden">
+          {/* Calendar header */}
+          <div className="grid grid-cols-7 text-center border-b">
+            {englishDays.map((day, index) => (
+              <div key={index} className="py-2 font-medium text-gray-500">
+                {day}
+              </div>
+            ))}
+          </div>
 
-      {/* Task details dialog */}
+          {/* Calendar grid */}
+          <div className="grid grid-cols-7 grid-rows-5 gap-px bg-gray-100 hover:bg-gray-50">
+            {/* Empty cells before first day of month */}
+            {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+              <div key={`empty-${i}`} className="min-h-[100px] p-2 bg-white text-gray-300">
+                {new Date(year, month, 0).getDate() - firstDayOfMonth + i + 1}
+              </div>
+            ))}
+
+            {/* Days of current month */}
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1
+              const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+              const tasks = getTasksForDate(dateStr)
+              const isToday = new Date().toDateString() === new Date(year, month, day).toDateString()
+
+              return (
+                <div
+                  key={`day-${day}`}
+                  className={`min-h-[100px] p-2 bg-white ${isToday ? "bg-red-50 border border-red-200" : ""} relative group cursor-pointer`}
+                  onClick={() => handleDayClick(day)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, dateStr)}
+                >
+                  <div className="flex justify-between items-start">
+                    <span className={`text-sm font-medium ${isToday ? "text-red-700" : ""}`}>{day}</span>
+                  </div>
+
+                  {tasks.length > 0 && (
+                    <div className="mt-2">
+                      {/* แสดง 2 งานแรกเสมอ */}
+                      {tasks.slice(0, 2).map((task, index) => (
+                        <div
+                          key={index}
+                          className={`mb-1 rounded ${getTaskBgColor(task.status)} px-1.5 py-0.5 text-[10px] font-medium truncate cursor-move`}
+                          title={task.title}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, task, dateStr)}
+                        >
+                          {task.title}
+                        </div>
+                      ))}
+
+                      {/* ถ้ามีงานมากกว่า 2 ชิ้นและกำลังแสดงงานเพิ่มเติม */}
+                      {tasks.length > 2 && expandedDays[dateStr] && (
+                        <div className="mt-1">
+                          {tasks.slice(2).map((task, index) => (
+                            <div
+                              key={`extra-${index}`}
+                              className={`mb-1 rounded ${getTaskBgColor(task.status)} px-1.5 py-0.5 text-[10px] font-medium truncate cursor-move`}
+                              title={task.title}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, task, dateStr)}
+                            >
+                              {task.title}
+                            </div>
+                          ))}
+                          <button
+                            onClick={(e) => toggleExpandDay(e, dateStr)}
+                            className="text-[10px] text-blue-600 hover:text-blue-800 font-medium hover:underline cursor-pointer w-full text-left"
+                          >
+                            แสดงน้อยลง
+                          </button>
+                        </div>
+                      )}
+
+                      {/* ถ้ามีงานมากกว่า 2 ชิ้นและไม่ได้แสดงงานเพิ่มเติม */}
+                      {tasks.length > 2 && !expandedDays[dateStr] && (
+                        <button
+                          onClick={(e) => toggleExpandDay(e, dateStr)}
+                          className="text-[10px] text-blue-600 hover:text-blue-800 font-medium hover:underline cursor-pointer w-full text-left"
+                        >
+                          + {tasks.length - 2} อื่นๆ
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Task count badge (bottom right) */}
+                  {tasks.length > 0 && (
+                    <div className="absolute bottom-1 right-1 text-[10px] text-gray-500">{tasks.length} งาน</div>
+                  )}
+
+                  {/* Add task button (visible on hover) */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      openAddTaskDialog(day)
+                    }}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+              )
+            })}
+
+            {/* Empty cells after last day of month */}
+            {Array.from({ length: 42 - (firstDayOfMonth + daysInMonth) }).map((_, i) => (
+              <div key={`empty-end-${i}`} className="min-h-[100px] p-2 bg-white text-gray-300">
+                {i + 1}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Task details dialog - Used in desktop view */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] w-[calc(100%-2rem)] rounded-xl ">
+        <DialogContent className="sm:max-w-[500px] w-[calc(100%-2rem)] rounded-xl">
           <DialogHeader>
-            <DialogTitle className="flex justify-between items-center ">
+            <DialogTitle className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5 text-red-700 " />
+                <CalendarIcon className="h-5 w-5 text-red-700" />
                 <span className="text-base md:text-lg">งานวันที่ {formatDate(selectedDate || "")}</span>
               </div>
               <DialogClose asChild>
@@ -340,7 +660,7 @@ export function MonthCalendar({ tasks }) {
                 </Button>
               </DialogClose>
             </DialogTitle>
-            <DialogDescription>รายการงานทั้งหมดในวันที่เลือก</DialogDescription>
+            <DialogDescription>รายการงานทั้งหมดในวันที่เลือก (ลากเพื่อย้ายงาน)</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 mt-2 max-h-[60vh] overflow-y-auto">
@@ -353,7 +673,11 @@ export function MonthCalendar({ tasks }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Card className="p-4 hover:shadow-md transition-shadow">
+                    <Card
+                      className="p-4 hover:shadow-md transition-shadow cursor-move"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, task, selectedDate)}
+                    >
                       <div className="flex justify-between items-start">
                         <div>
                           <div className="font-medium text-sm md:text-base">{task.title}</div>
@@ -406,9 +730,9 @@ export function MonthCalendar({ tasks }) {
 
       {/* Add task dialog */}
       <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
-        <DialogContent className="sm:max-w-[500px] w-[calc(100%-2rem)] rounded-xl ">
+        <DialogContent className="sm:max-w-[500px] w-[calc(100%-2rem)] rounded-xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 ">
+            <DialogTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5 text-red-700" />
               <span>เพิ่มงานใหม่</span>
             </DialogTitle>

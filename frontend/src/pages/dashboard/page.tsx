@@ -781,7 +781,7 @@ const handleLogout = async () => {
 
               {/* ===== TASK LIST ===== */}
               {/* รายการงานที่แสดงตามการกรอง */}
-              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scroll-smooth">
                 {/* แสดงงานเลยกำหนดเมื่อกรอง all หรือ overdue */}
                 {(activeFilter === "all" || activeFilter === "overdue") && (
                   <>
