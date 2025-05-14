@@ -1,5 +1,5 @@
 "use client";
-import axios from 'axios'
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -81,32 +81,32 @@ export default function ManageReminder() {
     // 2.1) ดึงงาน manual
     const fetchManualReminders = async () => {
       try {
-        const { data } = await axios.get('/api/notifications', {
+        const { data } = await axios.get("/api/notifications", {
           withCredentials: true,
           params: { skip: 0, take: 100 },
         });
         setReminders(data);
       } catch (e) {
-        console.error('Failed to load manual reminders', e);
+        console.error("Failed to load manual reminders", e);
       }
     };
 
     // 2.2) ดึงงาน cycle
     const fetchCycleReminders = async () => {
       try {
-        const { data } = await axios.get('/api/notifications/cycles', {
+        const { data } = await axios.get("/api/notifications/cycles", {
           withCredentials: true,
           params: { skip: 0, take: 100 },
         });
         setCycleReminders(data);
       } catch (e) {
-        console.error('Failed to load cycle reminders', e);
+        console.error("Failed to load cycle reminders", e);
       }
     };
 
     fetchManualReminders();
     fetchCycleReminders();
-  }, []);  // รันแค่ครั้งเดียวตอน mount
+  }, []); // รันแค่ครั้งเดียวตอน mount
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -190,24 +190,27 @@ export default function ManageReminder() {
     setCurrentReminder(null);
   };
 
-  const mappedCycle = cycleReminders.map(c => ({
-    id:       c.id,
-    title:    c.title,
-    details:  c.message,
-    date:     c.scheduledAt?.split('T')[0],
-    frequency:c.frequency,  // หรือ field จริงของคุณ
-    status:   c.status,
-    type:     c.type,       // ถ้ามี
+  const mappedCycle = cycleReminders.map((c) => ({
+    id: c.id,
+    title: c.title,
+    details: c.message,
+    date: c.scheduledAt?.split("T")[0],
+    frequency: c.frequency, // หรือ field จริงของคุณ
+    status: c.status,
+    type: c.type, // ถ้ามี
   }));
 
   // รวม manual + cycle
   const allReminders = [...reminders, ...mappedCycle];
 
   // กรอง search / filter บน allReminders
-  const filteredReminders = allReminders.filter(reminder => {
-    const matchesSearch = reminder.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || reminder.status === statusFilter;
-    const matchesType   = typeFilter   === "all" || reminder.type   === typeFilter;
+  const filteredReminders = allReminders.filter((reminder) => {
+    const matchesSearch = reminder.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || reminder.status === statusFilter;
+    const matchesType = typeFilter === "all" || reminder.type === typeFilter;
     return matchesSearch && matchesStatus && matchesType;
   });
 
@@ -290,12 +293,16 @@ export default function ManageReminder() {
           >
             เตือนความจำ
           </Link>
-          <Link to="/manage" className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer">
+          <Link
+            to="/manage"
+            className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer"
+          >
             ตั้งค่าการแจ้งเตือน
           </Link>
           <Link
             to="/auditperson"
-            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+          >
             ประวัติการดำเนินการ
           </Link>
         </div>
@@ -307,8 +314,17 @@ export default function ManageReminder() {
           แอดมิน
         </summary>
         <div className="ml-4 mt-2 space-y-1">
-          <Link to="/audit-logs" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+          <Link
+            to="/audit-logs"
+            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+          >
             ประวัติการดำเนินการพนักงาน
+          </Link>
+          <Link
+            to="/addemployee"
+            className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors cursor-pointer"
+          >
+            เพิ่มพนักงานใหม่
           </Link>
         </div>
       </details>
@@ -354,12 +370,25 @@ export default function ManageReminder() {
           <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-semibold">
             SG
           </div>
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="focus:outline-none">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="focus:outline-none"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                d={
+                  isMenuOpen
+                    ? "M6 18L18 6M6 6l12 12"
+                    : "M4 6h16M4 12h16M4 18h16"
+                }
               />
             </svg>
           </button>

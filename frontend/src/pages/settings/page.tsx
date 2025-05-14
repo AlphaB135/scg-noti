@@ -1,31 +1,52 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { useTheme } from "next-themes"
-import { toast } from "sonner"
-import { simulateApiDelay } from "@/lib/mock-data"
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useTheme } from "next-themes";
+import { toast } from "sonner";
+import { simulateApiDelay } from "@/lib/mock-data";
 
 // UI Components
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Slider } from "@/components/ui/slider"
-import { Textarea } from "@/components/ui/textarea"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Icons
 import {
@@ -43,7 +64,7 @@ import {
   Check,
   Home,
   CheckCircle,
-} from "lucide-react"
+} from "lucide-react";
 
 export default function SettingsPage() {
   /**
@@ -59,18 +80,18 @@ export default function SettingsPage() {
    * 6. การเชื่อมต่อ - ตั้งค่าการเชื่อมต่อกับบริการภายนอก
    * 7. ข้อมูล - จัดการการนำเข้า/ส่งออกและล้างข้อมูล
    */
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [currentTime, setCurrentTime] = useState(new Date())
-  const [activeTab, setActiveTab] = useState("profile")
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [activeTab, setActiveTab] = useState("profile");
 
   // อัพเดทเวลาทุกวินาที
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
+      setCurrentTime(new Date());
+    }, 1000);
 
-    return () => clearInterval(timer)
-  }, [])
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-white font-noto">
@@ -99,30 +120,43 @@ export default function SettingsPage() {
               >
                 เตือนความจำ
               </Link>
-              <Link to="/manage" className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors">
+              <Link
+                to="/manage"
+                className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors"
+              >
                 ตั้งค่าการแจ้งเตือน
               </Link>
               <Link
-            to="/dashboard"
-            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-              ประวัติการดำเนินการ
-          </Link>
+                to="/dashboard"
+                className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+              >
+                ประวัติการดำเนินการ
+              </Link>
             </div>
           </details>
 
-      <details className="group">
-        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
-          <CheckCircle className="h-5 w-5" />
-          แอดมิน
-        </summary>
-        <div className="ml-4 mt-2 space-y-1">
-          <Link to="/audit-logs" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-            ประวัติการดำเนินการพนักงาน
-          </Link>
-        </div>
-      </details>
+          <details className="group">
+            <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
+              <CheckCircle className="h-5 w-5" />
+              แอดมิน
+            </summary>
+            <div className="ml-4 mt-2 space-y-1">
+              <Link
+                to="/audit-logs"
+                className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+              >
+                ประวัติการดำเนินการพนักงาน
+              </Link>
+              <Link
+                to="/addemployee"
+                className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors cursor-pointer"
+              >
+                เพิ่มพนักงานใหม่
+              </Link>
+            </div>
+          </details>
 
-      <Link
+          <Link
             to="/settings"
             className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer"
           >
@@ -130,7 +164,6 @@ export default function SettingsPage() {
             การตั้งค่า
           </Link>
         </nav>
-        
 
         <button className="m-6 flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200">
           <LogOut className="mr-2 h-5 w-5" />
@@ -145,12 +178,25 @@ export default function SettingsPage() {
           <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-semibold">
             SG
           </div>
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="focus:outline-none">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="focus:outline-none"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                d={
+                  isMenuOpen
+                    ? "M6 18L18 6M6 6l12 12"
+                    : "M4 6h16M4 12h16M4 18h16"
+                }
               />
             </svg>
           </button>
@@ -161,47 +207,55 @@ export default function SettingsPage() {
       {isMenuOpen && (
         <div className="md:hidden fixed top-14 left-0 w-64 h-full bg-gradient-to-b from-red-800 to-red-900 text-white z-40 shadow-lg p-3 overflow-y-auto">
           <nav className="space-y-1">
-          <details className="group">
-            <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
-              <Bell className="h-5 w-5" />
-              ระบบการแจ้งเตือน
-            </summary>
-            <div className="ml-4 mt-2 space-y-1">
-              <Link
-                to="/dashboard"
-                className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors">
-                เตือนความจำ
-              </Link>
-              <Link to="/manage" className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors">
-                ตั้งค่าการแจ้งเตือน
-              </Link>
-              <Link
-            to="/dashboard"
-            className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-              ประวัติการดำเนินการ
-          </Link>
-            </div>
-          </details>
+            <details className="group">
+              <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
+                <Bell className="h-5 w-5" />
+                ระบบการแจ้งเตือน
+              </summary>
+              <div className="ml-4 mt-2 space-y-1">
+                <Link
+                  to="/dashboard"
+                  className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors"
+                >
+                  เตือนความจำ
+                </Link>
+                <Link
+                  to="/manage"
+                  className="block rounded-md px-3 py-2  hover:bg-white/5 transition-colors"
+                >
+                  ตั้งค่าการแจ้งเตือน
+                </Link>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+                >
+                  ประวัติการดำเนินการ
+                </Link>
+              </div>
+            </details>
 
-      <details className="group">
-        <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
-          <CheckCircle className="h-5 w-5" />
-          แอดมิน
-        </summary>
-        <div className="ml-4 mt-2 space-y-1">
-          <Link to="/audit-logs" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
-            ประวัติการดำเนินการพนักงาน
-          </Link>
-        </div>
-      </details>
+            <details className="group">
+              <summary className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors cursor-pointer">
+                <CheckCircle className="h-5 w-5" />
+                แอดมิน
+              </summary>
+              <div className="ml-4 mt-2 space-y-1">
+                <Link
+                  to="/audit-logs"
+                  className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+                >
+                  ประวัติการดำเนินการพนักงาน
+                </Link>
+              </div>
+            </details>
 
-      <Link
-            to="/settings"
-            className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer"
-          >
-            <Settings className="h-5 w-5" />
-            การตั้งค่า
-          </Link>
+            <Link
+              to="/settings"
+              className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/5 transition-colors font-bold cursor-pointer"
+            >
+              <Settings className="h-5 w-5" />
+              การตั้งค่า
+            </Link>
           </nav>
 
           <button className="mt-6 w-full flex items-center justify-center rounded-md bg-white py-2 font-bold text-red-700 hover:bg-gray-200">
@@ -218,7 +272,9 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between px-6 py-4 ml-64">
             <div>
               <h1 className="text-xl font-bold text-gray-800">การตั้งค่า</h1>
-              <p className="text-sm text-gray-500">จัดการการตั้งค่าบัญชีของคุณและปรับแต่งการตั้งค่าระบบ</p>
+              <p className="text-sm text-gray-500">
+                จัดการการตั้งค่าบัญชีของคุณและปรับแต่งการตั้งค่าระบบ
+              </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right text-sm text-gray-600">
@@ -253,7 +309,9 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-lg font-bold text-gray-800">การตั้งค่า</h1>
-                <p className="text-xs text-gray-500">จัดการการตั้งค่าบัญชีของคุณและปรับแต่งการตั้งค่าระบบ</p>
+                <p className="text-xs text-gray-500">
+                  จัดการการตั้งค่าบัญชีของคุณและปรับแต่งการตั้งค่าระบบ
+                </p>
               </div>
               <div className="text-right text-sm text-gray-600">
                 <div className="font-bold text-sm">
@@ -271,7 +329,12 @@ export default function SettingsPage() {
 
         {/* ===== SETTINGS TABS ===== */}
         <div className="mt-4">
-          <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <Tabs
+            defaultValue="profile"
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-4"
+          >
             <TabsList className="grid grid-cols-2 md:grid-cols-7 gap-2">
               <TabsTrigger value="profile" className="font-noto">
                 โปรไฟล์
@@ -355,7 +418,7 @@ export default function SettingsPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
 
 // ===============================================================================
@@ -363,17 +426,20 @@ export default function SettingsPage() {
 // ===============================================================================
 // ===== PROFILE SETTINGS COMPONENT =====
 function ProfileSettings() {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const profileFormSchema = z.object({
     name: z.string().min(2, { message: "Name must be at least 2 characters." }),
     email: z.string().email({ message: "Please enter a valid email address." }),
     title: z.string().optional(),
     department: z.string().optional(),
-    bio: z.string().max(160, { message: "Bio must not be longer than 160 characters." }).optional(),
-  })
+    bio: z
+      .string()
+      .max(160, { message: "Bio must not be longer than 160 characters." })
+      .optional(),
+  });
 
-  type ProfileFormValues = z.infer<typeof profileFormSchema>
+  type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
   // This would come from your user context or API in a real app
   const defaultValues: Partial<ProfileFormValues> = {
@@ -382,25 +448,25 @@ function ProfileSettings() {
     title: "Developer",
     department: "IT Department",
     bio: "ตื่นมาก็หล่อ พอให้พอใจ แต่ยังง่วงอยู่ไง ขอนอนต่ออีกที",
-  }
+  };
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
-  })
+  });
 
   async function onSubmit(data: ProfileFormValues) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // Simulate API call
-      await simulateApiDelay(1000)
-      toast.success("Profile updated successfully")
+      await simulateApiDelay(1000);
+      toast.success("Profile updated successfully");
     } catch (error) {
-      toast.error("Failed to update profile")
-      console.error(error)
+      toast.error("Failed to update profile");
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -414,7 +480,10 @@ function ProfileSettings() {
         <CardContent className="space-y-6">
           <div className="flex items-center gap-6">
             <Avatar className="h-24 w-24">
-              <AvatarImage src="/placeholder.svg?height=96&width=96" alt="Profile" />
+              <AvatarImage
+                src="/placeholder.svg?height=96&width=96"
+                alt="Profile"
+              />
               <AvatarFallback className="text-2xl">SG</AvatarFallback>
             </Avatar>
             <div className="space-y-2">
@@ -427,7 +496,9 @@ function ProfileSettings() {
                   ลบรูปโปรไฟล์
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">JPG, GIF or PNG. Max size 1MB.</p>
+              <p className="text-xs text-muted-foreground">
+                JPG, GIF or PNG. Max size 1MB.
+              </p>
             </div>
           </div>
 
@@ -498,16 +569,27 @@ function ProfileSettings() {
                   <FormItem>
                     <FormLabel>Bio</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Write a short bio about yourself" className="resize-none" {...field} />
+                      <Textarea
+                        placeholder="Write a short bio about yourself"
+                        className="resize-none"
+                        {...field}
+                      />
                     </FormControl>
-                    <FormDescription>คำอธิบายสั้น ๆ สำหรับโปรไฟล์ของคุณ ( ไม่เกิน 160 ตัวอักษร )</FormDescription>
+                    <FormDescription>
+                      คำอธิบายสั้น ๆ สำหรับโปรไฟล์ของคุณ ( ไม่เกิน 160 ตัวอักษร
+                      )
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
               <div className="flex justify-end">
-                <Button type="submit" disabled={isLoading} className="bg-[#E2001A] hover:bg-[#C0001A] text-white">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-[#E2001A] hover:bg-[#C0001A] text-white"
+                >
                   {isLoading ? "Saving..." : "บันทึกการเปลี่ยนแปลง"}
                 </Button>
               </div>
@@ -516,7 +598,7 @@ function ProfileSettings() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 // ===============================================================================
@@ -524,34 +606,34 @@ function ProfileSettings() {
 // ===============================================================================
 // ===== NOTIFICATION PREFERENCES COMPONENT =====
 function NotificationPreferences() {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   // Notification preferences state
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [pushNotifications, setPushNotifications] = useState(true)
-  const [smsNotifications, setSmsNotifications] = useState(false)
-  const [digestFrequency, setDigestFrequency] = useState("daily")
-  const [notificationSound, setNotificationSound] = useState("default")
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(true);
+  const [smsNotifications, setSmsNotifications] = useState(false);
+  const [digestFrequency, setDigestFrequency] = useState("daily");
+  const [notificationSound, setNotificationSound] = useState("default");
 
   // Notification types state
-  const [systemUpdates, setSystemUpdates] = useState(true)
-  const [approvalRequests, setApprovalRequests] = useState(true)
-  const [securityAlerts, setSecurityAlerts] = useState(true)
-  const [newsAndAnnouncements, setNewsAndAnnouncements] = useState(true)
-  const [maintenanceAlerts, setMaintenanceAlerts] = useState(true)
+  const [systemUpdates, setSystemUpdates] = useState(true);
+  const [approvalRequests, setApprovalRequests] = useState(true);
+  const [securityAlerts, setSecurityAlerts] = useState(true);
+  const [newsAndAnnouncements, setNewsAndAnnouncements] = useState(true);
+  const [maintenanceAlerts, setMaintenanceAlerts] = useState(true);
 
   async function handleSave() {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // Simulate API call
-      await simulateApiDelay(1000)
-      toast.success("Notification preferences saved")
+      await simulateApiDelay(1000);
+      toast.success("Notification preferences saved");
     } catch (error) {
-      toast.error("Failed to save notification preferences")
-      console.error(error)
+      toast.error("Failed to save notification preferences");
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -566,26 +648,46 @@ function NotificationPreferences() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="email-notifications">การแจ้งเตือนทางอีเมล</Label>
-                <p className="text-sm text-muted-foreground">รับการแจ้งเตือนผ่านทางอีเมล</p>
+                <Label htmlFor="email-notifications">
+                  การแจ้งเตือนทางอีเมล
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  รับการแจ้งเตือนผ่านทางอีเมล
+                </p>
               </div>
-              <Switch id="email-notifications" checked={emailNotifications} onCheckedChange={setEmailNotifications} />
+              <Switch
+                id="email-notifications"
+                checked={emailNotifications}
+                onCheckedChange={setEmailNotifications}
+              />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="push-notifications">การแจ้งเตือนแบบพุช</Label>
-                <p className="text-sm text-muted-foreground">รับการแจ้งเตือนผ่านเบราว์เซอร์ของคุณ</p>
+                <p className="text-sm text-muted-foreground">
+                  รับการแจ้งเตือนผ่านเบราว์เซอร์ของคุณ
+                </p>
               </div>
-              <Switch id="push-notifications" checked={pushNotifications} onCheckedChange={setPushNotifications} />
+              <Switch
+                id="push-notifications"
+                checked={pushNotifications}
+                onCheckedChange={setPushNotifications}
+              />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="sms-notifications">การแจ้งเตือนทาง Line</Label>
-                <p className="text-sm text-muted-foreground">รับการแจ้งเตือนผ่าน Line</p>
+                <p className="text-sm text-muted-foreground">
+                  รับการแจ้งเตือนผ่าน Line
+                </p>
               </div>
-              <Switch id="sms-notifications" checked={smsNotifications} onCheckedChange={setSmsNotifications} />
+              <Switch
+                id="sms-notifications"
+                checked={smsNotifications}
+                onCheckedChange={setSmsNotifications}
+              />
             </div>
           </div>
 
@@ -614,7 +716,10 @@ function NotificationPreferences() {
 
             <div className="space-y-2">
               <Label htmlFor="notification-sound">เสียงแจ้งเตือน</Label>
-              <Select value={notificationSound} onValueChange={setNotificationSound}>
+              <Select
+                value={notificationSound}
+                onValueChange={setNotificationSound}
+              >
                 <SelectTrigger id="notification-sound">
                   <SelectValue placeholder="Select a sound" />
                 </SelectTrigger>
@@ -633,42 +738,70 @@ function NotificationPreferences() {
       <Card>
         <CardHeader>
           <CardTitle>ประเภทการแจ้งเตือน</CardTitle>
-          <CardDescription>เลือกประเภทการแจ้งเตือนที่คุณต้องการรับ</CardDescription>
+          <CardDescription>
+            เลือกประเภทการแจ้งเตือนที่คุณต้องการรับ
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <Label htmlFor="system-updates">อัปเดตระบบ</Label>
-            <Switch id="system-updates" checked={systemUpdates} onCheckedChange={setSystemUpdates} />
+            <Switch
+              id="system-updates"
+              checked={systemUpdates}
+              onCheckedChange={setSystemUpdates}
+            />
           </div>
 
           <div className="flex items-center justify-between">
             <Label htmlFor="approval-requests">คำขออนุมัติ</Label>
-            <Switch id="approval-requests" checked={approvalRequests} onCheckedChange={setApprovalRequests} />
+            <Switch
+              id="approval-requests"
+              checked={approvalRequests}
+              onCheckedChange={setApprovalRequests}
+            />
           </div>
 
           <div className="flex items-center justify-between">
             <Label htmlFor="security-alerts">การแจ้งเตือนด้านความปลอดภัย</Label>
-            <Switch id="security-alerts" checked={securityAlerts} onCheckedChange={setSecurityAlerts} />
+            <Switch
+              id="security-alerts"
+              checked={securityAlerts}
+              onCheckedChange={setSecurityAlerts}
+            />
           </div>
 
           <div className="flex items-center justify-between">
             <Label htmlFor="news-announcements">ข่าวสารและประกาศ</Label>
-            <Switch id="news-announcements" checked={newsAndAnnouncements} onCheckedChange={setNewsAndAnnouncements} />
+            <Switch
+              id="news-announcements"
+              checked={newsAndAnnouncements}
+              onCheckedChange={setNewsAndAnnouncements}
+            />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="maintenance-alerts">การแจ้งเตือนการบำรุงรักษา</Label>
-            <Switch id="maintenance-alerts" checked={maintenanceAlerts} onCheckedChange={setMaintenanceAlerts} />
+            <Label htmlFor="maintenance-alerts">
+              การแจ้งเตือนการบำรุงรักษา
+            </Label>
+            <Switch
+              id="maintenance-alerts"
+              checked={maintenanceAlerts}
+              onCheckedChange={setMaintenanceAlerts}
+            />
           </div>
         </CardContent>
         <CardFooter className="flex justify-end">
-          <Button onClick={handleSave} disabled={isLoading} className="bg-[#E2001A] hover:bg-[#C0001A] text-white">
+          <Button
+            onClick={handleSave}
+            disabled={isLoading}
+            className="bg-[#E2001A] hover:bg-[#C0001A] text-white"
+          >
             {isLoading ? "Saving..." : "บันทึกการเปลี่ยนแปลง"}
           </Button>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
 
 // ===============================================================================
@@ -676,10 +809,12 @@ function NotificationPreferences() {
 // ===============================================================================
 // ===== SYSTEM SETTINGS COMPONENT =====
 function SystemSettings() {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const systemSettingsSchema = z.object({
-    systemName: z.string().min(2, { message: "กรุณากรอกชื่อระบบอย่างน้อย 2 ตัวอักษร" }),
+    systemName: z
+      .string()
+      .min(2, { message: "กรุณากรอกชื่อระบบอย่างน้อย 2 ตัวอักษร" }),
     defaultLanguage: z.string(),
     timezone: z.string(),
     dateFormat: z.string(),
@@ -687,9 +822,9 @@ function SystemSettings() {
     autoLogout: z.number().int().min(5).max(120),
     enableAuditLog: z.boolean(),
     enableAnalytics: z.boolean(),
-  })
+  });
 
-  type SystemSettingsValues = z.infer<typeof systemSettingsSchema>
+  type SystemSettingsValues = z.infer<typeof systemSettingsSchema>;
 
   const defaultValues: SystemSettingsValues = {
     systemName: "SCG ระบบแจ้งเตือน",
@@ -700,24 +835,24 @@ function SystemSettings() {
     autoLogout: 30,
     enableAuditLog: true,
     enableAnalytics: true,
-  }
+  };
 
   const form = useForm<SystemSettingsValues>({
     resolver: zodResolver(systemSettingsSchema),
     defaultValues,
-  })
+  });
 
   async function onSubmit(data: SystemSettingsValues) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      await simulateApiDelay(1000)
-      toast.success("บันทึกการตั้งค่าสำเร็จ")
+      await simulateApiDelay(1000);
+      toast.success("บันทึกการตั้งค่าสำเร็จ");
     } catch (error) {
-      toast.error("ไม่สามารถบันทึกการตั้งค่าได้")
-      console.error(error)
+      toast.error("ไม่สามารถบันทึกการตั้งค่าได้");
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -740,7 +875,9 @@ function SystemSettings() {
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                    <FormDescription>ชื่อนี้จะแสดงในหัวเบราว์เซอร์และอีเมล</FormDescription>
+                    <FormDescription>
+                      ชื่อนี้จะแสดงในหัวเบราว์เซอร์และอีเมล
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -753,7 +890,10 @@ function SystemSettings() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>ภาษาพื้นฐาน</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="เลือกภาษา" />
@@ -777,18 +917,31 @@ function SystemSettings() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>เขตเวลา</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="เลือกเขตเวลา" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Asia/Bangkok">กรุงเทพฯ (GMT+7)</SelectItem>
-                          <SelectItem value="Asia/Singapore">สิงคโปร์ (GMT+8)</SelectItem>
-                          <SelectItem value="Asia/Tokyo">โตเกียว (GMT+9)</SelectItem>
-                          <SelectItem value="Europe/London">ลอนดอน (GMT+0)</SelectItem>
-                          <SelectItem value="America/New_York">นิวยอร์ก (GMT-5)</SelectItem>
+                          <SelectItem value="Asia/Bangkok">
+                            กรุงเทพฯ (GMT+7)
+                          </SelectItem>
+                          <SelectItem value="Asia/Singapore">
+                            สิงคโปร์ (GMT+8)
+                          </SelectItem>
+                          <SelectItem value="Asia/Tokyo">
+                            โตเกียว (GMT+9)
+                          </SelectItem>
+                          <SelectItem value="Europe/London">
+                            ลอนดอน (GMT+0)
+                          </SelectItem>
+                          <SelectItem value="America/New_York">
+                            นิวยอร์ก (GMT-5)
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -802,7 +955,10 @@ function SystemSettings() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>รูปแบบวันที่</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="เลือกรูปแบบวันที่" />
@@ -812,7 +968,9 @@ function SystemSettings() {
                           <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
                           <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
                           <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                          <SelectItem value="DD-MMM-YYYY">DD-MMM-YYYY</SelectItem>
+                          <SelectItem value="DD-MMM-YYYY">
+                            DD-MMM-YYYY
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -826,14 +984,19 @@ function SystemSettings() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>รูปแบบเวลา</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="เลือกรูปแบบเวลา" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="12h">12 ชั่วโมง (AM/PM)</SelectItem>
+                          <SelectItem value="12h">
+                            12 ชั่วโมง (AM/PM)
+                          </SelectItem>
                           <SelectItem value="24h">24 ชั่วโมง</SelectItem>
                         </SelectContent>
                       </Select>
@@ -854,10 +1017,15 @@ function SystemSettings() {
                           min={5}
                           max={120}
                           {...field}
-                          onChange={(e) => field.onChange(Number.parseInt(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number.parseInt(e.target.value))
+                          }
                         />
                       </FormControl>
-                      <FormDescription>เวลาที่ไม่มีการใช้งานก่อนจะออกจากระบบอัตโนมัติ (5–120 นาที)</FormDescription>
+                      <FormDescription>
+                        เวลาที่ไม่มีการใช้งานก่อนจะออกจากระบบอัตโนมัติ (5–120
+                        นาที)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -872,10 +1040,15 @@ function SystemSettings() {
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
                         <FormLabel>เปิดใช้งานการบันทึกกิจกรรม</FormLabel>
-                        <FormDescription>บันทึกกิจกรรมของผู้ใช้ทั้งหมดเพื่อความปลอดภัยและการตรวจสอบย้อนหลัง</FormDescription>
+                        <FormDescription>
+                          บันทึกกิจกรรมของผู้ใช้ทั้งหมดเพื่อความปลอดภัยและการตรวจสอบย้อนหลัง
+                        </FormDescription>
                       </div>
                       <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -888,10 +1061,16 @@ function SystemSettings() {
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
                         <FormLabel>เปิดใช้งานระบบวิเคราะห์ข้อมูล</FormLabel>
-                        <FormDescription>เก็บข้อมูลการใช้งานแบบไม่ระบุตัวตน เพื่อปรับปรุงระบบให้ดียิ่งขึ้น</FormDescription>
+                        <FormDescription>
+                          เก็บข้อมูลการใช้งานแบบไม่ระบุตัวตน
+                          เพื่อปรับปรุงระบบให้ดียิ่งขึ้น
+                        </FormDescription>
                       </div>
                       <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -899,7 +1078,11 @@ function SystemSettings() {
               </div>
 
               <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={isLoading} className="bg-[#E2001A] hover:bg-[#C0001A] text-white">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-[#E2001A] hover:bg-[#C0001A] text-white"
+                >
                   {isLoading ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
                 </Button>
               </div>
@@ -908,7 +1091,7 @@ function SystemSettings() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 // ===============================================================================
@@ -916,28 +1099,28 @@ function SystemSettings() {
 // ===============================================================================
 // ===== APPEARANCE SETTINGS COMPONENT =====
 function AppearanceSettings() {
-  const { theme, setTheme } = useTheme()
-  const [isLoading, setIsLoading] = useState(false)
+  const { theme, setTheme } = useTheme();
+  const [isLoading, setIsLoading] = useState(false);
 
   // Appearance settings state
-  const [density, setDensity] = useState("comfortable")
-  const [fontSize, setFontSize] = useState(16)
-  const [animationsEnabled, setAnimationsEnabled] = useState(true)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [accentColor, setAccentColor] = useState("red")
+  const [density, setDensity] = useState("comfortable");
+  const [fontSize, setFontSize] = useState(16);
+  const [animationsEnabled, setAnimationsEnabled] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [accentColor, setAccentColor] = useState("red");
 
   async function handleSave() {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // Simulate API call
-      await simulateApiDelay(1000)
-      toast.success("บันทึกการตั้งค่าการแสดงผลแล้ว")
+      await simulateApiDelay(1000);
+      toast.success("บันทึกการตั้งค่าการแสดงผลแล้ว");
     } catch (error) {
-      toast.error("ไม่สามารถบันทึกการตั้งค่าการแสดงผลได้")
-      console.error(error)
+      toast.error("ไม่สามารถบันทึกการตั้งค่าการแสดงผลได้");
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -946,14 +1129,24 @@ function AppearanceSettings() {
       <Card>
         <CardHeader>
           <CardTitle className="font-noto">ธีม</CardTitle>
-          <CardDescription className="font-noto">ปรับแต่งลักษณะและความรู้สึกของระบบ</CardDescription>
+          <CardDescription className="font-noto">
+            ปรับแต่งลักษณะและความรู้สึกของระบบ
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label className="font-noto">ธีมสี</Label>
-            <RadioGroup value={theme || "light"} onValueChange={setTheme} className="grid grid-cols-3 gap-4">
+            <RadioGroup
+              value={theme || "light"}
+              onValueChange={setTheme}
+              className="grid grid-cols-3 gap-4"
+            >
               <div>
-                <RadioGroupItem value="light" id="light" className="peer sr-only" />
+                <RadioGroupItem
+                  value="light"
+                  id="light"
+                  className="peer sr-only"
+                />
                 <Label
                   htmlFor="light"
                   className="font-noto flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-4 hover:bg-gray-100 hover:text-accent-foreground peer-data-[state=checked]:border-[#E2001A] [&:has([data-state=checked])]:border-[#E2001A]"
@@ -970,7 +1163,11 @@ function AppearanceSettings() {
               </div>
 
               <div>
-                <RadioGroupItem value="dark" id="dark" className="peer sr-only" />
+                <RadioGroupItem
+                  value="dark"
+                  id="dark"
+                  className="peer sr-only"
+                />
                 <Label
                   htmlFor="dark"
                   className="font-noto flex flex-col items-center justify-between rounded-md border-2 border-muted bg-gray-950 p-4 hover:bg-gray-900 hover:text-accent-foreground peer-data-[state=checked]:border-[#E2001A] [&:has([data-state=checked])]:border-[#E2001A]"
@@ -987,7 +1184,11 @@ function AppearanceSettings() {
               </div>
 
               <div>
-                <RadioGroupItem value="system" id="system" className="peer sr-only" />
+                <RadioGroupItem
+                  value="system"
+                  id="system"
+                  className="peer sr-only"
+                />
                 <Label
                   htmlFor="system"
                   className="font-noto flex flex-col items-center justify-between rounded-md border-2 border-muted bg-gradient-to-r from-white to-gray-950 p-4 hover:bg-gray-100 hover:text-accent-foreground peer-data-[state=checked]:border-[#E2001A] [&:has([data-state=checked])]:border-[#E2001A]"
@@ -1007,7 +1208,11 @@ function AppearanceSettings() {
 
           <div className="space-y-2">
             <Label className="font-noto">สีเน้น</Label>
-            <RadioGroup value={accentColor} onValueChange={setAccentColor} className="grid grid-cols-5 gap-2">
+            <RadioGroup
+              value={accentColor}
+              onValueChange={setAccentColor}
+              className="grid grid-cols-5 gap-2"
+            >
               <div>
                 <RadioGroupItem value="red" id="red" className="peer sr-only" />
                 <Label
@@ -1019,7 +1224,11 @@ function AppearanceSettings() {
               </div>
 
               <div>
-                <RadioGroupItem value="blue" id="blue" className="peer sr-only" />
+                <RadioGroupItem
+                  value="blue"
+                  id="blue"
+                  className="peer sr-only"
+                />
                 <Label
                   htmlFor="blue"
                   className="font-noto flex aspect-square items-center justify-center rounded-md border-2 border-muted bg-blue-600 hover:opacity-90 peer-data-[state=checked]:border-black [&:has([data-state=checked])]:border-black"
@@ -1029,7 +1238,11 @@ function AppearanceSettings() {
               </div>
 
               <div>
-                <RadioGroupItem value="green" id="green" className="peer sr-only" />
+                <RadioGroupItem
+                  value="green"
+                  id="green"
+                  className="peer sr-only"
+                />
                 <Label
                   htmlFor="green"
                   className="font-noto flex aspect-square items-center justify-center rounded-md border-2 border-muted bg-green-600 hover:opacity-90 peer-data-[state=checked]:border-black [&:has([data-state=checked])]:border-black"
@@ -1039,7 +1252,11 @@ function AppearanceSettings() {
               </div>
 
               <div>
-                <RadioGroupItem value="purple" id="purple" className="peer sr-only" />
+                <RadioGroupItem
+                  value="purple"
+                  id="purple"
+                  className="peer sr-only"
+                />
                 <Label
                   htmlFor="purple"
                   className="font-noto flex aspect-square items-center justify-center rounded-md border-2 border-muted bg-purple-600 hover:opacity-90 peer-data-[state=checked]:border-black [&:has([data-state=checked])]:border-black"
@@ -1049,7 +1266,11 @@ function AppearanceSettings() {
               </div>
 
               <div>
-                <RadioGroupItem value="orange" id="orange" className="peer sr-only" />
+                <RadioGroupItem
+                  value="orange"
+                  id="orange"
+                  className="peer sr-only"
+                />
                 <Label
                   htmlFor="orange"
                   className="font-noto flex aspect-square items-center justify-center rounded-md border-2 border-muted bg-orange-500 hover:opacity-90 peer-data-[state=checked]:border-black [&:has([data-state=checked])]:border-black"
@@ -1062,9 +1283,17 @@ function AppearanceSettings() {
 
           <div className="space-y-2">
             <Label className="font-noto">ระดับความกระชับของอินเทอร์เฟซ</Label>
-            <RadioGroup value={density} onValueChange={setDensity} className="grid grid-cols-3 gap-4">
+            <RadioGroup
+              value={density}
+              onValueChange={setDensity}
+              className="grid grid-cols-3 gap-4"
+            >
               <div>
-                <RadioGroupItem value="compact" id="compact" className="peer sr-only" />
+                <RadioGroupItem
+                  value="compact"
+                  id="compact"
+                  className="peer sr-only"
+                />
                 <Label
                   htmlFor="compact"
                   className="font-noto flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-gray-100 hover:text-accent-foreground peer-data-[state=checked]:border-[#E2001A] [&:has([data-state=checked])]:border-[#E2001A]"
@@ -1079,7 +1308,11 @@ function AppearanceSettings() {
               </div>
 
               <div>
-                <RadioGroupItem value="comfortable" id="comfortable" className="peer sr-only" />
+                <RadioGroupItem
+                  value="comfortable"
+                  id="comfortable"
+                  className="peer sr-only"
+                />
                 <Label
                   htmlFor="comfortable"
                   className="font-noto flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-gray-100 hover:text-accent-foreground peer-data-[state=checked]:border-[#E2001A] [&:has([data-state=checked])]:border-[#E2001A]"
@@ -1094,7 +1327,11 @@ function AppearanceSettings() {
               </div>
 
               <div>
-                <RadioGroupItem value="spacious" id="spacious" className="peer sr-only" />
+                <RadioGroupItem
+                  value="spacious"
+                  id="spacious"
+                  className="peer sr-only"
+                />
                 <Label
                   htmlFor="spacious"
                   className="font-noto flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-gray-100 hover:text-accent-foreground peer-data-[state=checked]:border-[#E2001A] [&:has([data-state=checked])]:border-[#E2001A]"
@@ -1137,9 +1374,15 @@ function AppearanceSettings() {
                 <Label htmlFor="animations" className="font-noto">
                   เปิดอนิเมชัน
                 </Label>
-                <p className="font-noto text-sm text-muted-foreground">แสดงการเคลื่อนไหวและการเปลี่ยนองค์ประกอบในส่วนติดต่อ</p>
+                <p className="font-noto text-sm text-muted-foreground">
+                  แสดงการเคลื่อนไหวและการเปลี่ยนองค์ประกอบในส่วนติดต่อ
+                </p>
               </div>
-              <Switch id="animations" checked={animationsEnabled} onCheckedChange={setAnimationsEnabled} />
+              <Switch
+                id="animations"
+                checked={animationsEnabled}
+                onCheckedChange={setAnimationsEnabled}
+              />
             </div>
 
             <div className="flex items-center justify-between">
@@ -1147,9 +1390,15 @@ function AppearanceSettings() {
                 <Label htmlFor="sidebar-collapsed" className="font-noto">
                   ย่อแถบนำทางเริ่มต้น
                 </Label>
-                <p className="font-noto text-sm text-muted-foreground">ให้แถบนำทางถูกย่อเมื่อคุณเข้าสู่ระบบ</p>
+                <p className="font-noto text-sm text-muted-foreground">
+                  ให้แถบนำทางถูกย่อเมื่อคุณเข้าสู่ระบบ
+                </p>
               </div>
-              <Switch id="sidebar-collapsed" checked={sidebarCollapsed} onCheckedChange={setSidebarCollapsed} />
+              <Switch
+                id="sidebar-collapsed"
+                checked={sidebarCollapsed}
+                onCheckedChange={setSidebarCollapsed}
+              />
             </div>
           </div>
         </CardContent>
@@ -1164,7 +1413,7 @@ function AppearanceSettings() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
 
 // ===============================================================================
@@ -1172,27 +1421,33 @@ function AppearanceSettings() {
 // ===============================================================================
 // ===== SECURITY SETTINGS COMPONENT =====
 function SecuritySettings() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
-  const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false)
-  const [apiKey, setApiKey] = useState("scg_api_" + Math.random().toString(36).substring(2, 15))
+  const [isLoading, setIsLoading] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false);
+  const [apiKey, setApiKey] = useState(
+    "scg_api_" + Math.random().toString(36).substring(2, 15)
+  );
 
   const passwordSchema = z
     .object({
-      currentPassword: z.string().min(1, { message: "กรุณากรอกรหัสผ่านปัจจุบัน" }),
+      currentPassword: z
+        .string()
+        .min(1, { message: "กรุณากรอกรหัสผ่านปัจจุบัน" }),
       newPassword: z
         .string()
         .min(8, { message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" })
         .regex(/[A-Z]/, { message: "ต้องมีตัวพิมพ์ใหญ่อย่างน้อยหนึ่งตัว" })
         .regex(/[a-z]/, { message: "ต้องมีตัวพิมพ์เล็กอย่างน้อยหนึ่งตัว" })
         .regex(/[0-9]/, { message: "ต้องมีตัวเลขอย่างน้อยหนึ่งตัว" })
-        .regex(/[^A-Za-z0-9]/, { message: "ต้องมีอักขระพิเศษอย่างน้อยหนึ่งตัว" }),
+        .regex(/[^A-Za-z0-9]/, {
+          message: "ต้องมีอักขระพิเศษอย่างน้อยหนึ่งตัว",
+        }),
       confirmPassword: z.string(),
     })
     .refine((data) => data.newPassword === data.confirmPassword, {
       message: "รหัสผ่านไม่ตรงกัน",
       path: ["confirmPassword"],
-    })
+    });
 
   const form = useForm<z.infer<typeof passwordSchema>>({
     resolver: zodResolver(passwordSchema),
@@ -1201,59 +1456,61 @@ function SecuritySettings() {
       newPassword: "",
       confirmPassword: "",
     },
-  })
+  });
 
   async function onSubmit(data: z.infer<typeof passwordSchema>) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      await simulateApiDelay(1000)
-      toast.success("เปลี่ยนรหัสผ่านสำเร็จ")
-      form.reset()
+      await simulateApiDelay(1000);
+      toast.success("เปลี่ยนรหัสผ่านสำเร็จ");
+      form.reset();
     } catch (error) {
-      toast.error("ไม่สามารถเปลี่ยนรหัสผ่านได้")
-      console.error(error)
+      toast.error("ไม่สามารถเปลี่ยนรหัสผ่านได้");
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   const handleTwoFactorToggle = async (checked: boolean) => {
-    setTwoFactorEnabled(checked)
+    setTwoFactorEnabled(checked);
     if (checked) {
-      setShowTwoFactorSetup(true)
+      setShowTwoFactorSetup(true);
     } else {
-      setShowTwoFactorSetup(false)
-      toast.success("ปิดการยืนยันตัวตนสองชั้นแล้ว")
+      setShowTwoFactorSetup(false);
+      toast.success("ปิดการยืนยันตัวตนสองชั้นแล้ว");
     }
-  }
+  };
 
   const regenerateApiKey = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      await simulateApiDelay(1000)
-      setApiKey("scg_api_" + Math.random().toString(36).substring(2, 15))
-      toast.success("สร้างคีย์ API ใหม่สำเร็จ")
+      await simulateApiDelay(1000);
+      setApiKey("scg_api_" + Math.random().toString(36).substring(2, 15));
+      toast.success("สร้างคีย์ API ใหม่สำเร็จ");
     } catch (error) {
-      toast.error("ไม่สามารถสร้างคีย์ API ใหม่ได้")
-      console.error(error)
+      toast.error("ไม่สามารถสร้างคีย์ API ใหม่ได้");
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const copyApiKey = () => {
-    navigator.clipboard.writeText(apiKey)
-    toast.success("คัดลอกคีย์ API ไปยังคลิปบอร์ดแล้ว")
-  }
+    navigator.clipboard.writeText(apiKey);
+    toast.success("คัดลอกคีย์ API ไปยังคลิปบอร์ดแล้ว");
+  };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="font-noto">เปลี่ยนรหัสผ่าน</CardTitle>
-          <CardDescription className="font-noto">อัปเดตรหัสผ่านเพื่อให้บัญชีของคุณปลอดภัย</CardDescription>
+          <CardDescription className="font-noto">
+            อัปเดตรหัสผ่านเพื่อให้บัญชีของคุณปลอดภัย
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -1263,7 +1520,9 @@ function SecuritySettings() {
                 name="currentPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-noto">รหัสผ่านปัจจุบัน</FormLabel>
+                    <FormLabel className="font-noto">
+                      รหัสผ่านปัจจุบัน
+                    </FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -1282,7 +1541,9 @@ function SecuritySettings() {
                       <Input type="password" {...field} />
                     </FormControl>
                     <FormDescription className="font-noto">
-                      รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร และประกอบด้วยตัวพิมพ์ใหญ่, ตัวพิมพ์เล็ก, ตัวเลข และอักขระพิเศษ
+                      รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร
+                      และประกอบด้วยตัวพิมพ์ใหญ่, ตัวพิมพ์เล็ก, ตัวเลข
+                      และอักขระพิเศษ
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -1294,7 +1555,9 @@ function SecuritySettings() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-noto">ยืนยันรหัสผ่านใหม่</FormLabel>
+                    <FormLabel className="font-noto">
+                      ยืนยันรหัสผ่านใหม่
+                    </FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -1318,7 +1581,9 @@ function SecuritySettings() {
       <Card>
         <CardHeader>
           <CardTitle className="font-noto">การยืนยันตัวตนสองชั้น</CardTitle>
-          <CardDescription className="font-noto">เพิ่มชั้นความปลอดภัยให้บัญชีของคุณ</CardDescription>
+          <CardDescription className="font-noto">
+            เพิ่มชั้นความปลอดภัยให้บัญชีของคุณ
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
@@ -1326,9 +1591,15 @@ function SecuritySettings() {
               <Label htmlFor="two-factor" className="font-noto">
                 การยืนยันตัวตนสองชั้น
               </Label>
-              <p className="font-noto text-sm text-muted-foreground">ต้องใช้รหัสยืนยันเมื่อเข้าสู่ระบบ</p>
+              <p className="font-noto text-sm text-muted-foreground">
+                ต้องใช้รหัสยืนยันเมื่อเข้าสู่ระบบ
+              </p>
             </div>
-            <Switch id="two-factor" checked={twoFactorEnabled} onCheckedChange={handleTwoFactorToggle} />
+            <Switch
+              id="two-factor"
+              checked={twoFactorEnabled}
+              onCheckedChange={handleTwoFactorToggle}
+            />
           </div>
 
           {showTwoFactorSetup && (
@@ -1336,7 +1607,10 @@ function SecuritySettings() {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>ต้องการตั้งค่า</AlertTitle>
-                <AlertDescription>สแกน QR code ด้านล่างด้วยแอป Authenticator เพื่อตั้งค่าการยืนยันตัวตนสองชั้น</AlertDescription>
+                <AlertDescription>
+                  สแกน QR code ด้านล่างด้วยแอป Authenticator
+                  เพื่อตั้งค่าการยืนยันตัวตนสองชั้น
+                </AlertDescription>
               </Alert>
 
               <div className="flex justify-center p-4">
@@ -1354,7 +1628,11 @@ function SecuritySettings() {
                   รหัสยืนยัน
                 </Label>
                 <div className="flex gap-2">
-                  <Input id="verification-code" placeholder="กรอกรหัส 6 หลัก" maxLength={6} />
+                  <Input
+                    id="verification-code"
+                    placeholder="กรอกรหัส 6 หลัก"
+                    maxLength={6}
+                  />
                   <Button className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white">
                     <Check className="mr-2 h-4 w-4" />
                     ยืนยัน
@@ -1363,7 +1641,8 @@ function SecuritySettings() {
               </div>
 
               <p className="font-noto text-sm text-muted-foreground">
-                หากคุณสูญเสียการเข้าถึงแอป Authenticator คุณจะต้องติดต่อฝ่ายสนับสนุนเพื่อกู้คืนการเข้าถึงบัญชี
+                หากคุณสูญเสียการเข้าถึงแอป Authenticator
+                คุณจะต้องติดต่อฝ่ายสนับสนุนเพื่อกู้คืนการเข้าถึงบัญชี
               </p>
             </div>
           )}
@@ -1373,7 +1652,9 @@ function SecuritySettings() {
       <Card>
         <CardHeader>
           <CardTitle className="font-noto">เข้าถึง API</CardTitle>
-          <CardDescription className="font-noto">จัดการคีย์ API สำหรับการเข้าถึงระบบผ่านโปรแกรม</CardDescription>
+          <CardDescription className="font-noto">
+            จัดการคีย์ API สำหรับการเข้าถึงระบบผ่านโปรแกรม
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -1381,15 +1662,32 @@ function SecuritySettings() {
               คีย์ API
             </Label>
             <div className="flex gap-2">
-              <Input id="api-key" value={apiKey} readOnly className="font-mono" />
-              <Button variant="outline" size="icon" onClick={copyApiKey} className="font-noto">
+              <Input
+                id="api-key"
+                value={apiKey}
+                readOnly
+                className="font-mono"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={copyApiKey}
+                className="font-noto"
+              >
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            <p className="font-noto text-sm text-muted-foreground">คีย์นี้ให้สิทธิ์เข้าถึง API ทั้งหมด เก็บให้ปลอดภัยและห้ามแชร์</p>
+            <p className="font-noto text-sm text-muted-foreground">
+              คีย์นี้ให้สิทธิ์เข้าถึง API ทั้งหมด เก็บให้ปลอดภัยและห้ามแชร์
+            </p>
           </div>
 
-          <Button variant="outline" onClick={regenerateApiKey} disabled={isLoading} className="font-noto">
+          <Button
+            variant="outline"
+            onClick={regenerateApiKey}
+            disabled={isLoading}
+            className="font-noto"
+          >
             <RefreshCw className="mr-2 h-4 w-4" />
             สร้างคีย์ API ใหม่
           </Button>
@@ -1397,7 +1695,10 @@ function SecuritySettings() {
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>คำเตือน</AlertTitle>
-            <AlertDescription>การสร้างคีย์ API ใหม่จะทำให้คีย์เดิมใช้งานไม่ได้และอาจทำให้การเชื่อมต่อระบบล้มเหลว</AlertDescription>
+            <AlertDescription>
+              การสร้างคีย์ API
+              ใหม่จะทำให้คีย์เดิมใช้งานไม่ได้และอาจทำให้การเชื่อมต่อระบบล้มเหลว
+            </AlertDescription>
           </Alert>
         </CardContent>
       </Card>
@@ -1405,7 +1706,9 @@ function SecuritySettings() {
       <Card>
         <CardHeader>
           <CardTitle className="font-noto">เซสชันการเข้าสู่ระบบ</CardTitle>
-          <CardDescription className="font-noto">จัดการเซสชันที่กำลังใช้งาน</CardDescription>
+          <CardDescription className="font-noto">
+            จัดการเซสชันที่กำลังใช้งาน
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-4">
@@ -1413,18 +1716,32 @@ function SecuritySettings() {
               <div className="p-4 flex items-center justify-between">
                 <div>
                   <p className="font-noto font-medium">เซสชันปัจจุบัน</p>
-                  <p className="font-noto text-sm text-muted-foreground">Chrome บน Windows • กรุงเทพฯ ประเทศไทย</p>
-                  <p className="font-noto text-xs text-muted-foreground mt-1">เริ่มเมื่อ 2 ชั่วโมงที่แล้ว • IP: 192.168.1.1</p>
+                  <p className="font-noto text-sm text-muted-foreground">
+                    Chrome บน Windows • กรุงเทพฯ ประเทศไทย
+                  </p>
+                  <p className="font-noto text-xs text-muted-foreground mt-1">
+                    เริ่มเมื่อ 2 ชั่วโมงที่แล้ว • IP: 192.168.1.1
+                  </p>
                 </div>
-                <Badge className="font-noto bg-green-100 text-green-800">กำลังใช้งาน</Badge>
+                <Badge className="font-noto bg-green-100 text-green-800">
+                  กำลังใช้งาน
+                </Badge>
               </div>
               <div className="border-t p-4 flex items-center justify-between">
                 <div>
                   <p className="font-noto font-medium">แอปมือถือ</p>
-                  <p className="font-noto text-sm text-muted-foreground">iPhone • กรุงเทพฯ ประเทศไทย</p>
-                  <p className="font-noto text-xs text-muted-foreground mt-1">เริ่มเมื่อ 3 วันก่อน • IP: 192.168.2.2</p>
+                  <p className="font-noto text-sm text-muted-foreground">
+                    iPhone • กรุงเทพฯ ประเทศไทย
+                  </p>
+                  <p className="font-noto text-xs text-muted-foreground mt-1">
+                    เริ่มเมื่อ 3 วันก่อน • IP: 192.168.2.2
+                  </p>
                 </div>
-                <Button variant="outline" size="sm" className="font-noto text-red-500">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-noto text-red-500"
+                >
                   เพิกถอน
                 </Button>
               </div>
@@ -1437,7 +1754,7 @@ function SecuritySettings() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 // ===============================================================================
@@ -1445,7 +1762,7 @@ function SecuritySettings() {
 // ===============================================================================
 // ===== INTEGRATION SETTINGS COMPONENT =====
 function IntegrationSettings() {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const [integrations, setIntegrations] = useState<any[]>([
     {
@@ -1457,12 +1774,12 @@ function IntegrationSettings() {
       lastSync: "2023-05-01T10:30:00Z",
     },
     // ... other mock integrations
-  ])
+  ]);
 
   const toggleIntegration = async (id: string, enabled: boolean) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await simulateApiDelay(1000)
+      await simulateApiDelay(1000);
       setIntegrations(
         integrations.map((integration) =>
           integration.id === id
@@ -1470,59 +1787,75 @@ function IntegrationSettings() {
                 ...integration,
                 connected: enabled,
                 status: enabled ? "active" : "inactive",
-                lastSync: enabled ? new Date().toISOString() : integration.lastSync,
+                lastSync: enabled
+                  ? new Date().toISOString()
+                  : integration.lastSync,
               }
-            : integration,
-        ),
-      )
-      toast.success(`${enabled ? "เปิดใช้งาน" : "ปิดใช้งาน"} การเชื่อมต่อ ${integrations.find((i) => i.id === id)?.name}`)
+            : integration
+        )
+      );
+      toast.success(
+        `${enabled ? "เปิดใช้งาน" : "ปิดใช้งาน"} การเชื่อมต่อ ${
+          integrations.find((i) => i.id === id)?.name
+        }`
+      );
     } catch (error) {
-      toast.error(`${enabled ? "ไม่สามารถเปิดใช้งาน" : "ไม่สามารถปิดใช้งาน"} การเชื่อมต่อ`)
-      console.error(error)
+      toast.error(
+        `${enabled ? "ไม่สามารถเปิดใช้งาน" : "ไม่สามารถปิดใช้งาน"} การเชื่อมต่อ`
+      );
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const syncIntegration = async (id: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await simulateApiDelay(1500)
+      await simulateApiDelay(1500);
       setIntegrations(
         integrations.map((integration) =>
           integration.id === id
-            ? { ...integration, status: "active", lastSync: new Date().toISOString() }
-            : integration,
-        ),
-      )
-      toast.success(`ซิงค์ข้อมูลการเชื่อมต่อ ${integrations.find((i) => i.id === id)?.name}`)
+            ? {
+                ...integration,
+                status: "active",
+                lastSync: new Date().toISOString(),
+              }
+            : integration
+        )
+      );
+      toast.success(
+        `ซิงค์ข้อมูลการเชื่อมต่อ ${integrations.find((i) => i.id === id)?.name}`
+      );
     } catch (error) {
-      toast.error("ไม่สามารถซิงค์การเชื่อมต่อได้")
-      console.error(error)
+      toast.error("ไม่สามารถซิงค์การเชื่อมต่อได้");
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-100 text-green-800">Active</Badge>
+        return <Badge className="bg-green-100 text-green-800">Active</Badge>;
       case "inactive":
-        return <Badge className="bg-gray-100 text-gray-800">Inactive</Badge>
+        return <Badge className="bg-gray-100 text-gray-800">Inactive</Badge>;
       case "error":
-        return <Badge className="bg-red-100 text-red-800">Error</Badge>
+        return <Badge className="bg-red-100 text-red-800">Error</Badge>;
       default:
-        return <Badge>{status}</Badge>
+        return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="font-noto">การตั้งค่าอีเมล</CardTitle>
-          <CardDescription className="font-noto">ตั้งค่าบริการอีเมลสำหรับส่งการแจ้งเตือน</CardDescription>
+          <CardDescription className="font-noto">
+            ตั้งค่าบริการอีเมลสำหรับส่งการแจ้งเตือน
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1548,7 +1881,11 @@ function IntegrationSettings() {
               <Label htmlFor="smtp-password" className="font-noto">
                 รหัสผ่าน
               </Label>
-              <Input id="smtp-password" type="password" defaultValue="••••••••••••" />
+              <Input
+                id="smtp-password"
+                type="password"
+                defaultValue="••••••••••••"
+              />
             </div>
           </div>
           <div className="flex items-center justify-between pt-2">
@@ -1556,7 +1893,9 @@ function IntegrationSettings() {
               <Label htmlFor="smtp-ssl" className="font-noto">
                 ใช้งาน SSL/TLS
               </Label>
-              <p className="font-noto text-sm text-muted-foreground">เปิดใช้งานการเชื่อมต่อที่ปลอดภัยสำหรับการส่งอีเมล</p>
+              <p className="font-noto text-sm text-muted-foreground">
+                เปิดใช้งานการเชื่อมต่อที่ปลอดภัยสำหรับการส่งอีเมล
+              </p>
             </div>
             <Switch id="smtp-ssl" defaultChecked />
           </div>
@@ -1564,7 +1903,9 @@ function IntegrationSettings() {
             <Button variant="outline" className="font-noto">
               ทดสอบการเชื่อมต่อ
             </Button>
-            <Button className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white">บันทึกการตั้งค่าอีเมล</Button>
+            <Button className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white">
+              บันทึกการตั้งค่าอีเมล
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -1572,7 +1913,9 @@ function IntegrationSettings() {
       <Card>
         <CardHeader>
           <CardTitle className="font-noto">การเชื่อมต่อภายนอก</CardTitle>
-          <CardDescription className="font-noto">เชื่อมต่อกับบริการภายนอกสำหรับการแจ้งเตือนและแลกเปลี่ยนข้อมูล</CardDescription>
+          <CardDescription className="font-noto">
+            เชื่อมต่อกับบริการภายนอกสำหรับการแจ้งเตือนและแลกเปลี่ยนข้อมูล
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {integrations.map((integration) => (
@@ -1583,12 +1926,17 @@ function IntegrationSettings() {
               <div className="space-y-1 mb-4 md:mb-0">
                 <div className="flex items-center">
                   <h3 className="font-medium">{integration.name}</h3>
-                  <div className="ml-2">{getStatusBadge(integration.status)}</div>
+                  <div className="ml-2">
+                    {getStatusBadge(integration.status)}
+                  </div>
                 </div>
-                <p className="font-noto text-sm text-muted-foreground">{integration.description}</p>
+                <p className="font-noto text-sm text-muted-foreground">
+                  {integration.description}
+                </p>
                 {integration.lastSync && (
                   <p className="font-noto text-xs text-muted-foreground">
-                    ซิงค์ล่าสุด: {new Date(integration.lastSync).toLocaleString()}
+                    ซิงค์ล่าสุด:{" "}
+                    {new Date(integration.lastSync).toLocaleString()}
                   </p>
                 )}
               </div>
@@ -1605,14 +1953,21 @@ function IntegrationSettings() {
                     ซิงค์
                   </Button>
                 )}
-                <Button variant="outline" size="sm" disabled={isLoading} className="font-noto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoading}
+                  className="font-noto"
+                >
                   <ExternalLink className="mr-2 h-3 w-3" />
                   กำหนดค่า
                 </Button>
                 <Switch
                   id={`integration-${integration.id}`}
                   checked={integration.connected}
-                  onCheckedChange={(checked) => toggleIntegration(integration.id, checked)}
+                  onCheckedChange={(checked) =>
+                    toggleIntegration(integration.id, checked)
+                  }
                   disabled={isLoading}
                 />
               </div>
@@ -1628,59 +1983,85 @@ function IntegrationSettings() {
       <Card>
         <CardHeader>
           <CardTitle className="font-noto">การตั้งค่าเว็บฮุก</CardTitle>
-          <CardDescription className="font-noto">ตั้งค่าเว็บฮุกสำหรับการส่งการแจ้งเตือนแบบเรียลไทม์</CardDescription>
+          <CardDescription className="font-noto">
+            ตั้งค่าเว็บฮุกสำหรับการส่งการแจ้งเตือนแบบเรียลไทม์
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>สำคัญ</AlertTitle>
             <AlertDescription>
-              เว็บฮุกช่วยให้ระบบภายนอกรับข้อมูลเรียลไทม์จากระบบแจ้งเตือน โปรดตรวจสอบให้ endpoint ปลอดภัยและรองรับปริมาณคำขอที่คาดว่าจะรับ
+              เว็บฮุกช่วยให้ระบบภายนอกรับข้อมูลเรียลไทม์จากระบบแจ้งเตือน
+              โปรดตรวจสอบให้ endpoint ปลอดภัยและรองรับปริมาณคำขอที่คาดว่าจะรับ
             </AlertDescription>
           </Alert>
           <div className="space-y-2">
             <Label htmlFor="webhook-url" className="font-noto">
               URL เว็บฮุก
             </Label>
-            <Input id="webhook-url" defaultValue="https://api.example.com/webhooks/notifications" />
-            <p className="font-noto text-xs text-muted-foreground">URL ที่จะรับคำขอ POST สำหรับเว็บฮุก</p>
+            <Input
+              id="webhook-url"
+              defaultValue="https://api.example.com/webhooks/notifications"
+            />
+            <p className="font-noto text-xs text-muted-foreground">
+              URL ที่จะรับคำขอ POST สำหรับเว็บฮุก
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="webhook-secret" className="font-noto">
               ความลับของเว็บฮุก
             </Label>
             <div className="flex gap-2">
-              <Input id="webhook-secret" type="password" defaultValue="whsec_abcdefghijklmnopqrstuvwxyz" />
+              <Input
+                id="webhook-secret"
+                type="password"
+                defaultValue="whsec_abcdefghijklmnopqrstuvwxyz"
+              />
               <Button variant="outline" size="sm" className="font-noto">
                 สร้างใหม่
               </Button>
             </div>
-            <p className="font-noto text-xs text-muted-foreground">ใช้เพื่อยืนยันว่าคำขอมาจากระบบแจ้งเตือน SCG</p>
+            <p className="font-noto text-xs text-muted-foreground">
+              ใช้เพื่อยืนยันว่าคำขอมาจากระบบแจ้งเตือน SCG
+            </p>
           </div>
           <div className="space-y-2">
             <Label className="font-noto">ประเภทเหตุการณ์</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div className="flex items-center space-x-2">
                 <Switch id="event-notification-created" defaultChecked />
-                <Label htmlFor="event-notification-created" className="font-noto">
+                <Label
+                  htmlFor="event-notification-created"
+                  className="font-noto"
+                >
                   สร้างการแจ้งเตือน
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch id="event-notification-updated" defaultChecked />
-                <Label htmlFor="event-notification-updated" className="font-noto">
+                <Label
+                  htmlFor="event-notification-updated"
+                  className="font-noto"
+                >
                   อัปเดตการแจ้งเตือน
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch id="event-notification-approved" defaultChecked />
-                <Label htmlFor="event-notification-approved" className="font-noto">
+                <Label
+                  htmlFor="event-notification-approved"
+                  className="font-noto"
+                >
                   อนุมัติการแจ้งเตือน
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch id="event-notification-rejected" defaultChecked />
-                <Label htmlFor="event-notification-rejected" className="font-noto">
+                <Label
+                  htmlFor="event-notification-rejected"
+                  className="font-noto"
+                >
                   ปฏิเสธการแจ้งเตือน
                 </Label>
               </div>
@@ -1690,12 +2071,14 @@ function IntegrationSettings() {
             <Button variant="outline" className="font-noto">
               ทดสอบเว็บฮุก
             </Button>
-            <Button className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white">บันทึกการตั้งค่าเว็บฮุก</Button>
+            <Button className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white">
+              บันทึกการตั้งค่าเว็บฮุก
+            </Button>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 // ===============================================================================
@@ -1703,75 +2086,77 @@ function IntegrationSettings() {
 // ===============================================================================
 // ===== DATA MANAGEMENT COMPONENT =====
 function DataManagement() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [exportFormat, setExportFormat] = useState("json")
-  const [exportProgress, setExportProgress] = useState(0)
-  const [importProgress, setImportProgress] = useState(0)
-  const [isExporting, setIsExporting] = useState(false)
-  const [isImporting, setIsImporting] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [exportFormat, setExportFormat] = useState("json");
+  const [exportProgress, setExportProgress] = useState(0);
+  const [importProgress, setImportProgress] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   const handleExport = async () => {
-    setIsExporting(true)
-    setExportProgress(0)
+    setIsExporting(true);
+    setExportProgress(0);
 
     try {
       for (let i = 0; i <= 100; i += 10) {
-        setExportProgress(i)
-        await simulateApiDelay(300)
+        setExportProgress(i);
+        await simulateApiDelay(300);
       }
 
-      toast.success("ส่งออกข้อมูลสำเร็จ")
+      toast.success("ส่งออกข้อมูลสำเร็จ");
 
       setTimeout(() => {
-        const link = document.createElement("a")
-        link.href = "#"
-        link.download = `scg-notifications-export-${new Date().toISOString().split("T")[0]}.${exportFormat}`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      }, 500)
+        const link = document.createElement("a");
+        link.href = "#";
+        link.download = `scg-notifications-export-${
+          new Date().toISOString().split("T")[0]
+        }.${exportFormat}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }, 500);
     } catch (error) {
-      toast.error("ไม่สามารถส่งออกข้อมูลได้")
-      console.error(error)
+      toast.error("ไม่สามารถส่งออกข้อมูลได้");
+      console.error(error);
     } finally {
-      setIsExporting(false)
-      setExportProgress(0)
+      setIsExporting(false);
+      setExportProgress(0);
     }
-  }
+  };
 
   const handleImport = async () => {
-    setIsImporting(true)
-    setImportProgress(0)
+    setIsImporting(true);
+    setImportProgress(0);
 
     try {
       for (let i = 0; i <= 100; i += 5) {
-        setImportProgress(i)
-        await simulateApiDelay(200)
+        setImportProgress(i);
+        await simulateApiDelay(200);
       }
 
-      toast.success("นำเข้าข้อมูลสำเร็จ")
+      toast.success("นำเข้าข้อมูลสำเร็จ");
     } catch (error) {
-      toast.error("ไม่สามารถนำเข้าข้อมูลได้")
-      console.error(error)
+      toast.error("ไม่สามารถนำเข้าข้อมูลได้");
+      console.error(error);
     } finally {
-      setIsImporting(false)
-      setImportProgress(0)
+      setIsImporting(false);
+      setImportProgress(0);
     }
-  }
+  };
 
   const handlePurgeData = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      await simulateApiDelay(2000)
-      toast.success("ล้างข้อมูลสำเร็จ")
+      await simulateApiDelay(2000);
+      toast.success("ล้างข้อมูลสำเร็จ");
     } catch (error) {
-      toast.error("ไม่สามารถล้างข้อมูลได้")
-      console.error(error)
+      toast.error("ไม่สามารถล้างข้อมูลได้");
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -1792,7 +2177,9 @@ function DataManagement() {
           <Card>
             <CardHeader>
               <CardTitle className="font-noto">ส่งออกข้อมูล</CardTitle>
-              <CardDescription className="font-noto">ส่งออกข้อมูลแจ้งเตือนเพื่อสำรองหรือย้ายระบบ</CardDescription>
+              <CardDescription className="font-noto">
+                ส่งออกข้อมูลแจ้งเตือนเพื่อสำรองหรือย้ายระบบ
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -1851,7 +2238,10 @@ function DataManagement() {
                 <Label className="font-noto">ช่วงวันที่</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label htmlFor="export-start-date" className="font-noto text-xs">
+                    <Label
+                      htmlFor="export-start-date"
+                      className="font-noto text-xs"
+                    >
                       วันที่เริ่มต้น
                     </Label>
                     <div className="relative">
@@ -1860,12 +2250,19 @@ function DataManagement() {
                         id="export-start-date"
                         type="date"
                         className="pl-8"
-                        defaultValue={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
+                        defaultValue={
+                          new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+                            .toISOString()
+                            .split("T")[0]
+                        }
                       />
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="export-end-date" className="font-noto text-xs">
+                    <Label
+                      htmlFor="export-end-date"
+                      className="font-noto text-xs"
+                    >
                       วันที่สิ้นสุด
                     </Label>
                     <div className="relative">
@@ -1908,14 +2305,17 @@ function DataManagement() {
           <Card>
             <CardHeader>
               <CardTitle className="font-noto">นำเข้าข้อมูล</CardTitle>
-              <CardDescription className="font-noto">นำเข้าข้อมูลแจ้งเตือนจากไฟล์</CardDescription>
+              <CardDescription className="font-noto">
+                นำเข้าข้อมูลแจ้งเตือนจากไฟล์
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle className="font-noto">สำคัญ</AlertTitle>
                 <AlertDescription className="font-noto">
-                  การนำเข้าข้อมูลจะผสานกับข้อมูลเดิม โปรดตรวจสอบว่าไฟล์ของคุณอยู่ในรูปแบบที่ถูกต้อง
+                  การนำเข้าข้อมูลจะผสานกับข้อมูลเดิม
+                  โปรดตรวจสอบว่าไฟล์ของคุณอยู่ในรูปแบบที่ถูกต้อง
                 </AlertDescription>
               </Alert>
 
@@ -1924,7 +2324,9 @@ function DataManagement() {
                   ไฟล์นำเข้า
                 </Label>
                 <Input id="import-file" type="file" />
-                <p className="font-noto text-xs text-muted-foreground">รองรับ: JSON, CSV, XLSX</p>
+                <p className="font-noto text-xs text-muted-foreground">
+                  รองรับ: JSON, CSV, XLSX
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -1972,14 +2374,17 @@ function DataManagement() {
           <Card>
             <CardHeader>
               <CardTitle className="font-noto">ล้างข้อมูล</CardTitle>
-              <CardDescription className="font-noto">ลบข้อมูลเก่าหรือไม่จำเป็นถาวร</CardDescription>
+              <CardDescription className="font-noto">
+                ลบข้อมูลเก่าหรือไม่จำเป็นถาวร
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle className="font-noto">คำเตือน</AlertTitle>
                 <AlertDescription className="font-noto">
-                  การล้างข้อมูลไม่สามารถกู้คืนได้ ควรส่งออกข้อมูลสำรองก่อนดำเนินการ
+                  การล้างข้อมูลไม่สามารถกู้คืนได้
+                  ควรส่งออกข้อมูลสำรองก่อนดำเนินการ
                 </AlertDescription>
               </Alert>
 
@@ -2043,7 +2448,12 @@ function DataManagement() {
               </div>
             </CardContent>
             <CardFooter className="flex justify-end">
-              <Button variant="destructive" onClick={handlePurgeData} disabled={isLoading} className="font-noto">
+              <Button
+                variant="destructive"
+                onClick={handlePurgeData}
+                disabled={isLoading}
+                className="font-noto"
+              >
                 <Trash2 className="mr-2 h-4 w-4" />
                 {isLoading ? "กำลังล้าง..." : "ล้างข้อมูล"}
               </Button>
@@ -2052,5 +2462,5 @@ function DataManagement() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

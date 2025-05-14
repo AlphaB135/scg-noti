@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Bell,
   Calendar,
@@ -18,15 +18,26 @@ import {
   RefreshCw,
   Edit,
   ArrowRight,
-} from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // ประเภทของการดำเนินการ
 type ActionType =
@@ -35,43 +46,47 @@ type ActionType =
   | "task_updated"
   | "task_postponed"
   | "task_reopened"
-  | "task_deleted"
+  | "task_deleted";
 
 // ข้อมูลประวัติการดำเนินการ
 interface AuditLog {
-  id: string
-  taskId: number
-  taskTitle: string
-  actionType: ActionType
-  actionBy: string
-  actionDate: string
-  details?: string
-  oldValue?: string
-  newValue?: string
+  id: string;
+  taskId: number;
+  taskTitle: string;
+  actionType: ActionType;
+  actionBy: string;
+  actionDate: string;
+  details?: string;
+  oldValue?: string;
+  newValue?: string;
 }
 
 export default function UserActivityLogsPage() {
   // ===== STATE MANAGEMENT =====
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [currentTime, setCurrentTime] = useState(new Date())
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filterType, setFilterType] = useState<string>("all")
-  const [filterDate, setFilterDate] = useState<string>("all")
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
-  const [tasks, setTasks] = useState([])
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<string>("all");
+  const [filterDate, setFilterDate] = useState<string>("all");
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [tasks, setTasks] = useState([]);
   const [currentUser, setCurrentUser] = useState({
     id: "user1",
     name: "Shogun",
     role: "ผู้จัดการโครงการ",
     avatar: "/placeholder.svg?height=40&width=40",
     department: "Developer",
-  })
+  });
 
   // ===== MOCK DATA LOADING =====
   useEffect(() => {
-    const todayStr = new Date().toISOString().split("T")[0]
-    const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split("T")[0]
-    const twoDaysAgoStr = new Date(Date.now() - 86400000 * 2).toISOString().split("T")[0]
+    const todayStr = new Date().toISOString().split("T")[0];
+    const yesterdayStr = new Date(Date.now() - 86400000)
+      .toISOString()
+      .split("T")[0];
+    const twoDaysAgoStr = new Date(Date.now() - 86400000 * 2)
+      .toISOString()
+      .split("T")[0];
 
     // โหลดข้อมูลงานตัวอย่าง (เหมือนกับหน้าหลัก)
     const mockTasks = [
@@ -159,9 +174,9 @@ export default function UserActivityLogsPage() {
         priority: "overdue",
         done: false,
       },
-    ]
+    ];
 
-    setTasks(mockTasks)
+    setTasks(mockTasks);
 
     // สร้างข้อมูลประวัติการดำเนินการตัวอย่าง - เฉพาะของผู้ใช้ปัจจุบัน (สมชาย ใจดี)
     const mockAuditLogs: AuditLog[] = [
@@ -235,159 +250,167 @@ export default function UserActivityLogsPage() {
         actionDate: `${todayStr}T08:30:00`,
         details: "เปิดงานใหม่เนื่องจากต้องสั่งซื้อเพิ่มเติม",
       },
-    ]
+    ];
 
     // เรียงลำดับตามวันที่ล่าสุด
-    mockAuditLogs.sort((a, b) => new Date(b.actionDate).getTime() - new Date(a.actionDate).getTime())
+    mockAuditLogs.sort(
+      (a, b) =>
+        new Date(b.actionDate).getTime() - new Date(a.actionDate).getTime()
+    );
 
-    setAuditLogs(mockAuditLogs)
-  }, [])
+    setAuditLogs(mockAuditLogs);
+  }, []);
 
   // อัพเดทเวลาทุกวินาที
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
+      setCurrentTime(new Date());
+    }, 1000);
 
-    return () => clearInterval(timer)
-  }, [])
+    return () => clearInterval(timer);
+  }, []);
 
   // ===== HELPER FUNCTIONS =====
   // แปลงวันที่เป็นรูปแบบที่อ่านง่าย
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleDateString("th-TH", {
       year: "numeric",
       month: "long",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    })
-  }
+    });
+  };
 
   // แปลงวันที่แบบสั้น
   const formatShortDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleDateString("th-TH", {
       day: "numeric",
       month: "long",
       year: "numeric",
-    })
-  }
+    });
+  };
 
   // แปลงประเภทการดำเนินการเป็นภาษาไทย
   const getActionTypeText = (actionType: ActionType) => {
     switch (actionType) {
       case "task_created":
-        return "สร้างงานใหม่"
+        return "สร้างงานใหม่";
       case "task_completed":
-        return "ทำงานเสร็จแล้ว"
+        return "ทำงานเสร็จแล้ว";
       case "task_updated":
-        return "แก้ไขงาน"
+        return "แก้ไขงาน";
       case "task_postponed":
-        return "เลื่อนกำหนดส่ง"
+        return "เลื่อนกำหนดส่ง";
       case "task_reopened":
-        return "เปิดงานใหม่"
+        return "เปิดงานใหม่";
       case "task_deleted":
-        return "ลบงาน"
+        return "ลบงาน";
       default:
-        return actionType
+        return actionType;
     }
-  }
+  };
 
   // แปลงประเภทการดำเนินการเป็นสี
   const getActionTypeColor = (actionType: ActionType) => {
     switch (actionType) {
       case "task_created":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "task_completed":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "task_updated":
-        return "bg-purple-100 text-purple-800"
+        return "bg-purple-100 text-purple-800";
       case "task_postponed":
-        return "bg-orange-100 text-orange-800"
+        return "bg-orange-100 text-orange-800";
       case "task_reopened":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "task_deleted":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   // แปลงประเภทการดำเนินการเป็นไอคอน
   const getActionTypeIcon = (actionType: ActionType) => {
     switch (actionType) {
       case "task_created":
-        return <FileText className="h-4 w-4" />
+        return <FileText className="h-4 w-4" />;
       case "task_completed":
-        return <CheckCircle className="h-4 w-4" />
+        return <CheckCircle className="h-4 w-4" />;
       case "task_updated":
-        return <Edit className="h-4 w-4" />
+        return <Edit className="h-4 w-4" />;
       case "task_postponed":
-        return <ArrowRight className="h-4 w-4" />
+        return <ArrowRight className="h-4 w-4" />;
       case "task_reopened":
-        return <RefreshCw className="h-4 w-4" />
+        return <RefreshCw className="h-4 w-4" />;
       case "task_deleted":
-        return <AlertTriangle className="h-4 w-4" />
+        return <AlertTriangle className="h-4 w-4" />;
       default:
-        return <Clock className="h-4 w-4" />
+        return <Clock className="h-4 w-4" />;
     }
-  }
+  };
 
   // กรองประวัติการดำเนินการตามเงื่อนไข
   const filteredLogs = auditLogs.filter((log) => {
     // กรองตามคำค้นหา
     const matchesSearch =
       log.taskTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (log.details && log.details.toLowerCase().includes(searchQuery.toLowerCase()))
+      (log.details &&
+        log.details.toLowerCase().includes(searchQuery.toLowerCase()));
 
     // กรองตามประเภทการดำเนินการ
-    const matchesType = filterType === "all" || log.actionType === filterType
+    const matchesType = filterType === "all" || log.actionType === filterType;
 
     // กรองตามวันที่
-    let matchesDate = true
+    let matchesDate = true;
     if (filterDate === "today") {
-      const today = new Date().toISOString().split("T")[0]
-      matchesDate = log.actionDate.startsWith(today)
+      const today = new Date().toISOString().split("T")[0];
+      matchesDate = log.actionDate.startsWith(today);
     } else if (filterDate === "yesterday") {
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0]
-      matchesDate = log.actionDate.startsWith(yesterday)
+      const yesterday = new Date(Date.now() - 86400000)
+        .toISOString()
+        .split("T")[0];
+      matchesDate = log.actionDate.startsWith(yesterday);
     } else if (filterDate === "last7days") {
-      const sevenDaysAgo = new Date(Date.now() - 86400000 * 7)
-      matchesDate = new Date(log.actionDate) >= sevenDaysAgo
+      const sevenDaysAgo = new Date(Date.now() - 86400000 * 7);
+      matchesDate = new Date(log.actionDate) >= sevenDaysAgo;
     }
 
-    return matchesSearch && matchesType && matchesDate
-  })
+    return matchesSearch && matchesType && matchesDate;
+  });
 
   // จัดกลุ่มประวัติการดำเนินการตามวันที่
-  const groupedLogs: { [date: string]: AuditLog[] } = {}
+  const groupedLogs: { [date: string]: AuditLog[] } = {};
   filteredLogs.forEach((log) => {
-    const date = log.actionDate.split("T")[0]
+    const date = log.actionDate.split("T")[0];
     if (!groupedLogs[date]) {
-      groupedLogs[date] = []
+      groupedLogs[date] = [];
     }
-    groupedLogs[date].push(log)
-  })
+    groupedLogs[date].push(log);
+  });
 
   // แปลงวันที่เป็นรูปแบบที่อ่านง่ายสำหรับหัวข้อกลุ่ม
   const formatGroupDate = (dateString: string) => {
-    const today = new Date().toISOString().split("T")[0]
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0]
+    const today = new Date().toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - 86400000)
+      .toISOString()
+      .split("T")[0];
 
     if (dateString === today) {
-      return "วันนี้"
+      return "วันนี้";
     } else if (dateString === yesterday) {
-      return "เมื่อวาน"
+      return "เมื่อวาน";
     } else {
       return new Date(dateString).toLocaleDateString("th-TH", {
         year: "numeric",
         month: "long",
         day: "numeric",
-      })
+      });
     }
-  }
+  };
 
   // ===== SIDEBAR MENU ITEMS =====
   // แสดงรายการเมนูในแถบด้านข้าง
@@ -399,13 +422,22 @@ export default function UserActivityLogsPage() {
           ระบบการแจ้งเตือน
         </summary>
         <div className="ml-4 mt-2 space-y-1">
-          <Link to="/dashboard" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+          <Link
+            to="/dashboard"
+            className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+          >
             เตือนความจำ
           </Link>
-          <Link to="/manage" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+          <Link
+            to="/manage"
+            className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+          >
             ตั้งค่าการแจ้งเตือน
           </Link>
-          <Link to="/auditperson" className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/10 font-bold">
+          <Link
+            to="/auditperson"
+            className="flex items-center gap-3 rounded-md px-3 py-2 bg-white/10 font-bold"
+          >
             ประวัติการดำเนินการ
           </Link>
         </div>
@@ -417,18 +449,30 @@ export default function UserActivityLogsPage() {
           แอดมิน
         </summary>
         <div className="ml-4 mt-2 space-y-1">
-          <Link to="/audit-logs" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+          <Link
+            to="/audit-logs"
+            className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+          >
             ประวัติการดำเนินการพนักงาน
+          </Link>
+          <Link
+            to="/addemployee"
+            className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors cursor-pointer"
+          >
+            เพิ่มพนักงานใหม่
           </Link>
         </div>
       </details>
 
-      <Link to="/settings" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+      <Link
+        to="/settings"
+        className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+      >
         <Settings className="h-5 w-5" />
         การตั้งค่า
       </Link>
     </>
-  )
+  );
 
   return (
     <div className="flex min-h-screen bg-white font-noto">
@@ -452,10 +496,16 @@ export default function UserActivityLogsPage() {
               ระบบการแจ้งเตือน
             </summary>
             <div className="ml-4 mt-2 space-y-1">
-              <Link to="/dashboard" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+              <Link
+                to="/dashboard"
+                className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+              >
                 เตือนความจำ
               </Link>
-              <Link to="/manage" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+              <Link
+                to="/manage"
+                className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+              >
                 ตั้งค่าการแจ้งเตือน
               </Link>
               <Link
@@ -473,8 +523,17 @@ export default function UserActivityLogsPage() {
               แอดมิน
             </summary>
             <div className="ml-4 mt-2 space-y-1">
-              <Link to="/audit-logs" className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors">
+              <Link
+                to="/audit-logs"
+                className="block rounded-md px-3 py-2 hover:bg-white/5 transition-colors"
+              >
                 ประวัติการดำเนินการพนักงาน
+              </Link>
+              <Link
+                to="/addemployee"
+                className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors cursor-pointer"
+              >
+                เพิ่มพนักงานใหม่
               </Link>
             </div>
           </details>
@@ -502,12 +561,25 @@ export default function UserActivityLogsPage() {
           <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-semibold">
             SG
           </div>
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="focus:outline-none">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="focus:outline-none"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                d={
+                  isMenuOpen
+                    ? "M6 18L18 6M6 6l12 12"
+                    : "M4 6h16M4 12h16M4 18h16"
+                }
               />
             </svg>
           </button>
@@ -534,8 +606,12 @@ export default function UserActivityLogsPage() {
         <header className="hidden md:block fixed top-0 left-0 right-0 z-40 bg-white border-b shadow-sm">
           <div className="flex items-center justify-between px-6 py-4 ml-64">
             <div>
-              <h1 className="text-xl font-bold text-gray-800">ประวัติการดำเนินการของคุณ</h1>
-              <p className="text-sm text-gray-500">ติดตามการเปลี่ยนแปลงและการดำเนินการของงานที่คุณทำ</p>
+              <h1 className="text-xl font-bold text-gray-800">
+                ประวัติการดำเนินการของคุณ
+              </h1>
+              <p className="text-sm text-gray-500">
+                ติดตามการเปลี่ยนแปลงและการดำเนินการของงานที่คุณทำ
+              </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right text-sm text-gray-600">
@@ -570,8 +646,12 @@ export default function UserActivityLogsPage() {
           <div className="flex flex-col px-4 py-3">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-lg font-bold text-gray-800">ประวัติการดำเนินการของคุณ</h1>
-                <p className="text-xs text-gray-500">ติดตามการเปลี่ยนแปลงและการดำเนินการของงานที่คุณทำ</p>
+                <h1 className="text-lg font-bold text-gray-800">
+                  ประวัติการดำเนินการของคุณ
+                </h1>
+                <p className="text-xs text-gray-500">
+                  ติดตามการเปลี่ยนแปลงและการดำเนินการของงานที่คุณทำ
+                </p>
               </div>
               <div className="text-right text-sm text-gray-600">
                 <div className="font-bold text-sm">
@@ -592,7 +672,10 @@ export default function UserActivityLogsPage() {
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-center gap-4">
               <Avatar className="h-16 w-16 border-2 border-red-100">
-                <AvatarImage src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.name} />
+                <AvatarImage
+                  src={currentUser.avatar || "/placeholder.svg"}
+                  alt={currentUser.name}
+                />
                 <AvatarFallback className="bg-red-100 text-red-800 text-lg">
                   {currentUser.name
                     .split(" ")
@@ -601,7 +684,9 @@ export default function UserActivityLogsPage() {
                 </AvatarFallback>
               </Avatar>
               <div className="text-center md:text-left">
-                <h2 className="text-xl font-bold text-gray-800">{currentUser.name}</h2>
+                <h2 className="text-xl font-bold text-gray-800">
+                  {currentUser.name}
+                </h2>
                 <p className="text-gray-500">
                   {currentUser.role} • {currentUser.department}
                 </p>
@@ -609,18 +694,28 @@ export default function UserActivityLogsPage() {
               <div className="flex-1"></div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
                 <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-gray-800">{auditLogs.length}</p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {auditLogs.length}
+                  </p>
                   <p className="text-sm text-gray-500">การดำเนินการทั้งหมด</p>
                 </div>
                 <div className="p-3 bg-green-50 rounded-lg">
                   <p className="text-2xl font-bold text-green-700">
-                    {auditLogs.filter((log) => log.actionType === "task_completed").length}
+                    {
+                      auditLogs.filter(
+                        (log) => log.actionType === "task_completed"
+                      ).length
+                    }
                   </p>
                   <p className="text-sm text-gray-500">งานที่เสร็จสิ้น</p>
                 </div>
                 <div className="p-3 bg-blue-50 rounded-lg hidden md:block">
                   <p className="text-2xl font-bold text-blue-700">
-                    {auditLogs.filter((log) => log.actionType === "task_created").length}
+                    {
+                      auditLogs.filter(
+                        (log) => log.actionType === "task_created"
+                      ).length
+                    }
                   </p>
                   <p className="text-sm text-gray-500">งานที่สร้าง</p>
                 </div>
@@ -660,9 +755,13 @@ export default function UserActivityLogsPage() {
                   <SelectContent>
                     <SelectItem value="all">ทั้งหมด</SelectItem>
                     <SelectItem value="task_created">สร้างงานใหม่</SelectItem>
-                    <SelectItem value="task_completed">ทำงานเสร็จแล้ว</SelectItem>
+                    <SelectItem value="task_completed">
+                      ทำงานเสร็จแล้ว
+                    </SelectItem>
                     <SelectItem value="task_updated">แก้ไขงาน</SelectItem>
-                    <SelectItem value="task_postponed">เลื่อนกำหนดส่ง</SelectItem>
+                    <SelectItem value="task_postponed">
+                      เลื่อนกำหนดส่ง
+                    </SelectItem>
                     <SelectItem value="task_reopened">เปิดงานใหม่</SelectItem>
                     <SelectItem value="task_deleted">ลบงาน</SelectItem>
                   </SelectContent>
@@ -688,7 +787,9 @@ export default function UserActivityLogsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base font-medium text-gray-700">สร้างงานใหม่</CardTitle>
+                <CardTitle className="text-base font-medium text-gray-700">
+                  สร้างงานใหม่
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center">
@@ -697,7 +798,11 @@ export default function UserActivityLogsPage() {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-gray-800">
-                      {auditLogs.filter((log) => log.actionType === "task_created").length}
+                      {
+                        auditLogs.filter(
+                          (log) => log.actionType === "task_created"
+                        ).length
+                      }
                     </p>
                     <p className="text-sm text-gray-500">รายการ</p>
                   </div>
@@ -707,7 +812,9 @@ export default function UserActivityLogsPage() {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base font-medium text-gray-700">งานที่เสร็จสิ้น</CardTitle>
+                <CardTitle className="text-base font-medium text-gray-700">
+                  งานที่เสร็จสิ้น
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center">
@@ -716,7 +823,11 @@ export default function UserActivityLogsPage() {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-gray-800">
-                      {auditLogs.filter((log) => log.actionType === "task_completed").length}
+                      {
+                        auditLogs.filter(
+                          (log) => log.actionType === "task_completed"
+                        ).length
+                      }
                     </p>
                     <p className="text-sm text-gray-500">รายการ</p>
                   </div>
@@ -726,7 +837,9 @@ export default function UserActivityLogsPage() {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base font-medium text-gray-700">งานที่แก้ไข</CardTitle>
+                <CardTitle className="text-base font-medium text-gray-700">
+                  งานที่แก้ไข
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center">
@@ -735,7 +848,11 @@ export default function UserActivityLogsPage() {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-gray-800">
-                      {auditLogs.filter((log) => log.actionType === "task_updated").length}
+                      {
+                        auditLogs.filter(
+                          (log) => log.actionType === "task_updated"
+                        ).length
+                      }
                     </p>
                     <p className="text-sm text-gray-500">รายการ</p>
                   </div>
@@ -745,7 +862,9 @@ export default function UserActivityLogsPage() {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base font-medium text-gray-700">งานที่เลื่อนออกไป</CardTitle>
+                <CardTitle className="text-base font-medium text-gray-700">
+                  งานที่เลื่อนออกไป
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center">
@@ -754,7 +873,11 @@ export default function UserActivityLogsPage() {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-gray-800">
-                      {auditLogs.filter((log) => log.actionType === "task_postponed").length}
+                      {
+                        auditLogs.filter(
+                          (log) => log.actionType === "task_postponed"
+                        ).length
+                      }
                     </p>
                     <p className="text-sm text-gray-500">รายการ</p>
                   </div>
@@ -799,14 +922,21 @@ export default function UserActivityLogsPage() {
                               <CardContent className="p-4">
                                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
                                   <div className="flex items-center gap-2 mb-2 md:mb-0">
-                                    <Badge className={getActionTypeColor(log.actionType)} variant="secondary">
+                                    <Badge
+                                      className={getActionTypeColor(
+                                        log.actionType
+                                      )}
+                                      variant="secondary"
+                                    >
                                       <span className="flex items-center gap-1">
                                         {getActionTypeIcon(log.actionType)}
                                         {getActionTypeText(log.actionType)}
                                       </span>
                                     </Badge>
                                     <span className="text-sm text-gray-500">
-                                      {new Date(log.actionDate).toLocaleTimeString("th-TH", {
+                                      {new Date(
+                                        log.actionDate
+                                      ).toLocaleTimeString("th-TH", {
                                         hour: "2-digit",
                                         minute: "2-digit",
                                       })}
@@ -814,21 +944,31 @@ export default function UserActivityLogsPage() {
                                   </div>
                                 </div>
 
-                                <h4 className="text-base font-semibold text-gray-800 mb-1">{log.taskTitle}</h4>
+                                <h4 className="text-base font-semibold text-gray-800 mb-1">
+                                  {log.taskTitle}
+                                </h4>
 
-                                <p className="text-sm text-gray-600">{log.details}</p>
+                                <p className="text-sm text-gray-600">
+                                  {log.details}
+                                </p>
 
                                 {/* แสดงค่าเก่าและค่าใหม่ถ้ามี */}
                                 {(log.oldValue || log.newValue) && (
                                   <div className="mt-2 text-sm">
                                     {log.oldValue && (
                                       <div className="text-gray-500">
-                                        <span className="font-medium">ค่าเดิม:</span> {log.oldValue}
+                                        <span className="font-medium">
+                                          ค่าเดิม:
+                                        </span>{" "}
+                                        {log.oldValue}
                                       </div>
                                     )}
                                     {log.newValue && (
                                       <div className="text-gray-500">
-                                        <span className="font-medium">ค่าใหม่:</span> {log.newValue}
+                                        <span className="font-medium">
+                                          ค่าใหม่:
+                                        </span>{" "}
+                                        {log.newValue}
                                       </div>
                                     )}
                                   </div>
@@ -845,8 +985,12 @@ export default function UserActivityLogsPage() {
                   <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-gray-200">
                     <History className="h-8 w-8 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-700 mb-1">ไม่พบประวัติการดำเนินการ</h3>
-                  <p className="text-gray-500">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหาและการกรอง</p>
+                  <h3 className="text-lg font-medium text-gray-700 mb-1">
+                    ไม่พบประวัติการดำเนินการ
+                  </h3>
+                  <p className="text-gray-500">
+                    ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหาและการกรอง
+                  </p>
                 </div>
               )}
             </TabsContent>
@@ -880,16 +1024,23 @@ export default function UserActivityLogsPage() {
                               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                                 {formatDate(log.actionDate)}
                               </td>
-                              <td className="px-4 py-3 text-sm font-medium text-gray-900">{log.taskTitle}</td>
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                {log.taskTitle}
+                              </td>
                               <td className="px-4 py-3">
-                                <Badge className={getActionTypeColor(log.actionType)} variant="secondary">
+                                <Badge
+                                  className={getActionTypeColor(log.actionType)}
+                                  variant="secondary"
+                                >
                                   <span className="flex items-center gap-1">
                                     {getActionTypeIcon(log.actionType)}
                                     {getActionTypeText(log.actionType)}
                                   </span>
                                 </Badge>
                               </td>
-                              <td className="px-4 py-3 text-sm text-gray-500">{log.details}</td>
+                              <td className="px-4 py-3 text-sm text-gray-500">
+                                {log.details}
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -900,34 +1051,20 @@ export default function UserActivityLogsPage() {
                       <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-gray-100">
                         <History className="h-8 w-8 text-gray-400" />
                       </div>
-                      <h3 className="text-lg font-medium text-gray-700 mb-1">ไม่พบประวัติการดำเนินการ</h3>
-                      <p className="text-gray-500">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหาและการกรอง</p>
+                      <h3 className="text-lg font-medium text-gray-700 mb-1">
+                        ไม่พบประวัติการดำเนินการ
+                      </h3>
+                      <p className="text-gray-500">
+                        ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหาและการกรอง
+                      </p>
                     </div>
                   )}
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
-
-          {/* ===== EXPORT BUTTONS ===== */}
-          <div className="flex justify-end gap-2 mb-8">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <span>ตัวเลือกเพิ่มเติม</span>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>ดาวน์โหลดเป็น Excel</DropdownMenuItem>
-                <DropdownMenuItem>ดาวน์โหลดเป็น PDF</DropdownMenuItem>
-                <DropdownMenuItem>พิมพ์รายงาน</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
       </main>
     </div>
-  )
+  );
 }

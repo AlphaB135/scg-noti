@@ -66,6 +66,25 @@ export function MonthCalendar({ tasks, onMonthChange }) {
     window.dispatchEvent(event)
   }, [month, year, onMonthChange])
 
+  // ฟังก์ชันอัพเดทความสำคัญของงานตามวันที่กำหนด
+  const updateTaskPriority = (task) => {
+    if (task.done) return task // ถ้างานเสร็จแล้ว ไม่ต้องอัพเดทสถานะ
+
+    const todayDate = new Date()
+    const due = new Date(task.dueDate)
+
+    // เคลียร์เวลาทั้งคู่เพื่อเปรียบเทียบเฉพาะวัน
+    todayDate.setHours(0, 0, 0, 0)
+    due.setHours(0, 0, 0, 0)
+
+    const diffInDays = Math.floor((due - todayDate) / (1000 * 60 * 60 * 24))
+
+    if (diffInDays < 0) return { ...task, priority: "overdue" } // งานเลยกำหนด
+    if (diffInDays === 0) return { ...task, priority: "today" } // งานวันนี้
+    if (diffInDays <= 3) return { ...task, priority: "urgent" } // งานด่วน (ภายใน 3 วัน)
+    return { ...task, priority: "pending" } // งานอื่นๆ
+  }
+
   // แปลง tasks array เป็น map ตามวันที่
   const taskMap = allTasks.reduce((acc, task) => {
     const date = task.dueDate
@@ -79,7 +98,7 @@ export function MonthCalendar({ tasks, onMonthChange }) {
         : task.priority === "overdue"
           ? "เลยกำหนด"
           : task.priority === "most_urgent" || task.priority === "urgent"
-            ? "งานด่วน"
+            ? "กำลังจะมาถึง"
             : task.priority === "today"
               ? "งานวันนี้"
               : "ยังไม่เสร็จ",
@@ -158,7 +177,7 @@ export function MonthCalendar({ tasks, onMonthChange }) {
     switch (status) {
       case "เลยกำหนด":
         return "bg-red-500" // เปลี่ยนเป็นสีแดงสำหรับงานเลยกำหนด
-      case "งานด่วน":
+      case "กำลังจะมาถึง":
         return "bg-orange-500" // เปลี่ยนเป็นสีส้มสำหรับงานด่วน
       case "งานวันนี้":
         return "bg-yellow-500"
@@ -175,7 +194,7 @@ export function MonthCalendar({ tasks, onMonthChange }) {
     switch (status) {
       case "เลยกำหนด":
         return "bg-red-100 text-red-700"
-      case "งานด่วน":
+      case "กำลังจะมาถึง":
         return "bg-orange-100 text-orange-700"
       case "งานวันนี้":
         return "bg-yellow-100 text-yellow-700"
@@ -227,12 +246,16 @@ export function MonthCalendar({ tasks, onMonthChange }) {
     // Create a new array with the updated task
     const updatedTasks = allTasks.map((task) => {
       if (task.id === taskToReschedule.id) {
-        return {
+        // สร้างงานที่อัพเดทวันที่แล้ว
+        const updatedTask = {
           ...task,
           dueDate: newDueDate,
           rescheduleReason,
           rescheduleDate: new Date().toISOString(),
         }
+
+        // อัพเดทสถานะของงานตามวันที่ใหม่
+        return updateTaskPriority(updatedTask)
       }
       return task
     })
@@ -247,6 +270,7 @@ export function MonthCalendar({ tasks, onMonthChange }) {
   const handleAddTask = () => {
     if (!newTask.title.trim() || !newTask.dueDate) return
 
+    // สร้างงานใหม่และอัพเดทสถานะตามวันที่
     const newTaskObj = {
       id: `task-${Date.now()}`,
       title: newTask.title,
@@ -256,7 +280,10 @@ export function MonthCalendar({ tasks, onMonthChange }) {
       done: false,
     }
 
-    setAllTasks([...allTasks, newTaskObj])
+    // อัพเดทสถานะของงานตามวันที่
+    const taskWithUpdatedPriority = updateTaskPriority(newTaskObj)
+
+    setAllTasks([...allTasks, taskWithUpdatedPriority])
     setNewTask({ title: "", details: "", dueDate: "", priority: "normal" })
     setIsAddTaskOpen(false)
   }
@@ -275,16 +302,45 @@ export function MonthCalendar({ tasks, onMonthChange }) {
     }))
   }
 
+  // เพิ่มฟังก์ชัน handleEditTask ต่อจากฟังก์ชัน openRescheduleDialog
   const openRescheduleDialog = (task) => {
     setTaskToReschedule(task)
     setNewDueDate(task.dueDate)
     setIsRescheduleDialogOpen(true)
   }
 
+  // เพิ่มฟังก์ชันสำหรับการแก้ไขงาน
+  const handleEditTask = (task) => {
+    // ค้นหางานจาก allTasks เพื่อให้ได้ข้อมูลเต็ม
+    const fullTask = allTasks.find((t) => t.id === task.id)
+    if (fullTask) {
+      setEditTask(fullTask)
+    }
+  }
+
+  // เพิ่มฟังก์ชันสำหรับบันทึกการแก้ไขงาน
+  const handleSaveEdit = () => {
+    if (!editTask) return
+
+    // อัพเดทสถานะของงานตามวันที่ใหม่
+    const updatedTask = updateTaskPriority(editTask)
+
+    // อัพเดทงานในรายการ
+    const updatedTasks = allTasks.map((task) => {
+      if (task.id === updatedTask.id) {
+        return updatedTask
+      }
+      return task
+    })
+
+    setAllTasks(updatedTasks)
+    setEditTask(null)
+  }
+
   // แทนที่ return statement ด้วยโค้ดที่มีเงื่อนไขสำหรับมุมมองมือถือ
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 font-noto">
         <div>
           <h3 className="text-2xl font-semibold text-gray-900">ปฏิทินงาน</h3>
           <p className="text-sm text-gray-500">ดูงานทั้งหมดสำหรับเดือน {thaiMonths[month]}</p>
@@ -374,7 +430,7 @@ export function MonthCalendar({ tasks, onMonthChange }) {
                               className={`h-1.5 w-1.5 rounded-full ${
                                 task.status === "เลยกำหนด"
                                   ? "bg-red-500"
-                                  : task.status === "งานด่วน"
+                                  : task.status === "กำลังจะมาถึง"
                                     ? "bg-orange-500"
                                     : task.status === "งานวันนี้"
                                       ? "bg-yellow-500"
@@ -454,14 +510,15 @@ export function MonthCalendar({ tasks, onMonthChange }) {
                       className={`p-3 rounded-lg border ${
                         task.status === "เลยกำหนด"
                           ? "border-red-200 bg-red-50"
-                          : task.status === "งานด่วน"
+                          : task.status === "กำลังจะมาถึง"
                             ? "border-orange-200 bg-orange-50"
                             : task.status === "งานวันนี้"
                               ? "border-yellow-200 bg-yellow-50"
                               : task.status === "เสร็จแล้ว"
                                 ? "border-green-200 bg-green-50"
                                 : "border-blue-200 bg-blue-50"
-                      }`}
+                      } cursor-pointer`}
+                      onClick={() => handleEditTask(task)}
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
@@ -674,9 +731,10 @@ export function MonthCalendar({ tasks, onMonthChange }) {
                     transition={{ delay: index * 0.05 }}
                   >
                     <Card
-                      className="p-4 hover:shadow-md transition-shadow cursor-move"
+                      className="p-4 hover:shadow-md transition-shadow cursor-pointer"
                       draggable
                       onDragStart={(e) => handleDragStart(e, task, selectedDate)}
+                      onClick={() => handleEditTask(task)}
                     >
                       <div className="flex justify-between items-start">
                         <div>
@@ -768,7 +826,7 @@ export function MonthCalendar({ tasks, onMonthChange }) {
               >
                 <option value="normal">ปกติ</option>
                 <option value="today">วันนี้</option>
-                <option value="urgent">ด่วน</option>
+                <option value="urgent">กำลังจะมาถึง</option>
                 <option value="overdue">เลยกำหนด</option>
               </select>
             </div>
@@ -828,6 +886,77 @@ export function MonthCalendar({ tasks, onMonthChange }) {
             >
               บันทึกการเปลี่ยนแปลง
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Task Dialog */}
+      <Dialog open={!!editTask} onOpenChange={(open) => !open && setEditTask(null)}>
+        <DialogContent className="sm:max-w-[500px] w-[calc(100%-2rem)] rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-red-700" />
+              <span>แก้ไขงาน</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">ชื่องาน</label>
+              <Input
+                value={editTask?.title || ""}
+                onChange={(e) => setEditTask({ ...editTask, title: e.target.value })}
+                placeholder="ระบุชื่องาน"
+                disabled={editTask?.done}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">รายละเอียด</label>
+              <Textarea
+                value={editTask?.details || ""}
+                onChange={(e) => setEditTask({ ...editTask, details: e.target.value })}
+                placeholder="รายละเอียดงาน (ถ้ามี)"
+                rows={3}
+                disabled={editTask?.done}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">วันที่กำหนด</label>
+              <Input
+                type="date"
+                value={editTask?.dueDate || ""}
+                onChange={(e) => setEditTask({ ...editTask, dueDate: e.target.value })}
+                disabled={editTask?.done}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">สถานะ</label>
+              <div className="p-2 border rounded-md bg-gray-50">
+                {editTask?.done
+                  ? "เสร็จแล้ว"
+                  : editTask?.priority === "overdue"
+                    ? "เลยกำหนด"
+                    : editTask?.priority === "urgent"
+                      ? "กำลังจะมาถึง"
+                      : editTask?.priority === "today"
+                        ? "งานวันนี้"
+                        : "งานอื่นๆ"}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditTask(null)}>
+              ยกเลิก
+            </Button>
+            {!editTask?.done && (
+              <Button onClick={handleSaveEdit} className="bg-red-700 hover:bg-red-800">
+                บันทึกการเปลี่ยนแปลง
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

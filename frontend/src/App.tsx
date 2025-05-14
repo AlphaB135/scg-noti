@@ -23,6 +23,8 @@ import AuditPerson from './pages/audit-logs-person/page'
 // HOC ตรวจสอบสิทธิ์
 import { RequireAuth } from './components/RequireAuth'
 
+import AddEmployee from './pages/add-employee-page/page'
+
 function App() {
   const [, setRole] = useState('')
 
@@ -95,6 +97,14 @@ function App() {
           element={
             <RequireAuth>
               <Settings />
+            </RequireAuth>
+          }
+        />
+                <Route
+          path="/addemployee"
+          element={
+            <RequireAuth>
+              <AddEmployee />
             </RequireAuth>
           }
         />
