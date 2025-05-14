@@ -8,9 +8,6 @@ import LoginPage from './pages/LoginPage'
 
 // ––– Protected pages
 import DashboardPage from './pages/dashboard/page'
-import NotificationPage from './pages/notifications/page'
-import Rpa from './pages/rpa/page'
-import Approvals from './pages/approvals/page'
 import Audit from './pages/audit-logs/page'
 import Settings from './pages/settings/page'
 
@@ -41,30 +38,6 @@ function App() {
           element={
             <RequireAuth>
               <DashboardPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/notifications"
-          element={
-            <RequireAuth>
-              <NotificationPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/approvals"
-          element={
-            <RequireAuth>
-              <Approvals />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/rpa"
-          element={
-            <RequireAuth>
-              <Rpa />
             </RequireAuth>
           }
         />
