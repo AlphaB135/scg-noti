@@ -1,30 +1,22 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { simulateApiDelay } from "@/lib/mock-data"
-import { AlertCircle, Check, ExternalLink, RefreshCw } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle, Check, ExternalLink, RefreshCw } from "lucide-react"
 
-interface Integration {
-  id: string
-  name: string
-  description: string
-  connected: boolean
-  status: "active" | "inactive" | "error"
-  lastSync?: string
-}
-
-export function IntegrationSettings() {
+export default function IntegrationSettings() {
   const [isLoading, setIsLoading] = useState(false)
 
-  const [integrations, setIntegrations] = useState<Integration[]>([
+  const [integrations, setIntegrations] = useState<any[]>([
     {
       id: "email",
       name: "Email Service",
@@ -68,7 +60,11 @@ export function IntegrationSettings() {
       setIntegrations(
         integrations.map((integration) =>
           integration.id === id
-            ? { ...integration, status: "active", lastSync: new Date().toISOString() }
+            ? {
+                ...integration,
+                status: "active",
+                lastSync: new Date().toISOString(),
+              }
             : integration,
         ),
       )
@@ -99,9 +95,7 @@ export function IntegrationSettings() {
       <Card>
         <CardHeader>
           <CardTitle className="font-noto">การตั้งค่าอีเมล</CardTitle>
-          <CardDescription className="font-noto">
-            ตั้งค่าบริการอีเมลสำหรับส่งการแจ้งเตือน
-          </CardDescription>
+          <CardDescription className="font-noto">ตั้งค่าบริการอีเมลสำหรับส่งการแจ้งเตือน</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -135,9 +129,7 @@ export function IntegrationSettings() {
               <Label htmlFor="smtp-ssl" className="font-noto">
                 ใช้งาน SSL/TLS
               </Label>
-              <p className="font-noto text-sm text-muted-foreground">
-                เปิดใช้งานการเชื่อมต่อที่ปลอดภัยสำหรับการส่งอีเมล
-              </p>
+              <p className="font-noto text-sm text-muted-foreground">เปิดใช้งานการเชื่อมต่อที่ปลอดภัยสำหรับการส่งอีเมล</p>
             </div>
             <Switch id="smtp-ssl" defaultChecked />
           </div>
@@ -145,9 +137,7 @@ export function IntegrationSettings() {
             <Button variant="outline" className="font-noto">
               ทดสอบการเชื่อมต่อ
             </Button>
-            <Button className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white">
-              บันทึกการตั้งค่าอีเมล
-            </Button>
+            <Button className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white">บันทึกการตั้งค่าอีเมล</Button>
           </div>
         </CardContent>
       </Card>
@@ -155,9 +145,7 @@ export function IntegrationSettings() {
       <Card>
         <CardHeader>
           <CardTitle className="font-noto">การเชื่อมต่อภายนอก</CardTitle>
-          <CardDescription className="font-noto">
-            เชื่อมต่อกับบริการภายนอกสำหรับการแจ้งเตือนและแลกเปลี่ยนข้อมูล
-          </CardDescription>
+          <CardDescription className="font-noto">เชื่อมต่อกับบริการภายนอกสำหรับการแจ้งเตือนและแลกเปลี่ยนข้อมูล</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {integrations.map((integration) => (
@@ -170,9 +158,7 @@ export function IntegrationSettings() {
                   <h3 className="font-medium">{integration.name}</h3>
                   <div className="ml-2">{getStatusBadge(integration.status)}</div>
                 </div>
-                <p className="font-noto text-sm text-muted-foreground">
-                  {integration.description}
-                </p>
+                <p className="font-noto text-sm text-muted-foreground">{integration.description}</p>
                 {integration.lastSync && (
                   <p className="font-noto text-xs text-muted-foreground">
                     ซิงค์ล่าสุด: {new Date(integration.lastSync).toLocaleString()}
@@ -192,12 +178,7 @@ export function IntegrationSettings() {
                     ซิงค์
                   </Button>
                 )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={isLoading}
-                  className="font-noto"
-                >
+                <Button variant="outline" size="sm" disabled={isLoading} className="font-noto">
                   <ExternalLink className="mr-2 h-3 w-3" />
                   กำหนดค่า
                 </Button>
@@ -220,9 +201,7 @@ export function IntegrationSettings() {
       <Card>
         <CardHeader>
           <CardTitle className="font-noto">การตั้งค่าเว็บฮุก</CardTitle>
-          <CardDescription className="font-noto">
-            ตั้งค่าเว็บฮุกสำหรับการส่งการแจ้งเตือนแบบเรียลไทม์
-          </CardDescription>
+          <CardDescription className="font-noto">ตั้งค่าเว็บฮุกสำหรับการส่งการแจ้งเตือนแบบเรียลไทม์</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
@@ -237,9 +216,7 @@ export function IntegrationSettings() {
               URL เว็บฮุก
             </Label>
             <Input id="webhook-url" defaultValue="https://api.example.com/webhooks/notifications" />
-            <p className="font-noto text-xs text-muted-foreground">
-              URL ที่จะรับคำขอ POST สำหรับเว็บฮุก
-            </p>
+            <p className="font-noto text-xs text-muted-foreground">URL ที่จะรับคำขอ POST สำหรับเว็บฮุก</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="webhook-secret" className="font-noto">
@@ -251,9 +228,7 @@ export function IntegrationSettings() {
                 สร้างใหม่
               </Button>
             </div>
-            <p className="font-noto text-xs text-muted-foreground">
-              ใช้เพื่อยืนยันว่าคำขอมาจากระบบแจ้งเตือน SCG
-            </p>
+            <p className="font-noto text-xs text-muted-foreground">ใช้เพื่อยืนยันว่าคำขอมาจากระบบแจ้งเตือน SCG</p>
           </div>
           <div className="space-y-2">
             <Label className="font-noto">ประเภทเหตุการณ์</Label>
@@ -288,9 +263,7 @@ export function IntegrationSettings() {
             <Button variant="outline" className="font-noto">
               ทดสอบเว็บฮุก
             </Button>
-            <Button className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white">
-              บันทึกการตั้งค่าเว็บฮุก
-            </Button>
+            <Button className="font-noto bg-[#E2001A] hover:bg-[#C0001A] text-white">บันทึกการตั้งค่าเว็บฮุก</Button>
           </div>
         </CardContent>
       </Card>

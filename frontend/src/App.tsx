@@ -1,29 +1,36 @@
 // 📁 frontend/src/App.tsx
 
-import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import React, { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 // ––– Public pages
-import LoginPage from './pages/LoginPage'
+import LoginPage from "./pages/LoginPage";
 
 // ––– Protected pages
-import DashboardPage from './pages/dashboard/page'
-import Audit from './pages/audit-logs/page'
-import Settings from './pages/settings/page'
+import DashboardPage from "./pages/dashboard/page";
+import Audit from "./pages/audit-logs/page";
+import Settings from "./pages/settings/page";
 
 // **ตรงนี้ต้อง import ให้ตรงกับไฟล์ของคุณ**
 // สมมติโฟลเดอร์ชื่อ manage_reminder/page.tsx และ default export เป็น component ชื่อ Manage
-import Manage from './pages/manage_reminder/page'
+import Manage from "./pages/manage_reminder/page";
 
-import AuditPerson from './pages/audit-logs-person/page'
+import UserLogs from "./pages/user-logs/page";
 
 // HOC ตรวจสอบสิทธิ์
-import { RequireAuth } from './components/RequireAuth'
+import { RequireAuth } from "./components/RequireAuth";
 
-import AddEmployee from './pages/add-employee-page/page'
+import AddEmployee from "./pages/add-employee-page/page";
+
+import TeamMember from "./pages/team-member/page";
 
 function App() {
-  const [, setRole] = useState('')
+  const [, setRole] = useState("");
 
   return (
     <Router>
@@ -58,10 +65,10 @@ function App() {
           }
         />
         <Route
-          path="/auditperson"
+          path="/userlogs"
           element={
             <RequireAuth>
-              <AuditPerson />
+              <UserLogs />
             </RequireAuth>
           }
         />
@@ -73,7 +80,7 @@ function App() {
             </RequireAuth>
           }
         />
-                <Route
+        <Route
           path="/addemployee"
           element={
             <RequireAuth>
@@ -81,9 +88,17 @@ function App() {
             </RequireAuth>
           }
         />
+                <Route
+          path="/teammember"
+          element={
+            <RequireAuth>
+              <TeamMember />
+            </RequireAuth>
+          }
+        />
       </Routes>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

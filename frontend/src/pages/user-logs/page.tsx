@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react"
 import AppLayout from "@/components/layout/app-layout"
-import SearchFilter from "@/components/audit-logs/search-filter"
-import Statistics from "@/components/audit-logs/statistics"
-import LogsTabs from "@/components/audit-logs/logs-tabs"
+import UserProfile from "@/components/user-logs/user-profile"
+import SearchFilter from "@/components/user-logs/search-filter"
+import Statistics from "@/components/user-logs/statistics"
+import LogsTabs from "@/components/user-logs/logs-tabs"
 import {
   formatDate,
   getActionTypeText,
@@ -26,12 +27,19 @@ interface AuditLog {
   newValue?: string
 }
 
-export default function AuditLogsPage() {
+export default function UserActivityLogsPage() {
   // ===== STATE MANAGEMENT =====
   const [searchQuery, setSearchQuery] = useState("")
   const [filterType, setFilterType] = useState<string>("all")
   const [filterDate, setFilterDate] = useState<string>("all")
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
+  const [currentUser, setCurrentUser] = useState({
+    id: "user1",
+    name: "Shogun",
+    role: "ผู้จัดการโครงการ",
+    avatar: "/placeholder.svg?height=40&width=40",
+    department: "Developer",
+  })
 
   // ===== MOCK DATA LOADING =====
   useEffect(() => {
@@ -39,7 +47,7 @@ export default function AuditLogsPage() {
     const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split("T")[0]
     const twoDaysAgoStr = new Date(Date.now() - 86400000 * 2).toISOString().split("T")[0]
 
-    // สร้างข้อมูลประวัติการดำเนินการตัวอย่าง
+    // สร้างข้อมูลประวัติการดำเนินการตัวอย่าง - เฉพาะของผู้ใช้ปัจจุบัน (สมชาย ใจดี)
     const mockAuditLogs: AuditLog[] = [
       // วันนี้
       {
@@ -47,107 +55,69 @@ export default function AuditLogsPage() {
         taskId: 1,
         taskTitle: "สรุปรายงานผลประกอบการ",
         actionType: "task_created",
-        actionBy: "โชกุน สุดหล่อ",
+        actionBy: "สมชาย ใจดี",
         actionDate: `${todayStr}T09:15:00`,
         details: "สร้างงานใหม่",
       },
-      {
-        id: "log2",
-        taskId: 2,
-        taskTitle: "ปฐมนิเทศพนักงานใหม่",
-        actionType: "task_updated",
-        actionBy: "แบงค์ คาร์แคร์",
-        actionDate: `${todayStr}T10:30:00`,
-        details: "แก้ไขรายละเอียดงาน",
-        oldValue: "เริ่มปฐมนิเทศ",
-        newValue: "เริ่มปฐมนิเทศในวันนี้",
-      },
-      {
-        id: "log3",
-        taskId: 5,
-        taskTitle: "ตรวจสอบระบบเซิร์ฟเวอร์",
-        actionType: "task_postponed",
-        actionBy: "บิว อาสยาม",
-        actionDate: `${todayStr}T11:45:00`,
-        details: "เลื่อนกำหนดส่งงาน",
-        oldValue: "2025-05-08",
-        newValue: "2025-05-09",
-      },
-
-      // เมื่อวาน
-      {
-        id: "log4",
-        taskId: 9,
-        taskTitle: "ส่งรายงานประจำเดือน",
-        actionType: "task_updated",
-        actionBy: "บาส ไม่เป็นสุข",
-        actionDate: `${yesterdayStr}T14:20:00`,
-        details: "เปลี่ยนสถานะเป็นเลยกำหนด",
-      },
-      {
-        id: "log5",
-        taskId: 10,
-        taskTitle: "ตรวจสอบงบประมาณไตรมาส",
-        actionType: "task_updated",
-        actionBy: "พี่พีท ซีเนียร์จำเป็น",
-        actionDate: `${yesterdayStr}T15:10:00`,
-        details: "เปลี่ยนสถานะเป็นเลยกำหนด",
-      },
-      {
-        id: "log6",
-        taskId: 8,
-        taskTitle: "จัดทำงบประมาณไตรมาสใหม่",
-        actionType: "task_created",
-        actionBy: "พี่พีท ซีเนียร์จำเป็น",
-        actionDate: `${yesterdayStr}T16:30:00`,
-        details: "สร้างงานใหม่",
-      },
-
       // 2 วันที่แล้ว
       {
         id: "log7",
         taskId: 3,
         taskTitle: "เตรียมเอกสารประชุม",
         actionType: "task_created",
-        actionBy: "โชกุน สุดหล่อ",
+        actionBy: "สมชาย ใจดี",
         actionDate: `${twoDaysAgoStr}T09:00:00`,
         details: "สร้างงานใหม่",
-      },
-      {
-        id: "log8",
-        taskId: 4,
-        taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
-        actionType: "task_created",
-        actionBy: "แบงค์ คาร์แคร์",
-        actionDate: `${twoDaysAgoStr}T10:15:00`,
-        details: "สร้างงานใหม่",
-      },
-      {
-        id: "log9",
-        taskId: 7,
-        taskTitle: "วางแผนอบรมประจำเดือน",
-        actionType: "task_postponed",
-        actionBy: "บาส ไม่เป็นสุข",
-        actionDate: `${twoDaysAgoStr}T13:45:00`,
-        details: "เลื่อนกำหนดส่งงานจากวันที่ 15 พ.ค. ไปเป็นวันที่ 17 พ.ค.",
-      },
-      {
-        id: "log10",
-        taskId: 6,
-        taskTitle: "อัปโหลดข้อมูลเข้าระบบ",
-        actionType: "task_completed",
-        actionBy: "บิว อาสยาม",
-        actionDate: `${twoDaysAgoStr}T16:20:00`,
-        details: "ทำงานเสร็จแล้ว",
       },
       {
         id: "log11",
         taskId: 6,
         taskTitle: "อัปโหลดข้อมูลเข้าระบบ",
         actionType: "task_reopened",
-        actionBy: "โชกุน สุดหล่อ",
+        actionBy: "สมชาย ใจดี",
         actionDate: `${twoDaysAgoStr}T17:30:00`,
         details: "เปิดงานใหม่เนื่องจากข้อมูลไม่ครบถ้วน",
+      },
+      // เพิ่มข้อมูลเพิ่มเติมเพื่อให้มีประวัติมากขึ้น
+      {
+        id: "log12",
+        taskId: 9,
+        taskTitle: "ส่งรายงานประจำเดือน",
+        actionType: "task_postponed",
+        actionBy: "สมชาย ใจดี",
+        actionDate: `${yesterdayStr}T10:15:00`,
+        details: "เลื่อนกำหนดส่งงานจากวันที่ 3 พ.ค. ไปเป็นวันที่ 5 พ.ค.",
+        oldValue: "2025-05-03",
+        newValue: "2025-05-05",
+      },
+      {
+        id: "log13",
+        taskId: 2,
+        taskTitle: "ปฐมนิเทศพนักงานใหม่",
+        actionType: "task_updated",
+        actionBy: "สมชาย ใจดี",
+        actionDate: `${yesterdayStr}T14:30:00`,
+        details: "แก้ไขรายละเอียดงาน",
+        oldValue: "เตรียมการปฐมนิเทศ",
+        newValue: "เริ่มปฐมนิเทศในวันนี้",
+      },
+      {
+        id: "log14",
+        taskId: 4,
+        taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
+        actionType: "task_completed",
+        actionBy: "สมชาย ใจดี",
+        actionDate: `${yesterdayStr}T16:45:00`,
+        details: "ทำงานเสร็จแล้ว",
+      },
+      {
+        id: "log15",
+        taskId: 4,
+        taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
+        actionType: "task_reopened",
+        actionBy: "สมชาย ใจดี",
+        actionDate: `${todayStr}T08:30:00`,
+        details: "เปิดงานใหม่เนื่องจากต้องสั่งซื้อเพิ่มเติม",
       },
     ]
 
@@ -181,7 +151,6 @@ export default function AuditLogsPage() {
     // กรองตามคำค้นหา
     const matchesSearch =
       log.taskTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.actionBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (log.details && log.details.toLowerCase().includes(searchQuery.toLowerCase()))
 
     // กรองตามประเภทการดำเนินการ
@@ -214,8 +183,11 @@ export default function AuditLogsPage() {
   })
 
   return (
-    <AppLayout title="ประวัติการดำเนินการพนักงาน" description="ติดตามการเปลี่ยนแปลงและการดำเนินการของงานทั้งหมด">
+    <AppLayout title="ประวัติการดำเนินการของคุณ" description="ติดตามการเปลี่ยนแปลงและการดำเนินการของงานที่คุณทำ">
       <div className="mt-4">
+        {/* ===== USER PROFILE SECTION ===== */}
+        <UserProfile currentUser={currentUser} auditLogs={auditLogs} />
+
         {/* ===== SEARCH AND FILTER SECTION ===== */}
         <SearchFilter
           searchQuery={searchQuery}

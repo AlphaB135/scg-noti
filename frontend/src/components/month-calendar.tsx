@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { ChevronLeft, ChevronRight, X, Filter, Plus, CalendarIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
@@ -18,7 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { motion } from "framer-motion"
 
-export function MonthCalendar({ tasks, onMonthChange }) {
+export function MonthCalendar({ tasks, onMonthChange, setIsAddDialogOpen, setEditTask, resetForm }) {
   // เพิ่ม state สำหรับการแสดงผลบนมือถือ
   const [isMobileView, setIsMobileView] = useState(false)
 
@@ -28,12 +27,17 @@ export function MonthCalendar({ tasks, onMonthChange }) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
   const [newTask, setNewTask] = useState({
     title: "",
     details: "",
     dueDate: "",
     priority: "normal",
+    frequency: "no-repeat",
+    impact: "",
+    link: "",
+    hasLogin: false,
+    username: "",
+    password: "",
   })
   const [draggedTask, setDraggedTask] = useState(null)
   const [allTasks, setAllTasks] = useState(tasks)
@@ -42,7 +46,7 @@ export function MonthCalendar({ tasks, onMonthChange }) {
   const [rescheduleReason, setRescheduleReason] = useState("")
   const [newDueDate, setNewDueDate] = useState("")
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({})
-  const [editTask, setEditTask] = useState(null)
+  // const [editTask, setEditTask] = useState(null)
 
   // Sync tasks prop with internal state
   useEffect(() => {
@@ -268,7 +272,13 @@ export function MonthCalendar({ tasks, onMonthChange }) {
   }
 
   const handleAddTask = () => {
-    if (!newTask.title.trim() || !newTask.dueDate) return
+    if (!newTask.title.trim() || !newTask.dueDate || !newTask.details.trim() || !newTask.impact.trim()) return
+
+    // สร้างข้อมูล password จาก username และ password ถ้ามีการติ๊กช่อง hasLogin
+    let passwordData = ""
+    if (newTask.hasLogin && (newTask.username || newTask.password)) {
+      passwordData = `user: ${newTask.username}\npassword: ${newTask.password}`
+    }
 
     // สร้างงานใหม่และอัพเดทสถานะตามวันที่
     const newTaskObj = {
@@ -277,6 +287,12 @@ export function MonthCalendar({ tasks, onMonthChange }) {
       details: newTask.details,
       dueDate: newTask.dueDate,
       priority: newTask.priority,
+      frequency: newTask.frequency,
+      impact: newTask.impact,
+      link: newTask.link,
+      hasLogin: newTask.hasLogin,
+      username: newTask.username,
+      password: newTask.password,
       done: false,
     }
 
@@ -284,14 +300,28 @@ export function MonthCalendar({ tasks, onMonthChange }) {
     const taskWithUpdatedPriority = updateTaskPriority(newTaskObj)
 
     setAllTasks([...allTasks, taskWithUpdatedPriority])
-    setNewTask({ title: "", details: "", dueDate: "", priority: "normal" })
-    setIsAddTaskOpen(false)
+    setNewTask({
+      title: "",
+      details: "",
+      dueDate: "",
+      priority: "normal",
+      frequency: "no-repeat",
+      impact: "",
+      link: "",
+      hasLogin: false,
+      username: "",
+      password: "",
+    })
+    // setIsAddTaskOpen(false)
   }
 
   const openAddTaskDialog = (day) => {
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-    setNewTask({ ...newTask, dueDate: dateStr })
-    setIsAddTaskOpen(true)
+    resetForm()
+    setEditTask(null)
+    // กำหนดวันที่ในฟอร์มหลัก
+    window.selectedCalendarDate = dateStr
+    setIsAddDialogOpen(true)
   }
 
   const toggleExpandDay = (e, dateStr) => {
@@ -314,27 +344,26 @@ export function MonthCalendar({ tasks, onMonthChange }) {
     // ค้นหางานจาก allTasks เพื่อให้ได้ข้อมูลเต็ม
     const fullTask = allTasks.find((t) => t.id === task.id)
     if (fullTask) {
+      resetForm()
       setEditTask(fullTask)
+      setIsAddDialogOpen(true)
     }
   }
 
   // เพิ่มฟังก์ชันสำหรับบันทึกการแก้ไขงาน
   const handleSaveEdit = () => {
-    if (!editTask) return
-
-    // อัพเดทสถานะของงานตามวันที่ใหม่
-    const updatedTask = updateTaskPriority(editTask)
-
-    // อัพเดทงานในรายการ
-    const updatedTasks = allTasks.map((task) => {
-      if (task.id === updatedTask.id) {
-        return updatedTask
-      }
-      return task
-    })
-
-    setAllTasks(updatedTasks)
-    setEditTask(null)
+    // if (!editTask) return
+    // // อัพเดทสถานะของงานตามวันที่ใหม่
+    // const updatedTask = updateTaskPriority(editTask)
+    // // อัพเดทงานในรายการ
+    // const updatedTasks = allTasks.map((task) => {
+    //   if (task.id === updatedTask.id) {
+    //     return updatedTask
+    //   }
+    //   return task
+    // })
+    // setAllTasks(updatedTasks)
+    // setEditTask(null)
   }
 
   // แทนที่ return statement ด้วยโค้ดที่มีเงื่อนไขสำหรับมุมมองมือถือ
@@ -471,8 +500,7 @@ export function MonthCalendar({ tasks, onMonthChange }) {
                   className="h-8 w-8 p-0"
                   onClick={() => {
                     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`
-                    setNewTask({ ...newTask, dueDate: dateStr })
-                    setIsAddTaskOpen(true)
+                    openAddTaskDialog(selectedDay)
                   }}
                 >
                   <Plus className="h-4 w-4" />
@@ -494,8 +522,8 @@ export function MonthCalendar({ tasks, onMonthChange }) {
                           size="sm"
                           className="mt-3"
                           onClick={() => {
-                            setNewTask({ ...newTask, dueDate: dateStr })
-                            setIsAddTaskOpen(true)
+                            const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`
+                            openAddTaskDialog(selectedDay)
                           }}
                         >
                           <Plus className="h-3.5 w-3.5 mr-1.5" /> เพิ่มงานใหม่
@@ -757,8 +785,8 @@ export function MonthCalendar({ tasks, onMonthChange }) {
                       e.preventDefault()
                       setIsDialogOpen(false)
                       if (selectedDate) {
-                        setNewTask({ ...newTask, dueDate: selectedDate })
-                        setIsAddTaskOpen(true)
+                        const day = Number.parseInt(selectedDate.split("-")[2])
+                        openAddTaskDialog(day)
                       }
                     }}
                   >
@@ -774,70 +802,13 @@ export function MonthCalendar({ tasks, onMonthChange }) {
                 e.preventDefault()
                 setIsDialogOpen(false)
                 if (selectedDate) {
-                  setNewTask({ ...newTask, dueDate: selectedDate })
-                  setIsAddTaskOpen(true)
+                  const day = Number.parseInt(selectedDate.split("-")[2])
+                  openAddTaskDialog(day)
                 }
               }}
               className="bg-red-700 hover:bg-red-800"
             >
               <Plus className="h-4 w-4 mr-2" /> เพิ่มงานใหม่
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add task dialog */}
-      <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
-        <DialogContent className="sm:max-w-[500px] w-[calc(100%-2rem)] rounded-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5 text-red-700" />
-              <span>เพิ่มงานใหม่</span>
-            </DialogTitle>
-            <DialogDescription>เพิ่มงานใหม่สำหรับวันที่ {formatDate(newTask.dueDate)}</DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">ชื่องาน</label>
-              <Input
-                value={newTask.title}
-                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                placeholder="ระบุชื่องาน"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">รายละเอียด</label>
-              <Textarea
-                value={newTask.details}
-                onChange={(e) => setNewTask({ ...newTask, details: e.target.value })}
-                placeholder="รายละเอียดงาน (ถ้ามี)"
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">ความสำคัญ</label>
-              <select
-                value={newTask.priority}
-                onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                className="w-full rounded-md border border-gray-300 p-2 text-sm"
-              >
-                <option value="normal">ปกติ</option>
-                <option value="today">วันนี้</option>
-                <option value="urgent">กำลังจะมาถึง</option>
-                <option value="overdue">เลยกำหนด</option>
-              </select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddTaskOpen(false)}>
-              ยกเลิก
-            </Button>
-            <Button onClick={handleAddTask} className="bg-red-700 hover:bg-red-800">
-              เพิ่มงาน
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -886,77 +857,6 @@ export function MonthCalendar({ tasks, onMonthChange }) {
             >
               บันทึกการเปลี่ยนแปลง
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Task Dialog */}
-      <Dialog open={!!editTask} onOpenChange={(open) => !open && setEditTask(null)}>
-        <DialogContent className="sm:max-w-[500px] w-[calc(100%-2rem)] rounded-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5 text-red-700" />
-              <span>แก้ไขงาน</span>
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">ชื่องาน</label>
-              <Input
-                value={editTask?.title || ""}
-                onChange={(e) => setEditTask({ ...editTask, title: e.target.value })}
-                placeholder="ระบุชื่องาน"
-                disabled={editTask?.done}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">รายละเอียด</label>
-              <Textarea
-                value={editTask?.details || ""}
-                onChange={(e) => setEditTask({ ...editTask, details: e.target.value })}
-                placeholder="รายละเอียดงาน (ถ้ามี)"
-                rows={3}
-                disabled={editTask?.done}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">วันที่กำหนด</label>
-              <Input
-                type="date"
-                value={editTask?.dueDate || ""}
-                onChange={(e) => setEditTask({ ...editTask, dueDate: e.target.value })}
-                disabled={editTask?.done}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">สถานะ</label>
-              <div className="p-2 border rounded-md bg-gray-50">
-                {editTask?.done
-                  ? "เสร็จแล้ว"
-                  : editTask?.priority === "overdue"
-                    ? "เลยกำหนด"
-                    : editTask?.priority === "urgent"
-                      ? "กำลังจะมาถึง"
-                      : editTask?.priority === "today"
-                        ? "งานวันนี้"
-                        : "งานอื่นๆ"}
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditTask(null)}>
-              ยกเลิก
-            </Button>
-            {!editTask?.done && (
-              <Button onClick={handleSaveEdit} className="bg-red-700 hover:bg-red-800">
-                บันทึกการเปลี่ยนแปลง
-              </Button>
-            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

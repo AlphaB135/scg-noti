@@ -4,61 +4,42 @@ import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { simulateApiDelay } from "@/lib/mock-data"
 
-const systemSettingsSchema = z.object({
-  systemName: z.string().min(2, { message: "กรุณากรอกชื่อระบบอย่างน้อย 2 ตัวอักษร" }),
-  defaultLanguage: z.string(),
-  timezone: z.string(),
-  dateFormat: z.string(),
-  timeFormat: z.string(),
-  autoLogout: z.number().int().min(5).max(120),
-  enableAuditLog: z.boolean(),
-  enableAnalytics: z.boolean(),
-})
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
-type SystemSettingsValues = z.infer<typeof systemSettingsSchema>
-
-const defaultValues: SystemSettingsValues = {
-  systemName: "SCG ระบบแจ้งเตือน",
-  defaultLanguage: "th-TH",
-  timezone: "Asia/Bangkok",
-  dateFormat: "DD/MM/YYYY",
-  timeFormat: "24h",
-  autoLogout: 30,
-  enableAuditLog: true,
-  enableAnalytics: true,
-}
-
-export function SystemSettings() {
+export default function SystemSettings() {
   const [isLoading, setIsLoading] = useState(false)
+
+  const systemSettingsSchema = z.object({
+    systemName: z.string().min(2, { message: "กรุณากรอกชื่อระบบอย่างน้อย 2 ตัวอักษร" }),
+    defaultLanguage: z.string(),
+    timezone: z.string(),
+    dateFormat: z.string(),
+    timeFormat: z.string(),
+    autoLogout: z.number().int().min(5).max(120),
+    enableAuditLog: z.boolean(),
+    enableAnalytics: z.boolean(),
+  })
+
+  type SystemSettingsValues = z.infer<typeof systemSettingsSchema>
+
+  const defaultValues: SystemSettingsValues = {
+    systemName: "SCG ระบบแจ้งเตือน",
+    defaultLanguage: "th-TH",
+    timezone: "Asia/Bangkok",
+    dateFormat: "DD/MM/YYYY",
+    timeFormat: "24h",
+    autoLogout: 30,
+    enableAuditLog: true,
+    enableAnalytics: true,
+  }
 
   const form = useForm<SystemSettingsValues>({
     resolver: zodResolver(systemSettingsSchema),
@@ -98,9 +79,7 @@ export function SystemSettings() {
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                    <FormDescription>
-                      ชื่อนี้จะแสดงในหัวเบราว์เซอร์และอีเมล
-                    </FormDescription>
+                    <FormDescription>ชื่อนี้จะแสดงในหัวเบราว์เซอร์และอีเมล</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -217,9 +196,7 @@ export function SystemSettings() {
                           onChange={(e) => field.onChange(Number.parseInt(e.target.value))}
                         />
                       </FormControl>
-                      <FormDescription>
-                        เวลาที่ไม่มีการใช้งานก่อนจะออกจากระบบอัตโนมัติ (5–120 นาที)
-                      </FormDescription>
+                      <FormDescription>เวลาที่ไม่มีการใช้งานก่อนจะออกจากระบบอัตโนมัติ (5–120 นาที)</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -234,9 +211,7 @@ export function SystemSettings() {
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
                         <FormLabel>เปิดใช้งานการบันทึกกิจกรรม</FormLabel>
-                        <FormDescription>
-                          บันทึกกิจกรรมของผู้ใช้ทั้งหมดเพื่อความปลอดภัยและการตรวจสอบย้อนหลัง
-                        </FormDescription>
+                        <FormDescription>บันทึกกิจกรรมของผู้ใช้ทั้งหมดเพื่อความปลอดภัยและการตรวจสอบย้อนหลัง</FormDescription>
                       </div>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -252,9 +227,7 @@ export function SystemSettings() {
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
                         <FormLabel>เปิดใช้งานระบบวิเคราะห์ข้อมูล</FormLabel>
-                        <FormDescription>
-                          เก็บข้อมูลการใช้งานแบบไม่ระบุตัวตน เพื่อปรับปรุงระบบให้ดียิ่งขึ้น
-                        </FormDescription>
+                        <FormDescription>เก็บข้อมูลการใช้งานแบบไม่ระบุตัวตน เพื่อปรับปรุงระบบให้ดียิ่งขึ้น</FormDescription>
                       </div>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -265,11 +238,7 @@ export function SystemSettings() {
               </div>
 
               <div className="flex justify-end pt-4">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="bg-[#E2001A] hover:bg-[#C0001A] text-white"
-                >
+                <Button type="submit" disabled={isLoading} className="bg-[#E2001A] hover:bg-[#C0001A] text-white">
                   {isLoading ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
                 </Button>
               </div>

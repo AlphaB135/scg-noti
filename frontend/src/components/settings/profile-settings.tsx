@@ -4,36 +4,37 @@ import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "sonner"
 import { simulateApiDelay } from "@/lib/mock-data"
 
-const profileFormSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  title: z.string().optional(),
-  department: z.string().optional(),
-  bio: z.string().max(160, { message: "Bio must not be longer than 160 characters." }).optional(),
-})
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>
-
-// This would come from your user context or API in a real app
-const defaultValues: Partial<ProfileFormValues> = {
-  name: "John Doe",
-  email: "john.doe@scg.com",
-  title: "Notification Manager",
-  department: "IT Department",
-  bio: "Managing notifications and approvals for SCG systems.",
-}
-
-export function ProfileSettings() {
+export default function ProfileSettings() {
   const [isLoading, setIsLoading] = useState(false)
+
+  const profileFormSchema = z.object({
+    name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+    email: z.string().email({ message: "Please enter a valid email address." }),
+    title: z.string().optional(),
+    department: z.string().optional(),
+    bio: z.string().max(160, { message: "Bio must not be longer than 160 characters." }).optional(),
+  })
+
+  type ProfileFormValues = z.infer<typeof profileFormSchema>
+
+  // This would come from your user context or API in a real app
+  const defaultValues: Partial<ProfileFormValues> = {
+    name: "Shogun",
+    email: "shokun159@gmail.com",
+    title: "Developer",
+    department: "IT Department",
+    bio: "ตื่นมาก็หล่อ พอให้พอใจ แต่ยังง่วงอยู่ไง ขอนอนต่ออีกที",
+  }
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -66,7 +67,7 @@ export function ProfileSettings() {
           <div className="flex items-center gap-6">
             <Avatar className="h-24 w-24">
               <AvatarImage src="/placeholder.svg?height=96&width=96" alt="Profile" />
-              <AvatarFallback className="text-2xl">JD</AvatarFallback>
+              <AvatarFallback className="text-2xl">SG</AvatarFallback>
             </Avatar>
             <div className="space-y-2">
               <h3 className="font-medium">รูปโปรไฟล์</h3>

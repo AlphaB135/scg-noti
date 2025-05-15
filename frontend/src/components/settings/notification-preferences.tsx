@@ -1,16 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 import { simulateApiDelay } from "@/lib/mock-data"
 
-export function NotificationPreferences() {
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+
+export default function NotificationPreferences() {
   const [isLoading, setIsLoading] = useState(false)
 
   // Notification preferences state
@@ -90,9 +91,7 @@ export function NotificationPreferences() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="daily" id="daily" />
-                  <Label htmlFor="daily">สรุปรายวัน
-
-</Label>
+                  <Label htmlFor="daily">สรุปรายวัน</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="weekly" id="weekly" />
@@ -108,11 +107,10 @@ export function NotificationPreferences() {
                   <SelectValue placeholder="Select a sound" />
                 </SelectTrigger>
                 <SelectContent>
-                <SelectItem value="default">ค่าเริ่มต้น</SelectItem>
-<SelectItem value="chime">เสียงกระทบ</SelectItem>
-<SelectItem value="bell">เสียงกระดิ่ง</SelectItem>
-<SelectItem value="none">ไม่มีเสียง (เงียบ)</SelectItem>
-
+                  <SelectItem value="default">ค่าเริ่มต้น</SelectItem>
+                  <SelectItem value="chime">เสียงกระทบ</SelectItem>
+                  <SelectItem value="bell">เสียงกระดิ่ง</SelectItem>
+                  <SelectItem value="none">ไม่มีเสียง (เงียบ)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -122,35 +120,34 @@ export function NotificationPreferences() {
 
       <Card>
         <CardHeader>
-        <CardTitle>ประเภทการแจ้งเตือน</CardTitle>
-<CardDescription>เลือกประเภทการแจ้งเตือนที่คุณต้องการรับ</CardDescription>
-</CardHeader>
-<CardContent className="space-y-4">
-  <div className="flex items-center justify-between">
-    <Label htmlFor="system-updates">อัปเดตระบบ</Label>
-    <Switch id="system-updates" checked={systemUpdates} onCheckedChange={setSystemUpdates} />
-  </div>
+          <CardTitle>ประเภทการแจ้งเตือน</CardTitle>
+          <CardDescription>เลือกประเภทการแจ้งเตือนที่คุณต้องการรับ</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="system-updates">อัปเดตระบบ</Label>
+            <Switch id="system-updates" checked={systemUpdates} onCheckedChange={setSystemUpdates} />
+          </div>
 
-  <div className="flex items-center justify-between">
-    <Label htmlFor="approval-requests">คำขออนุมัติ</Label>
-    <Switch id="approval-requests" checked={approvalRequests} onCheckedChange={setApprovalRequests} />
-  </div>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="approval-requests">คำขออนุมัติ</Label>
+            <Switch id="approval-requests" checked={approvalRequests} onCheckedChange={setApprovalRequests} />
+          </div>
 
-  <div className="flex items-center justify-between">
-    <Label htmlFor="security-alerts">การแจ้งเตือนด้านความปลอดภัย</Label>
-    <Switch id="security-alerts" checked={securityAlerts} onCheckedChange={setSecurityAlerts} />
-  </div>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="security-alerts">การแจ้งเตือนด้านความปลอดภัย</Label>
+            <Switch id="security-alerts" checked={securityAlerts} onCheckedChange={setSecurityAlerts} />
+          </div>
 
-  <div className="flex items-center justify-between">
-    <Label htmlFor="news-announcements">ข่าวสารและประกาศ</Label>
-    <Switch id="news-announcements" checked={newsAndAnnouncements} onCheckedChange={setNewsAndAnnouncements} />
-  </div>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="news-announcements">ข่าวสารและประกาศ</Label>
+            <Switch id="news-announcements" checked={newsAndAnnouncements} onCheckedChange={setNewsAndAnnouncements} />
+          </div>
 
-  <div className="flex items-center justify-between">
-    <Label htmlFor="maintenance-alerts">การแจ้งเตือนการบำรุงรักษา</Label>
-    <Switch id="maintenance-alerts" checked={maintenanceAlerts} onCheckedChange={setMaintenanceAlerts} />
-  </div>
-
+          <div className="flex items-center justify-between">
+            <Label htmlFor="maintenance-alerts">การแจ้งเตือนการบำรุงรักษา</Label>
+            <Switch id="maintenance-alerts" checked={maintenanceAlerts} onCheckedChange={setMaintenanceAlerts} />
+          </div>
         </CardContent>
         <CardFooter className="flex justify-end">
           <Button onClick={handleSave} disabled={isLoading} className="bg-[#E2001A] hover:bg-[#C0001A] text-white">
