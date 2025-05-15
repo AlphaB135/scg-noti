@@ -10,26 +10,26 @@ datasource db {
 
 // USER + PROFILE
 model User {
-  id                String    @id @default(uuid()) @db.UniqueIdentifier
-  email             String    @unique @db.NVarChar(160)
-  passwordHash      String    @db.NVarChar(255)
-  role              String    @db.VarChar(20) // e.g. "EMPLOYEE", "ADMIN", "SUPERADMIN", "AUDITOR"
-  status            String    @default("ACTIVE") @db.VarChar(10) // e.g. "ACTIVE", "LOCKED", "DISABLED"
-  lastLoginAt       DateTime? @db.DateTime2
-  lastLoginIp       String?   @db.VarChar(45)
-  loginFailCount    Int       @default(0)
-  twoFaSecret       String?   @db.NVarChar(64)
-  deviceFingerprint String?   @db.NVarChar(128)
-  createdAt         DateTime  @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
-  updatedAt         DateTime  @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
-
-  sessions         Session[]
-  approvals        Approval[]
-  employeeProfile  EmployeeProfile?
-  adminProfile     AdminProfile?
-  notificationPref UserNotificationPref?
-  appearancePref   UserAppearancePref?
-  securityLogs     SecurityLog[]
+  id                String                @id @default(uuid()) @db.UniqueIdentifier
+  email             String                @unique @db.NVarChar(160)
+  passwordHash      String                @db.NVarChar(255)
+  role              String                @db.VarChar(20) // e.g. "EMPLOYEE", "ADMIN", "SUPERADMIN", "AUDITOR"
+  status            String                @default("ACTIVE") @db.VarChar(10) // e.g. "ACTIVE", "LOCKED", "DISABLED"
+  lastLoginAt       DateTime?             @db.DateTime2
+  lastLoginIp       String?               @db.VarChar(45)
+  loginFailCount    Int                   @default(0)
+  twoFaSecret       String?               @db.NVarChar(64)
+  deviceFingerprint String?               @db.NVarChar(128)
+  createdAt         DateTime              @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
+  updatedAt         DateTime              @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
+  sessions          Session[]
+  approvals         Approval[]
+  employeeProfile   EmployeeProfile?
+  adminProfile      AdminProfile?
+  notificationPref  UserNotificationPref?
+  appearancePref    UserAppearancePref?
+  securityLogs      SecurityLog[]
+  teamMemberships   TeamMember[]
 }
 
 // Profiles
@@ -138,12 +138,14 @@ model WebhookConfig {
 
 // Session
 model Session {
-  id          String   @id @default(uuid())
-  userId      String   @db.UniqueIdentifier
-  user        User     @relation(fields: [userId], references: [id])
-  fingerprint String
-  createdAt   DateTime @default(now())
-  expiresAt   DateTime
+  id             String    @id @default(uuid())
+  userId         String    @db.UniqueIdentifier
+  user           User      @relation(fields: [userId], references: [id])
+  fingerprint    String?   @db.NVarChar(255)
+  userAgent      String?   @db.NVarChar(500)
+  status         String    @default("ACTIVE") @db.VarChar(20)
+  createdAt      DateTime  @default(now())
+  expiresAt      DateTime
   refreshToken   String?   @db.NVarChar(255)
   refreshExpires DateTime? @db.DateTime2
 
@@ -157,17 +159,17 @@ model Notification {
   title              String    @db.NVarChar(255)
   message            String    @db.NVarChar(2000)
   scheduledAt        DateTime?
-  status      String @default("PENDING") @db.VarChar(20) 
+  status             String    @default("PENDING") @db.VarChar(20)
   type               String    @db.VarChar(20) // SYSTEM / TODO / REMINDER
   category           String?   @db.NVarChar(80)
   link               String?   @db.NVarChar(255)
   urgencyDays        Int       @default(0)
   repeatIntervalDays Int       @default(0)
   dueDate            DateTime?
- 
-  createdBy          String    @db.UniqueIdentifier
-  createdAt          DateTime  @default(now()) @db.DateTime2
-  updatedAt          DateTime  @updatedAt @db.DateTime2
+
+  createdBy String   @db.UniqueIdentifier
+  createdAt DateTime @default(now()) @db.DateTime2
+  updatedAt DateTime @updatedAt @db.DateTime2
 
   approvals   Approval[]
   recipients  Recipient[]
@@ -193,12 +195,12 @@ model Approval {
 model Recipient {
   id             String       @id @default(uuid())
   notificationId String       @db.UniqueIdentifier
-  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
-  type           String       @db.VarChar(20) // ALL / GROUP / USER
+  notification   Notification @relation(fields: [notificationId], references: [id])
+  type           String       @db.VarChar(20) // ALL / USER / GROUP / COMPANY
   userId         String?      @db.UniqueIdentifier
+  groupId        String?      @db.UniqueIdentifier // เก็บ teamId
+  companyCode    String?      @db.VarChar(12)
 }
-
-
 
 model NotificationAttachment {
   id             String       @id @default(uuid())
@@ -207,4 +209,27 @@ model NotificationAttachment {
   fileUrl        String       @db.NVarChar(255)
   mimeType       String       @db.NVarChar(100)
   Notification   Notification @relation(fields: [notificationId], references: [id])
+}
+
+model Team {
+  id        String       @id @default(uuid()) @db.UniqueIdentifier
+  name      String       @db.NVarChar(255)
+  leaderId  String?      @db.UniqueIdentifier // user.id ของหัวหน้าทีม
+  members   TeamMember[]
+  createdAt DateTime     @default(now()) @db.DateTime2
+
+  @@index([leaderId])
+}
+
+model TeamMember {
+  id         String @id @default(uuid()) @db.UniqueIdentifier
+  teamId     String @db.UniqueIdentifier
+  employeeId String @db.UniqueIdentifier // user.id ของพนักงาน
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [employeeId], references: [id])
+
+  @@index([teamId], map: "TeamMember_teamId_idx")
+  @@index([employeeId], map: "TeamMember_userId_idx")
+  @@index([employeeId])
 }

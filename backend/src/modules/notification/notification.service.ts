@@ -1,14 +1,24 @@
-import { prisma } from '../../prisma'
-import type { ListQueryOpts, CreateNotificationInput } from './notification.dto'
+import  { prisma }from '../../prisma'
+import type { CreateNotificationInput, ListQueryOpts } from './notification.dto'
 
+/**
+ * List notifications with pagination and total count
+ */
 export async function list(opts: ListQueryOpts) {
-  return prisma.notification.findMany({
-    skip: opts.skip,
-    take: opts.take,
-    orderBy: { scheduledAt: 'asc' },
-  })
+  const [data, total] = await Promise.all([
+    prisma.notification.findMany({
+      skip: opts.skip,
+      take: opts.take,
+      orderBy: { scheduledAt: 'asc' },
+    }),
+    prisma.notification.count(),
+  ])
+  return { data, meta: { total, skip: opts.skip, take: opts.take } }
 }
 
+/**
+ * Update the status of a notification
+ */
 export async function updateStatus(id: string, status: string) {
   return prisma.notification.update({
     where: { id },
@@ -16,45 +26,74 @@ export async function updateStatus(id: string, status: string) {
   })
 }
 
+/**
+ * List recurring notifications (those with a repeatIntervalDays > 0)
+ */
 export async function listCycle(opts: ListQueryOpts) {
   return prisma.notification.findMany({
-    where: { frequency: { not: 'no-repeat' } },
+    where: { repeatIntervalDays: { gt: 0 } },
     skip: opts.skip,
     take: opts.take,
     orderBy: { scheduledAt: 'asc' },
   })
 }
 
+/**
+ * Reschedule a notification by updating its scheduledAt date
+ */
 export async function reschedule(
   id: string,
-  dueDate: string,
-  userId: string,
-  reason: string
+  scheduledAt: Date
 ) {
   return prisma.notification.update({
     where: { id },
-    data: {
-      scheduledAt: new Date(dueDate),
-      rescheduleReason: reason,
-      rescheduledBy: { connect: { id: userId } },
-      rescheduledAt: new Date(),
-    },
+    data: { scheduledAt },
   })
 }
 
-// ฟังก์ชันสร้างแจ้งเตือนใหม่
-export async function create(input: CreateNotificationInput, userId: string) {
+/**
+ * Create a new notification along with its recipients
+ */
+export async function create(
+  input: CreateNotificationInput,
+  createdBy: string
+) {
+  const { recipients, ...data } = input
   return prisma.notification.create({
     data: {
-      title:              input.title,
-      message:            input.message,
-      scheduledAt:        new Date(input.scheduledAt),
-      type:               input.type,
-      category:           input.category,
-      link:               input.link,
-      urgencyDays:        input.urgencyDays,
-      repeatIntervalDays: input.repeatIntervalDays,
-      createdBy:          userId,            // ตรงนี้เป็น scalar String ตาม Prisma schema
+      ...data,
+      createdBy,
+      recipients: {
+        create: recipients.map((r) => ({
+          type: r.type,
+          userId: r.userId,
+          groupId: r.groupId,
+          companyCode: r.companyCode,
+        })),
+      },
     },
+    include: { recipients: true },
+  })
+}
+
+/**
+ * List notifications visible to the current user
+ */
+export async function listMine(
+  userId: string,
+  companyCode: string,
+  teamIds: string[]
+) {
+  return prisma.notification.findMany({
+    where: {
+      OR: [
+        { recipients: { some: { type: 'ALL' } } },
+        { recipients: { some: { type: 'USER', userId } } },
+        { recipients: { some: { type: 'GROUP', groupId: { in: teamIds } } } },
+        { recipients: { some: { type: 'COMPANY', companyCode } } },
+      ],
+    },
+    orderBy: { scheduledAt: 'asc' },
+    include: { recipients: true },
   })
 }

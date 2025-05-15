@@ -1,23 +1,29 @@
-// 📁 backend/src/routes/notifications.ts
 import { Router } from 'express'
-import * as ctrl from '../modules/notification/notification.controller'
-import { verifyToken } from '../middleware/authMiddleware'
+import {
+  list,
+  listCycle,
+  listMyNotifications,
+  createNotification,
+  updateStatus,
+  reschedule,
+} from '../modules/notification/notification.controller'
+import * as approvalController from '../modules/approval/approval.controller'
+import { authMiddleware } from '../middleware/auth.middleware'
 
 const router = Router()
 
-// POST /api/notifications — สร้าง notification ใหม่
-router.post('/', verifyToken, ctrl.create)
+router.use(authMiddleware)
 
-// GET /api/notifications
-router.get('/', verifyToken, ctrl.list)
+// Notification routes - แก้ไขตำแหน่งของ routes ให้ถูกต้อง
+router.get('/cycles', listCycle)
+router.get('/mine', listMyNotifications)
+router.get('/', list)
+router.post('/', createNotification)
+router.patch('/:id', updateStatus)
+router.post('/:id/reschedule', reschedule)
 
-// PATCH /api/notifications/:id  { status }
-router.patch('/:id', verifyToken, ctrl.updateStatus)
-
-// POST /api/notifications/:id/reschedule  { dueDate, reason }
-router.post('/:id/reschedule', verifyToken, ctrl.reschedule)
-
-// GET /api/notifications/cycles  — ดึงรายการแจ้งเตือนแบบ cycle
-router.get('/cycles', verifyToken, ctrl.listCycle)
+// Approval routes
+router.get('/:id/approvals', approvalController.listApprovals)
+router.post('/:id/approvals', approvalController.createApproval)
 
 export default router

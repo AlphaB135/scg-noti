@@ -1,5 +1,5 @@
 // 📁 backend/src/modules/auth/auth.controller.ts
-import { Request, Response } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
@@ -9,14 +9,14 @@ import { prisma } from '../../config/prismaClient'
 // Helper เพื่อคืน options เดียวกันทั้ง access & refresh cookies
 const cookieOptions = (maxAge: number) => ({
   httpOnly: true,
-  sameSite: 'Strict',
+  sameSite: 'strict' as const,
   secure: process.env.NODE_ENV === 'production',
   maxAge,
   path: '/',
 })
 
 // Login handler
-export async function login(req: Request, res: Response): Promise<void> {
+export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     console.log('📥 [LOGIN] req.body:', req.body)
 
@@ -52,12 +52,16 @@ export async function login(req: Request, res: Response): Promise<void> {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000) // 15 นาที
     const session = await prisma.session.create({
       data: { userId: user.id, fingerprint, expiresAt },
-    })
-
-    // เซ็น Access JWT (15m)
-    const token = jwt.sign({ sessionId: session.id }, JWT_SECRET!, {
-      expiresIn: '15m',
-    })
+    })    // เซ็น Access JWT (15m)
+    const token = jwt.sign(
+      { 
+        sessionId: session.id,
+        userId: user.id,
+        role: user.role
+      }, 
+      JWT_SECRET!, 
+      { expiresIn: '15m' }
+    )
 
     // สร้าง Refresh Token (7 วัน)
     const rawRefresh = crypto.randomBytes(64).toString('hex')
