@@ -1,15 +1,7 @@
 "use client"
 import { Calendar, Plus, AlertTriangle, AlertCircle, Clock, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-type Task = {
-  id: string
-  title: string
-  details: string
-  dueDate?: string
-  priority: "today" | "urgent" | "overdue" | "pending"
-  done: boolean
-}
+import type { Task } from "@/lib/types/task"
 
 type TaskListProps = {
   tasks: Task[]

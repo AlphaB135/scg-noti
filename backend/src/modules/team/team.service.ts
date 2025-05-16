@@ -1,4 +1,16 @@
-// backend/src/modules/team/team.service.ts
+/**
+ * @fileoverview เซอร์วิสสำหรับจัดการทีม
+ * รองรับการดำเนินการเกี่ยวกับทีม รวมถึงการสร้าง แก้ไข จัดการสมาชิก
+ * และติดตามกิจกรรมของทีม
+ * 
+ * โมเดลที่เกี่ยวข้อง:
+ * - Team (ทีม)
+ * - TeamMember (สมาชิกทีม)
+ * - User (พร้อมโปรไฟล์พนักงานและแอดมิน)
+ * - SecurityLog (ล็อกความปลอดภัย)
+ * - Approval (การอนุมัติ)
+ * - Notification (การแจ้งเตือน)
+ */
 
 import { prisma } from '../../prisma'
 import { Team, TeamMember } from '@prisma/client'
@@ -6,7 +18,18 @@ import type { CreateTeamInput, UpdateTeamInput, Pagination } from './team.dto'
 import { TeamEvent } from './team.types'
 
 class TeamService {
-  /** สร้างทีมใหม่ */
+  /**
+   * สร้างทีมใหม่
+   * 
+   * @param {CreateTeamInput} input - ข้อมูลทีมที่จะสร้าง 
+   * @param {string} input.name - ชื่อทีม
+   * @param {string} input.description - รายละเอียดหรือวัตถุประสงค์ของทีม
+   * @param {string} input.leaderId - รหัสหัวหน้าทีม
+   * @returns {Promise<Team & { members: TeamMember[] }>} ทีมที่สร้างพร้อมรายชื่อสมาชิก
+   * 
+   * @prismaModel Team
+   * @transaction สร้างทีมและกำหนดรายการสมาชิกเริ่มต้น
+   */
   async createTeam(input: CreateTeamInput): Promise<Team> {
     return prisma.team.create({
       data: input,
@@ -15,7 +38,24 @@ class TeamService {
       }
     })
   }
-  /** ดึงทีมทั้งหมดพร้อม pagination */
+
+  /**
+   * แสดงรายการทีมทั้งหมดพร้อมการแบ่งหน้า
+   * 
+   * @param {Pagination} opts - ตัวเลือกการแบ่งหน้า
+   * @param {number} opts.skip - จำนวนรายการที่ต้องการข้าม
+   * @param {number} opts.take - จำนวนรายการที่ต้องการดึง
+   * @returns {Promise<{
+   *   data: (Team & { 
+   *     members: (TeamMember & { 
+   *       user: { id: string, email: string, role: string, employeeProfile: any }
+   *     })[] 
+   *   })[],
+   *   total: number  // จำนวนทีมทั้งหมด
+   * }>} รายการทีมพร้อมข้อมูลสมาชิกและการแบ่งหน้า
+   * 
+   * @prismaModel Team, TeamMember, User
+   */
   async listTeams(opts: Pagination) {
     const teams = await prisma.team.findMany({
       skip: opts.skip,
@@ -42,7 +82,20 @@ class TeamService {
 
     return { data: teams, total }
   }
-  /** ดึงข้อมูลทีมเดียว */
+
+  /**
+   * ดึงข้อมูลทีมเดียวพร้อมรายละเอียดสมาชิก
+   * 
+   * @param {string} id - รหัสทีมที่ต้องการดึงข้อมูล
+   * @returns {Promise<Team & {
+   *   members: (TeamMember & {
+   *     user: { employeeProfile: any }
+   *   })[]
+   * }>} ข้อมูลทีมและสมาชิก
+   * 
+   * @prismaModel Team, TeamMember, User
+   * @throws {PrismaClientKnownRequestError} หากไม่พบทีม
+   */
   async getTeam(id: string) {
     return prisma.team.findUnique({
       where: { id },
@@ -61,7 +114,18 @@ class TeamService {
     })
   }
 
-  /** อัปเดตข้อมูลทีม */
+  /**
+   * อัพเดทข้อมูลทีม
+   * 
+   * @param {string} id - รหัสทีมที่ต้องการแก้ไข
+   * @param {UpdateTeamInput} input - ข้อมูลที่ต้องการอัพเดท
+   * @param {string} [input.name] - ชื่อทีมใหม่
+   * @param {string} [input.description] - รายละเอียดทีมใหม่
+   * @returns {Promise<Team & { members: TeamMember[] }>} ทีมที่อัพเดทแล้ว
+   * 
+   * @prismaModel Team
+   * @throws {PrismaClientKnownRequestError} หากไม่พบทีม
+   */
   async updateTeam(id: string, input: UpdateTeamInput): Promise<Team> {
     return prisma.team.update({
       where: { id },
@@ -72,12 +136,33 @@ class TeamService {
     })
   }
 
-  /** ลบทีม */
+  /**
+   * ลบทีมและความสัมพันธ์ของสมาชิกทั้งหมด
+   * หมายเหตุ: ไม่ได้ลบข้อมูลผู้ใช้ เพียงแต่ลบการเป็นสมาชิกทีมเท่านั้น
+   * 
+   * @param {string} id - รหัสทีมที่ต้องการลบ
+   * @returns {Promise<void>}
+   * 
+   * @prismaModel Team
+   * @throws {PrismaClientKnownRequestError} หากไม่พบทีม
+   * @cascade ลบรายการ TeamMember ที่เกี่ยวข้องด้วย
+   */
   async deleteTeam(id: string): Promise<void> {
     await prisma.team.delete({ where: { id } })
   }
 
-  /** เพิ่มสมาชิกทีม */
+  /**
+   * เพิ่มสมาชิกใหม่เข้าทีม
+   * 
+   * @param {string} teamId - รหัสทีม
+   * @param {string} employeeId - รหัสพนักงานที่จะเพิ่ม
+   * @returns {Promise<TeamMember & {
+   *   user: { id: string, email: string, employeeProfile: any }
+   * }>} ข้อมูลการเป็นสมาชิกทีมที่สร้างขึ้น
+   * 
+   * @prismaModel TeamMember, User
+   * @throws {PrismaClientKnownRequestError} หากไม่พบทีมหรือพนักงาน
+   */
   async addMember(teamId: string, employeeId: string): Promise<TeamMember> {
     return prisma.teamMember.create({
       data: {
@@ -96,12 +181,29 @@ class TeamService {
     })
   }
 
-  /** ลบสมาชิกทีม */
+  /**
+   * ลบสมาชิกออกจากทีม
+   * 
+   * @param {string} memberId - รหัสการเป็นสมาชิกทีมที่ต้องการลบ
+   * @returns {Promise<void>}
+   * 
+   * @prismaModel TeamMember
+   * @throws {PrismaClientKnownRequestError} หากไม่พบข้อมูลการเป็นสมาชิก
+   */
   async removeMember(memberId: string): Promise<void> {
     await prisma.teamMember.delete({ where: { id: memberId } })
   }
 
-  /** เปลี่ยนหัวหน้าทีม */
+  /**
+   * เปลี่ยนหัวหน้าทีม
+   * 
+   * @param {string} teamId - รหัสทีม
+   * @param {string} leaderId - รหัสหัวหน้าทีมคนใหม่
+   * @returns {Promise<Team>} ทีมที่อัพเดทแล้ว
+   * 
+   * @prismaModel Team
+   * @throws {PrismaClientKnownRequestError} หากไม่พบทีม
+   */
   async changeLeader(teamId: string, leaderId: string): Promise<Team> {
     return prisma.team.update({
       where: { id: teamId },
@@ -109,7 +211,19 @@ class TeamService {
     })
   }
 
-  /** ดึง timeline ของทีม */
+  /**
+   * ดึงไทม์ไลน์กิจกรรมของทีม รวมถึง:
+   * - กิจกรรมความปลอดภัยของสมาชิกทีม
+   * - การอนุมัติการแจ้งเตือนของทีม
+   * - การแจ้งเตือนที่ส่งถึงทีม
+   * 
+   * @param {string} teamId - รหัสทีม
+   * @returns {Promise<TeamEvent[]>} รายการกิจกรรมเรียงตามเวลา
+   * 
+   * @prismaModel TeamMember, SecurityLog, Approval, Notification
+   * @aggregation รวมและเรียงลำดับกิจกรรมจากหลายแหล่ง
+   * @pagination จำกัดที่ 100 รายการล่าสุดต่อประเภท
+   */
   async getTeamTimeline(teamId: string) {
     // Get team members
     const teamMembers = await prisma.teamMember.findMany({

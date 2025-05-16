@@ -16,12 +16,16 @@
     "studio": "prisma studio",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:integration": "pnpm setup:test-db && jest -c jest.integration.config.js",
+    "test:integration:watch": "jest -c jest.integration.config.js --watch",
+    "setup:test-db": "ts-node scripts/setup-test-db.ts"
   },
   "prisma": {
     "seed": "ts-node --transpile-only prisma/seed-all.ts"
   },
   "dependencies": {
+    "@line/bot-sdk": "^9.9.0",
     "@prisma/client": "^6.7.0",
     "@types/ioredis": "^5.0.0",
     "bcrypt": "^5.1.1",

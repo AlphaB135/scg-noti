@@ -1,4 +1,15 @@
-// 📁 backend/src/modules/auth/auth.controller.ts
+/**
+ * @fileoverview ตัวควบคุมการยืนยันตัวตนสำหรับระบบ SCG Notification
+ * จัดการการเข้าสู่ระบบ ออกจากระบบ และจัดการเซสชันผู้ใช้
+ * รวมถึงการจัดการโทเค็นและคุกกี้สำหรับการยืนยันตัวตน
+ * 
+ * คุณสมบัติ:
+ * - รองรับการเข้าสู่ระบบด้วยรหัสพนักงานหรืออีเมล
+ * - จัดการเซสชันและการติดตามอุปกรณ์
+ * - ใช้ระบบโทเค็น JWT แยก Access Token และ Refresh Token
+ * - มีการป้องกันความปลอดภัยด้วย HTTP-only cookies
+ */
+
 import { Request, Response, NextFunction } from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
@@ -6,7 +17,13 @@ import crypto from 'crypto'
 import { JWT_SECRET } from '../../config/env'
 import { prisma } from '../../config/prismaClient'
 
-// Helper เพื่อคืน options เดียวกันทั้ง access & refresh cookies
+/**
+ * ตัวช่วยสร้างตัวเลือกคุกกี้มาตรฐาน
+ * ใช้ค่าเดียวกันทั้ง access token และ refresh token
+ * 
+ * @param {number} maxAge - อายุของคุกกี้ในมิลลิวินาที
+ * @returns {Object} ตัวเลือกการตั้งค่าคุกกี้
+ */
 const cookieOptions = (maxAge: number) => ({
   httpOnly: true,
   sameSite: 'strict' as const,
@@ -15,8 +32,25 @@ const cookieOptions = (maxAge: number) => ({
   path: '/',
 })
 
-// Login handler
-export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
+/**
+ * ตัวจัดการการเข้าสู่ระบบ
+ * ตรวจสอบข้อมูลประจำตัว สร้างเซสชัน และตั้งค่าคุกกี้
+ * 
+ * @route POST /auth/login
+ * @param {Request} req - Express request พร้อมข้อมูลการเข้าสู่ระบบในส่วน body
+ * @param {Response} res - Express response
+ * @param {NextFunction} next - Express next middleware
+ * 
+ * @bodyParam {string} [employeeCode] - รหัสพนักงาน
+ * @bodyParam {string} [email] - อีเมล
+ * @bodyParam {string} password - รหัสผ่าน
+ * 
+ * @returns {Promise<Response>} ส่งกลับโทเค็นและข้อมูลผู้ใช้ถ้าสำเร็จ
+ * @throws {400} ถ้าข้อมูลไม่ครบ
+ * @throws {401} ถ้าข้อมูลประจำตัวไม่ถูกต้อง
+ * @throws {500} ถ้าเกิดข้อผิดพลาดที่เซิร์ฟเวอร์
+ */
+export async function login(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
   try {
     console.log('📥 [LOGIN] req.body:', req.body)
 
@@ -92,8 +126,18 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
   }
 }
 
-// Logout handler
-export async function logout(req: Request, res: Response): Promise<void> {
+/**
+ * ตัวจัดการการออกจากระบบ
+ * ลบเซสชันและล้างคุกกี้
+ * 
+ * @route POST /auth/logout
+ * @param {Request} req - Express request พร้อม token ในคุกกี้
+ * @param {Response} res - Express response
+ * @returns {Promise<Response>} ส่งกลับสถานะสำเร็จ
+ * 
+ * @security JWT
+ */
+export async function logout(req: Request, res: Response): Promise<Response | void> {
   const token = req.cookies?.token as string | undefined
   if (token) {
     try {
@@ -111,8 +155,17 @@ export async function logout(req: Request, res: Response): Promise<void> {
     .json({ ok: true })
 }
 
-// Me handler
-export async function me(req: Request, res: Response): Promise<void> {
+/**
+ * ดูข้อมูลผู้ใช้ปัจจุบัน
+ * 
+ * @route GET /auth/me
+ * @param {Request} req - Express request พร้อมข้อมูลผู้ใช้จาก JWT
+ * @param {Response} res - Express response
+ * @returns {Promise<Response>} ส่งกลับข้อมูลผู้ใช้
+ * 
+ * @security JWT
+ */
+export async function me(req: Request, res: Response): Promise<Response | void> {
   console.log('📥 [ME] req.user:', req.user)
   const userId = (req.user as any)?.id
   if (!userId) {
@@ -135,8 +188,18 @@ export async function me(req: Request, res: Response): Promise<void> {
   res.json({ user })
 }
 
-// Refresh token handler
-export async function refresh(req: Request, res: Response): Promise<void> {
+/**
+ * ตัวจัดการรีเฟรชโทเค็น
+ * สร้างโทเค็นใหม่โดยใช้ refresh token
+ * 
+ * @route POST /auth/refresh
+ * @param {Request} req - Express request พร้อม refresh token ในคุกกี้
+ * @param {Response} res - Express response
+ * @returns {Promise<Response>} ส่งกลับโทเค็นใหม่ถ้าสำเร็จ
+ * 
+ * @security RefreshToken
+ */
+export async function refresh(req: Request, res: Response): Promise<Response | void> {
   try {
     const raw = req.cookies?.refreshToken as string | undefined
     if (!raw) {

@@ -1,3 +1,16 @@
+/**
+ * @fileoverview มิดเดิลแวร์สำหรับการยืนยันตัวตนในระบบ SCG Notification
+ * รองรับการยืนยันตัวตนด้วย JWT พร้อมการจัดการเซสชัน การจำกัดอัตราการเรียก
+ * และกลไกป้องกันการโจมตีแบบ Brute Force
+ * 
+ * คุณสมบัติ:
+ * - ตรวจสอบโทเค็น JWT และจัดการเซสชัน
+ * - แคชข้อมูลเซสชันและโทเค็นที่ถูกระงับในหน่วยความจำ
+ * - จำกัดอัตราการเรียกตาม IP และผู้ใช้
+ * - ป้องกันการโจมตีแบบ Brute Force ด้วยการล็อคบัญชี
+ * - รองรับการใช้งานหลายเซสชันพร้อมกัน
+ */
+
 import { Request, Response, NextFunction } from 'express'
 import jwt, { JwtPayload, Secret, verify } from 'jsonwebtoken'
 import { prisma } from '../prisma'
@@ -5,41 +18,66 @@ import { rateLimit } from 'express-rate-limit'
 import { LRUCache } from 'lru-cache'
 import crypto from 'crypto'
 
-// กำหนดค่าคงที่สำหรับการตั้งค่าต่างๆ
+/**
+ * ค่าคงที่สำหรับการตั้งค่าความปลอดภัย
+ * @const {Object} CONSTANTS
+ */
 const CONSTANTS = {
+  /** จำนวนเซสชันสูงสุดที่จะเก็บในแคช */
   SESSION_CACHE_SIZE: 500,
-  SESSION_CACHE_TTL: 15 * 60 * 1000, // 15 นาที
+  /** ระยะเวลาหมดอายุของแคชเซสชัน (15 นาที) */
+  SESSION_CACHE_TTL: 15 * 60 * 1000,
+  /** จำนวนสูงสุดของโทเค็นที่ถูกระงับที่จะติดตาม */
   TOKEN_BLACKLIST_SIZE: 1000,
-  TOKEN_BLACKLIST_TTL: 24 * 60 * 60 * 1000, // 24 ชั่วโมง
+  /** ระยะเวลาหมดอายุของโทเค็นที่ถูกระงับ (24 ชั่วโมง) */
+  TOKEN_BLACKLIST_TTL: 24 * 60 * 60 * 1000,
+  /** จำนวนครั้งสูงสุดของการล็อกอินที่ผิดพลาดก่อนล็อคบัญชี */
   MAX_FAILED_ATTEMPTS: 5,
-  LOCK_TIME: 15 * 60 * 1000, // 15 นาที
+  /** ระยะเวลาในการล็อคบัญชี (15 นาที) */
+  LOCK_TIME: 15 * 60 * 1000,
+  /** จำนวนคำขอสูงสุดต่อผู้ใช้ในช่วงเวลาที่กำหนด */
   MAX_REQUESTS_PER_USER: 50,
-  RATE_LIMIT_WINDOW: 5 * 60 * 1000, // 5 นาที
+  /** ขนาดหน้าต่างเวลาสำหรับการจำกัดอัตรา (5 นาที) */
+  RATE_LIMIT_WINDOW: 5 * 60 * 1000,
+  /** จำนวนเซสชันที่ใช้งานพร้อมกันสูงสุดต่อผู้ใช้ */
   MAX_ACTIVE_SESSIONS: 5
 } as const
 
-// สร้าง LRU Cache สำหรับจัดการข้อมูลแคช
+/**
+ * อินสแตนซ์แคชสำหรับกลไกความปลอดภัยต่างๆ
+ * ใช้แคชแบบ LRU (Least Recently Used) เพื่อการใช้หน่วยความจำอย่างมีประสิทธิภาพ
+ */
 const caches = {
+  /** แคชเซสชันที่ใช้งานพร้อมการหมดอายุอัตโนมัติ */
   sessions: new LRUCache<string, any>({
     max: CONSTANTS.SESSION_CACHE_SIZE,
     ttl: CONSTANTS.SESSION_CACHE_TTL,
-    updateAgeOnGet: true // อัพเดท TTL เมื่อมีการเรียกใช้
+    updateAgeOnGet: true // รีเซ็ต TTL เมื่อมีการเรียกใช้แคช
   }),
+
+  /** การติดตามโทเค็นที่ถูกระงับ */
   blacklist: new LRUCache<string, boolean>({
     max: CONSTANTS.TOKEN_BLACKLIST_SIZE,
     ttl: CONSTANTS.TOKEN_BLACKLIST_TTL
   }),
+
+  /** ตัวนับการจำกัดอัตราต่อผู้ใช้ */
   rateLimiter: new LRUCache<string, number>({
     max: 10000,
     ttl: CONSTANTS.RATE_LIMIT_WINDOW
   }),
+
+  /** การติดตามความพยายามล็อกอินที่ผิดพลาด */
   failedAttempts: new LRUCache<string, { count: number, lockUntil: number }>({
     max: 10000,
     ttl: CONSTANTS.LOCK_TIME
   })
 }
 
-// Rate limiting ต่อ IP
+/**
+ * มิดเดิลแวร์จำกัดอัตราการเรียกตาม IP
+ * จำกัดจำนวนครั้งของความพยายามยืนยันตัวตนที่ผิดพลาดจาก IP เดียวกัน
+ */
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -48,10 +86,10 @@ export const authRateLimiter = rateLimit({
   skipSuccessfulRequests: true
 })
 
-// JWT configuration
+// การตั้งค่า JWT
 const JWT_SECRET = process.env.JWT_SECRET as Secret
 if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required')
+  throw new Error('ต้องระบุตัวแปรสภาพแวดล้อม JWT_SECRET')
 }
 
 interface CustomJWTPayload extends JwtPayload {

@@ -16,24 +16,53 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [visible, setVisible] = useState(false)
   const navigate = useNavigate()
-
   useEffect(() => {
     // fade in card
     const t = setTimeout(() => setVisible(true), 100)
     return () => clearTimeout(t)
   }, [])
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setLoading(true)
-
-    try {
-      const res = await api.post("/auth/login", {
+      try {
+      console.log("Attempting login with:", { employeeCode: username })
+      
+      // แสดงข้อมูลเพิ่มเติมเพื่อ debug
+      console.log("API base URL:", api.defaults.baseURL)
+      console.log("With credentials:", api.defaults.withCredentials)      // ตรวจสอบข้อมูลที่ส่งไป
+      console.log("Sending auth request with credentials:", { 
         employeeCode: username,
+        passwordLength: password.length
+      });
+      
+      // เราใช้ api จาก real-api.ts ซึ่งมี baseURL เป็น '/api' แล้ว
+      // ใน backend เส้นทาง login อยู่ที่ /api/auth/login แต่ใน baseURL มี /api อยู่แล้ว
+      const res = await api.post("/auth/login", {
+        employeeCode: username, // ส่ง username ในฟิลด์ employeeCode
         password,
       })
+      
+      console.log("Login response:", res.data)
+      
+      // ตรวจสอบผลการล็อกอิน
+      if (!res.data) {
+        console.error("Login failed! Empty response")
+        setError("ล็อกอินไม่สำเร็จ: ไม่ได้รับข้อมูลตอบกลับ")
+        return
+      }
+      
+      if (!res.data.ok && !res.data.role) {
+        console.error("Login failed! Server response:", res.data)
+        setError("ล็อกอินไม่สำเร็จ: " + (res.data?.message || "ไม่สามารถเข้าสู่ระบบได้"))
+        return
+      }
+      
+      console.log('Login successful! Auth cookies should be set.')
+      
       const { role } = res.data
+      
       switch (role) {
         case "ADMIN":
           navigate("/admin")
@@ -52,6 +81,7 @@ export default function LoginPage() {
       let msg = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
       if (axios.isAxiosError(err)) {
         msg = err.response?.data?.message ?? err.message
+        console.error("Login error:", err.response?.data)
       } else if (err instanceof Error) {
         msg = err.message
       }

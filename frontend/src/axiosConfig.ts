@@ -3,6 +3,7 @@ import axios from 'axios'
 
 // ให้ axios ใช้ cookie ทุกครั้ง และ proxy /api → backend
 axios.defaults.withCredentials = true
+console.log('Axios configured with withCredentials = true')
 
 // ติด interceptor ดัก 401 แค่กับ “data-fetch” routes เท่านั้น
 axios.interceptors.response.use(

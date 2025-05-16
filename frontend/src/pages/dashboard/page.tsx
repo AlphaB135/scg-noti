@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
-import axios from "axios"
+import axios from 'axios'
+import { notificationsApi } from '@/lib/real-api'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -18,266 +18,445 @@ import MonthlyProgress from "@/components/dashboard/2.monthly-progress"
 import TaskList from "@/components/dashboard/3.task-list"
 import TaskCalendar from "@/components/dashboard/5.task-calendar"
 import TaskModal from "@/components/dashboard/4.task-modal"
+import type { Task } from "@/lib/types/task"
 
-// Type definitions
-type Task = {
+// Define API types
+type APINotification = {
   id: string
   title: string
-  details: string
+  message: string
   dueDate?: string
-  priority: "today" | "urgent" | "overdue" | "pending"
-  done: boolean
+  scheduledAt?: string
+  status: string
+  rescheduleHistory?: Array<{date: string, reason: string}>
+  reopenHistory?: Array<{date: string, reason: string}>
 }
 
+// ===== STATE MANAGEMENT =====
 export default function AdminNotificationPage() {
-  // ===== STATE MANAGEMENT =====
-  const [tasks, setTasks] = useState<Task[]>([]) // เก็บรายการงานทั้งหมด
-  const [isMenuOpen, setIsMenuOpen] = useState(false) // ควบคุมการเปิด/ปิดเมนูบนมือถือ
-  const [currentTime, setCurrentTime] = useState(new Date()) // เก็บเวลาปัจจุบัน
+  const [tasks, setTasks] = useState<Task[]>([]) // เก็บรายการงานที่แสดงในปัจจุบัน
+  const [allTasks, setAllTasks] = useState<Task[]>([]) // เก็บรายการงานทั้งหมด
+
+  // Initial state with current date
+  const now = new Date()
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1)
+  const [currentTime, setCurrentTime] = useState(now)
+
   const [expandTodo, setExpandTodo] = useState(false) // ควบคุมการแสดง modal รายการงานแบบเต็มจอ
   const [editTask, setEditTask] = useState<Task | null>(null) // เก็บข้อมูลงานที่กำลังแก้ไข
-  const [activeFilter, setActiveFilter] = useState("all") // ตัวกรองสำหรับแสดงงานตามประเภท
-  const [modalActiveFilter, setModalActiveFilter] = useState("all") // ตัวกรองสำหรับแสดงงานในโมดัล
+
+  // dialog states
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isRescheduleDialogOpen, setIsRescheduleDialogOpen] = useState(false)
   const [isReopenDialogOpen, setIsReopenDialogOpen] = useState(false)
-  const [taskToReschedule, setTaskToReschedule] = useState<Task | null>(null)
-  const [taskToReopen, setTaskToReopen] = useState<Task | null>(null)
-  const [rescheduleReason, setRescheduleReason] = useState("")
-  const [reopenReason, setReopenReason] = useState("")
-  const [newDueDate, setNewDueDate] = useState("")
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [authPassword, setAuthPassword] = useState("")
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [activeFilter, setActiveFilter] = useState("all")
+  const [modalActiveFilter, setModalActiveFilter] = useState("all")
 
-  // Form state for new reminder
+  // form states
   const [formData, setFormData] = useState({
     title: "",
+    details: "",
     date: "",
     frequency: "no-repeat",
-    details: "",
-    link: "",
-    password: "",
-    username: "",
     impact: "",
     hasLogin: false,
+    username: "",    password: "",
+    link: "",
   })
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
+  
+  const [taskToReschedule, setTaskToReschedule] = useState<Task | null>(null)
+  const [taskToReopen, setTaskToReopen] = useState<Task | null>(null)
+  const [reopenReason, setReopenReason] = useState("")
+  const [rescheduleReason, setRescheduleReason] = useState("")
+  const [newDueDate, setNewDueDate] = useState("")
+  
+  // Load notifications on component mount only
+  useEffect(() => {  const loadNotifications = async () => {
       try {
-        const { data } = await axios.get("/api/notifications", {
-          withCredentials: true,
-        })
+        console.log("Fetching notifications...", { selectedMonth, selectedYear })
+        
+        let allNotifications: APINotification[] = []
+        let currentPage = 1
+        let hasMorePages = true
+        let retryCount = 0
+        const maxRetries = 3
+        const delayMs = 1000 // 1 second delay between requests
+        
+        while (hasMorePages && retryCount < maxRetries) {
+          try {
+            // Add delay between requests
+            if (currentPage > 1) {
+              await new Promise(resolve => setTimeout(resolve, delayMs))
+            }
+            
+            const response = await notificationsApi.getAll(currentPage)
+            console.log(`Page ${currentPage} API Response:`, response)
+            
+            if (!response || !response.data || !response.meta) {
+              console.error("Invalid response format:", response)
+              break
+            }
 
-        const mappedTasks: Task[] = data.map((rawTask: any) => {
-          const task = {
-            id: rawTask.id,
-            title: rawTask.title,
-            details: rawTask.message,
-            dueDate: rawTask.scheduledAt?.split("T")[0],
-            done: rawTask.status === "DONE",
-            priority: "pending" as const,
+            allNotifications = [...allNotifications, ...response.data]
+            
+            hasMorePages = currentPage < response.meta.totalPages
+            currentPage++
+            retryCount = 0 // Reset retry count on successful request
+          } catch (err) {
+            if (axios.isAxiosError(err) && err.response?.status === 429) {
+              retryCount++
+              console.log(`Rate limited, retry ${retryCount}/${maxRetries}. Waiting ${delayMs}ms...`)
+              await new Promise(resolve => setTimeout(resolve, delayMs))
+              continue
+            }
+            throw err // Re-throw other errors
+          }
+        }
+        
+        console.log(`Found ${allNotifications.length} total notifications`)        // Map API response to Task format with proper date handling
+        const mappedTasks = allNotifications.map((notification: APINotification) => {
+          const dueDate = notification.dueDate || notification.scheduledAt?.split("T")[0]
+          const task: Task = {
+            id: notification.id,
+            title: notification.title,
+            details: notification.message,
+            dueDate,
+            done: notification.status === "DONE",
+            priority: "pending",
+            rescheduleHistory: notification.rescheduleHistory,
+            reopenHistory: notification.reopenHistory
           }
           return updateTaskPriority(task)
         })
 
-        const now = new Date()
-        const currentYear = now.getFullYear()
-        const currentMonth = now.getMonth() + 1
+        // Store all tasks
+        setAllTasks(mappedTasks)
 
-        const tasksInCurrentMonth = mappedTasks.filter((task) => {
+        // Filter tasks for current month
+        const tasksInCurrentMonth = mappedTasks.filter((task: Task) => {
           if (!task.dueDate) return false
-          const [taskYear, taskMonth] = task.dueDate.split("-").map(Number)
-          return taskYear === currentYear && taskMonth === currentMonth
+          const taskDate = new Date(task.dueDate)
+          const taskMonth = taskDate.getMonth() + 1 // JavaScript months are 0-based
+          const taskYear = taskDate.getFullYear()
+          
+          console.log("Comparing dates:", {
+            task: task.title,
+            taskDate: task.dueDate,
+            taskMonth,
+            taskYear,
+            selectedMonth,
+            selectedYear,
+            match: taskYear === selectedYear && taskMonth === selectedMonth
+          })
+          
+          return taskYear === selectedYear && taskMonth === selectedMonth
         })
-
+        
+        console.log("Tasks in current month:", tasksInCurrentMonth)
         setTasks(tasksInCurrentMonth)
       } catch (err) {
         console.error("Failed to fetch notifications:", err)
+        if (axios.isAxiosError(err)) {
+          console.error("API Error Details:", {
+            status: err.response?.status,
+            data: err.response?.data,
+            headers: err.response?.headers
+          })
+        }
       }
     }
+    
+    loadNotifications()
+  }, [selectedMonth, selectedYear])
 
-    fetchNotifications()
-  }, [])
+  // Handle edit task
+  useEffect(() => {
+    if (editTask) {
+      setFormData({
+        title: editTask.title || "",
+        details: editTask.details || "",
+        date: editTask.dueDate || "",
+        frequency: (editTask.frequency as string) || "no-repeat",
+        impact: editTask.impact || "",
+        hasLogin: editTask.hasLogin || false,
+        username: editTask.username || "",
+        password: editTask.password || "",
+        link: editTask.link || "",
+      });
+    }
+  }, [editTask]);
 
   // ===== TASK MANAGEMENT FUNCTIONS =====
-  // บันทึกการแก้ไขงาน
-  const handleSaveEdit = () => {
-    if (!editTask) return
-    const updated = updateTaskPriority(editTask)
-    setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
-    setEditTask(null)
-  }
-
-  // อัพเดทความสำคัญของงานตามวันที่กำหนด
+  // Set task priority based on due date
   const updateTaskPriority = (task: Task): Task => {
-    const todayDate = new Date()
-    const due = task.dueDate ? new Date(task.dueDate) : new Date()
+    if (!task.dueDate) return { ...task, priority: "pending" }
 
-    // เคลียร์เวลาทั้งคู่เพื่อเปรียบเทียบเฉพาะวัน
+    const todayDate = new Date()
     todayDate.setHours(0, 0, 0, 0)
+
+    const due = new Date(task.dueDate)
     due.setHours(0, 0, 0, 0)
 
     const diffInDays = Math.floor((due.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24))
 
-    if (diffInDays < 0) return { ...task, priority: "overdue" } // 👈 เลยกำหนด
+    if (diffInDays < 0) return { ...task, priority: "overdue" } 
     if (diffInDays === 0) return { ...task, priority: "today" }
     if (diffInDays <= 3) return { ...task, priority: "urgent" }
     return { ...task, priority: "pending" }
   }
 
-  // Function to handle rescheduling a task
-  const handleRescheduleTask = () => {
-    if (!taskToReschedule || !rescheduleReason.trim() || !newDueDate) return
-
-    const updatedTask = {
-      ...taskToReschedule,
-      dueDate: newDueDate,
-      rescheduleReason,
-      rescheduleDate: new Date().toISOString(),
-    }
-
-    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)))
-    setTaskToReschedule(null)
-    setRescheduleReason("")
+  // Reset form to initial state
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      details: "",
+      date: "",
+      frequency: "no-repeat",
+      impact: "",
+      hasLogin: false,
+      username: "",
+      password: "",
+      link: "",
+    })
     setNewDueDate("")
-    setIsRescheduleDialogOpen(false)
+    setEditTask(null)
   }
 
-  // Function to handle reopening a completed task
-  const handleReopenTask = () => {
-    if (!taskToReopen || !reopenReason.trim()) return
-
-    const updatedTask = {
-      ...taskToReopen,
-      done: false,
-      reopenReason,
-      reopenDate: new Date().toISOString(),
+  // Form change handlers
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target
+    if (type === 'checkbox') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: (e.target as HTMLInputElement).checked
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }))
     }
-
-    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)))
-    setTaskToReopen(null)
-    setReopenReason("")
-    setIsReopenDialogOpen(false)
   }
 
-  // Function to open the reschedule dialog
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  // Function to open reschedule dialog
   const openRescheduleDialog = (task: Task) => {
     setTaskToReschedule(task)
-    setNewDueDate(task.dueDate || "")
     setIsRescheduleDialogOpen(true)
   }
 
-  // Function to open the reopen dialog
+  // Function to open reopen dialog
   const openReopenDialog = (task: Task) => {
     setTaskToReopen(task)
     setIsReopenDialogOpen(true)
   }
 
-  // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value,
+  // Function to change month/year
+  const changeMonth = (month: number, year: number) => {
+    console.log("Changing month/year to:", { month, year })
+    setSelectedMonth(month)
+    setSelectedYear(year)
+    
+    // กรองข้อมูลใหม่จาก allTasks
+    const filteredTasks = allTasks.filter((task: Task) => {
+      if (!task.dueDate) return false
+      const taskDate = new Date(task.dueDate)
+      const taskMonth = taskDate.getMonth() + 1 // JavaScript months are 0-based
+      const taskYear = taskDate.getFullYear()
+      return taskYear === year && taskMonth === month
     })
+    
+    console.log("Filtered tasks after month change:", filteredTasks)
+    setTasks(filteredTasks)
   }
 
-  // Handle select changes
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData({
-      ...formData,
-      [name]: value,
-    })
+  // Handler for reopening a task
+  const handleReopenTask = async () => {
+    if (!taskToReopen || !reopenReason.trim()) return
+
+    try {
+      const updatedTask = await notificationApi.reopenNotification(
+        taskToReopen.id,
+        reopenReason
+      )
+
+      setTasks(prev => prev.map(t => 
+        t.id === updatedTask.id 
+          ? { ...t, done: false, reopenHistory: updatedTask.reopenHistory }
+          : t
+      ))
+
+      setTaskToReopen(null)
+      setReopenReason("")
+      setIsReopenDialogOpen(false)
+    } catch (error) {
+      console.error('Failed to reopen task:', error)
+    }
   }
 
-  // Add or edit task
-  const handleAddTask = () => {
-    // Validate required fields
-    if (!formData.title.trim() || !formData.date || !formData.details.trim() || !formData.impact.trim()) {
-      // Show error or return
+  // Handler for rescheduling a task
+  const handleRescheduleTask = async () => {
+    if (!taskToReschedule || !rescheduleReason.trim() || !newDueDate) return
+
+    try {
+      const updatedTask = await notificationApi.rescheduleNotification(
+        taskToReschedule.id,
+        newDueDate,
+        rescheduleReason
+      )
+
+      setTasks(prev => prev.map(t => 
+        t.id === updatedTask.id 
+          ? {
+              ...t,
+              dueDate: updatedTask.scheduledAt?.split('T')[0],
+              rescheduleHistory: updatedTask.rescheduleHistory
+            }
+          : t
+      ))
+
+      setTaskToReschedule(null)
+      setRescheduleReason("")
+      setNewDueDate("")
+      setIsRescheduleDialogOpen(false)
+    } catch (error) {
+      console.error('Failed to reschedule task:', error)
+    }
+  }
+
+  // Toggle task completion status
+  const handleToggleTaskDone = async (id: string) => {
+    const target = tasks.find((t) => t.id === id)
+    if (!target) return
+
+    if (target.done) {
+      openReopenDialog(target)
       return
     }
 
-    // สร้างข้อมูล password จาก username และ password ถ้ามีการติ๊กช่อง hasLogin
-    let passwordData = ""
-    if (formData.hasLogin && (formData.username || formData.password)) {
-      passwordData = `user: ${formData.username}\npassword: ${formData.password}`
+    try {
+      await notificationApi.updateNotificationStatus(id, 'DONE')
+      
+      setTasks(prev => prev.map(t => 
+        t.id === id 
+          ? { ...t, done: true, priority: "pending" }
+          : t
+      ))
+    } catch (error) {
+      console.error("Failed to update task status:", error)
     }
-
-    if (editTask) {
-      // Update existing task
-      const updatedTask = {
-        ...editTask,
-        title: formData.title,
-        details: formData.details,
-        dueDate: formData.date,
-      }
-
-      const taskWithUpdatedPriority = updateTaskPriority(updatedTask)
-      setTasks(tasks.map((t) => (t.id === editTask.id ? taskWithUpdatedPriority : t)))
-    } else {
-      // Create new task
-      const newTask = {
-        id: String(tasks.length + 1),
-        title: formData.title,
-        details: formData.details,
-        dueDate: formData.date,
-        done: false,
-        priority: "pending" as const,
-      }
-
-      const updatedTask = updateTaskPriority(newTask)
-      setTasks([...tasks, updatedTask])
-    }
-
-    setIsAddDialogOpen(false)
-    setEditTask(null)
-    resetForm()
   }
-
-  // Reset form or populate with edit data
-  const resetForm = () => {
+  // Load existing task data when editing
+  useEffect(() => {
     if (editTask) {
       setFormData({
         title: editTask.title || "",
-        date: editTask.dueDate || "",
-        frequency: editTask.frequency || "no-repeat",
         details: editTask.details || "",
-        link: editTask.link || "",
-        password: editTask.password || "",
-        username: editTask.username || "",
+        date: editTask.dueDate || "",
+        frequency: (editTask.frequency as string) || "no-repeat",
         impact: editTask.impact || "",
         hasLogin: editTask.hasLogin || false,
-      })
-    } else {
-      // ตรวจสอบว่ามีการเลือกวันที่จากปฏิทินหรือไม่
-      const selectedDate = window.selectedCalendarDate || ""
-
-      setFormData({
-        title: "",
-        date: selectedDate,
-        frequency: "no-repeat",
-        details: "",
-        link: "",
-        password: "",
-        username: "",
-        impact: "",
-        hasLogin: false,
-      })
-
-      // ล้างค่าวันที่ที่เลือกจากปฏิทิน
-      window.selectedCalendarDate = ""
+        username: editTask.username || "",
+        password: editTask.password || "",
+        link: editTask.link || "",
+      });
     }
-  }
+  }, [editTask]);
+  // Add or edit task
+  const handleAddTask = async () => {
+    if (!formData.title.trim() || !formData.date || !formData.details.trim() || !formData.impact.trim()) {
+      return
+    }
 
-  // Handle authentication for viewing password
-  const handleAuthenticate = () => {
-    // ในระบบจริงควรมีการตรวจสอบรหัสผ่านกับ backend
-    // สำหรับตัวอย่างนี้จะแสดงรหัสผ่านเมื่อกดปุ่มยืนยัน
-    setIsPasswordVisible(true)
+    try {
+      // Create message with all details
+      const message = `${formData.details}\n\nผลกระทบ: ${formData.impact}${
+        formData.hasLogin 
+          ? `\n\nข้อมูลการเข้าสู่ระบบ:\nUsername: ${formData.username}\nPassword: ${formData.password}` 
+          : ''
+      }`
+
+      const repeatIntervalMap = {
+        'no-repeat': 0,
+        'daily': 1,
+        'weekly': 7,
+        'monthly': 30,
+        'quarterly': 90,
+        'yearly': 365
+      }
+
+      if (editTask) {
+        // Update existing task
+        try {          await notificationsApi.update(editTask.id, {
+            title: formData.title,
+            message: message,
+            scheduledAt: new Date(formData.date).toISOString()
+          } as any); // TODO: Fix types
+          
+          // Update local state
+          setTasks(prev => prev.map(t => 
+            t.id === editTask.id 
+            ? {
+                ...t,
+                title: formData.title,
+                details: message,
+                dueDate: formData.date,
+                frequency: formData.frequency as Task['frequency'],
+                impact: formData.impact,
+                link: formData.link,
+                hasLogin: formData.hasLogin,
+                username: formData.username,
+                password: formData.password
+              }
+            : t
+          ))
+        } catch (error) {
+          console.error('Error updating notification:', error);
+        }
+      } else {        // Create new task
+        const notification = await notificationsApi.create({
+          title: formData.title,
+          message,
+          type: 'TODO',
+          scheduledAt: new Date(formData.date).toISOString(),
+          category: 'TASK',
+          link: formData.link || undefined,
+          urgencyDays: 3,
+          repeatIntervalDays: repeatIntervalMap[formData.frequency as keyof typeof repeatIntervalMap],
+          recipients: [{ type: 'ALL' }]
+        } as any) // TODO: Fix types
+
+        // Convert API response to Task format
+        const newTask: Task = {
+          id: notification.id,
+          title: notification.title,
+          details: notification.message,
+          dueDate: notification.scheduledAt?.split('T')[0],
+          done: false,
+          priority: 'pending',
+          frequency: formData.frequency as Task['frequency'],
+          impact: formData.impact,
+          link: formData.link,
+          hasLogin: formData.hasLogin,
+          username: formData.username,
+          password: formData.password
+        }
+
+        setTasks(prev => [...prev, updateTaskPriority(newTask)])
+      }
+      
+      setIsAddDialogOpen(false)
+      resetForm()
+    } catch (error) {
+      console.error('Failed to create or update notification:', error)
+    }
   }
 
   // ===== TASK STATISTICS =====
@@ -296,33 +475,6 @@ export default function AdminNotificationPage() {
     overdue: overdueCount,
     other: otherPendingCount,
     done: doneCount,
-  }
-
-  // สลับสถานะงานเสร็จ/ไม่เสร็จ
-  const handleToggleTaskDone = async (id: string) => {
-    const target = tasks.find((t) => t.id === id)
-    if (!target) return
-
-    // ถ้า tick งานเสร็จแล้ว → reopen dialog เหมือนเดิม
-    if (target.done) {
-      openReopenDialog(target)
-      return
-    }
-
-    try {
-      // In a real application, you would update the task status in your API
-      // await axios.patch(
-      //   `/api/notifications/${id}`,
-      //   {
-      //     status: "DONE",
-      //   },
-      //   { withCredentials: true }
-      // );
-
-      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: true, priority: "pending" } : t)))
-    } catch (e) {
-      console.error("update status fail", e)
-    }
   }
 
   // อัพเดทเวลาทุกวินาที
@@ -400,14 +552,15 @@ export default function AdminNotificationPage() {
       {/* ===== EDIT TASK DIALOG ===== */}
       <Dialog open={false} onOpenChange={() => {}}>
         {/* This dialog is no longer needed as we're using the Add Task Dialog for editing */}
-      </Dialog>
-
-      {/* ===== CALENDAR SECTION ===== */}
+      </Dialog>      {/* ===== CALENDAR SECTION ===== */}
       <TaskCalendar
         tasks={tasks}
         setIsAddDialogOpen={setIsAddDialogOpen}
         setEditTask={setEditTask}
         resetForm={resetForm}
+        selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
+        onMonthChange={changeMonth}
       />
 
       {/* ===== RESCHEDULE TASK DIALOG ===== */}

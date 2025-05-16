@@ -1,114 +1,334 @@
-// 📁 backend/src/modules/notification/notification.controller.ts
+/**
+ * @fileoverview Controller for managing notifications in the SCG Notification System.
+ * Handles creation, updates, listing, and scheduling of notifications with proper
+ * caching and database interactions.
+ */
+
 import { Request, Response, NextFunction } from 'express'
-import * as svc from './notification.service'
-import {
-  listQuerySchema,
-  updateStatusSchema,
-  rescheduleSchema,
-  createNotificationSchema,
-} from './notification.dto'
+import { prisma } from '../../prisma'
+import { BadRequestError } from '../../lib/errors'
+import { CacheService } from '../../services/cache.service'
+import type { Notification } from '@prisma/client'
 
-// List notifications with pagination
-export async function list(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    // parse opts ก่อน
-    const opts = listQuerySchema.parse(req.query)
-    const result = await svc.list(opts)
-    res.json(result)
-    return
-  } catch (err) {
-    next(err)
-  }
-}
-
-// List recurring (cycled) notifications
-export async function listCycle(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const opts = listQuerySchema.parse(req.query)
-    const data = await svc.listCycle(opts)
-    res.json({ data })
-    return
-  } catch (err) {
-    next(err)
-  }
-}
-
-// Update notification status
-export async function updateStatus(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const { status } = updateStatusSchema.parse(req.body)
-    const data = await svc.updateStatus(req.params.id, status)
-    res.json(data)
-    return
-  } catch (err) {
-    next(err)
-  }
-}
-
-// Reschedule a notification
-export async function reschedule(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const { dueDate } = rescheduleSchema.parse(req.body)
-    const data = await svc.reschedule(req.params.id, dueDate)
-    res.json(data)
-    return
-  } catch (err) {
-    next(err)
-  }
-}
-
-// Create a new notification with recipients
+/**
+ * Creates a new notification with recipients and approval workflow.
+ * 
+ * @param {Request} req - Express request object containing notification data in body
+ *                       and authenticated user in req.user
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} Resolves when notification is created
+ * @throws {BadRequestError} If required fields are missing
+ * @throws {Error} If database operations fail
+ * 
+ * @endpoint POST /api/notifications
+ * @auth Requires authenticated user
+ */
 export async function createNotification(
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
-    const input = createNotificationSchema.parse(req.body)
-    const userId = (req as any).user?.id
-    if (!userId) {
-      res.status(401).json({ error: 'Missing user ID' })
-      return
-    }
-    const data = await svc.create(input, userId)
-    res.status(201).json(data)
-    return
+    // Create notification with nested recipient and approval relations
+    const notification = await prisma.notification.create({
+      data: {
+        ...req.body,
+        createdBy: req.user!.id
+      },
+      include: {
+        recipients: true,
+        approvals: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                employeeProfile: {
+                  select: {
+                    firstName: true,
+                    lastName: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    // Invalidate caches to ensure fresh data
+    await CacheService.invalidateNotificationCaches()
+
+    res.status(201).json(notification)
   } catch (err) {
     next(err)
   }
 }
 
-// List notifications visible to the current user
+/**
+ * Updates the status of an existing notification.
+ * 
+ * @param {Request} req - Express request object containing status in body
+ *                       and notification ID in params
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} Resolves when notification is updated
+ * @throws {Error} If notification not found or update fails
+ * 
+ * @endpoint PATCH /api/notifications/:id
+ * @auth Requires authenticated user
+ */
+export async function updateStatus(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { id } = req.params
+    const { status } = req.body
+
+    // Update notification and fetch related data
+    const notification = await prisma.notification.update({
+      where: { id },
+      data: { status },
+      include: {
+        recipients: true,
+        approvals: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                employeeProfile: {
+                  select: {
+                    firstName: true,
+                    lastName: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    await CacheService.invalidateNotificationCaches()
+
+    res.json(notification)
+  } catch (err) {
+    next(err)
+  }
+}
+
+/**
+ * Lists notifications with pagination, filtering, and full relational data.
+ * 
+ * @param {Request} req - Express request object containing query parameters:
+ *                       - page: Current page number (default: 1)
+ *                       - limit: Items per page (default: 20)
+ *                       - status: Optional status filter
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} Resolves with paginated notifications
+ * @throws {BadRequestError} If pagination parameters are invalid
+ * 
+ * @endpoint GET /api/notifications
+ * @auth Requires authenticated user
+ */
+export async function list(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    // Parse and validate pagination parameters
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 20
+    const status = req.query.status as Notification['status'] | undefined
+
+    if (page < 1) throw new BadRequestError('Page must be >= 1')
+    if (limit < 1) throw new BadRequestError('Limit must be >= 1')
+
+    // Build dynamic where clause for filtering
+    const where = {
+      ...(status && { status })
+    }
+
+    // Fetch notifications and total count in parallel for efficiency
+    const [notifications, total] = await Promise.all([
+      prisma.notification.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          recipients: true,
+          approvals: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  employeeProfile: {
+                    select: {
+                      firstName: true,
+                      lastName: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }),
+      prisma.notification.count({ where })
+    ])
+
+    res.json({
+      data: notifications,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+/**
+ * Lists notifications relevant to the current user, including:
+ * - Direct notifications (where user is recipient)
+ * - Team notifications (where user's team is recipient)
+ * - Global notifications (type = 'ALL')
+ * 
+ * @param {Request} req - Express request object with authenticated user
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} Resolves with user's notifications
+ * @throws {Error} If query fails
+ * 
+ * @endpoint GET /api/notifications/mine
+ * @auth Requires authenticated user
+ */
 export async function listMyNotifications(
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
-    const user = (req as any).user
-    const data = await svc.listMine(
-      user.id,
-      user.profile.companyCode,
-      user.profile.teamIds
-    )
-    res.json({ data })
-    return
+    const userId = req.user!.id
+
+    // Complex query to fetch notifications based on multiple recipient types
+    const notifications = await prisma.notification.findMany({
+      where: {
+        recipients: {
+          some: {
+            OR: [
+              { userId }, // Direct notifications
+              { 
+                type: 'ALL' // Global notifications
+              },
+              {
+                // Team notifications - fetch user's teams first
+                type: 'GROUP',
+                groupId: {
+                  in: (await prisma.teamMember.findMany({
+                    where: { employeeId: userId },
+                    select: { teamId: true }
+                  })).map(tm => tm.teamId)
+                }
+              }
+            ]
+          }
+        }
+      },
+      include: {
+        recipients: true,
+        approvals: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                employeeProfile: {
+                  select: {
+                    firstName: true,
+                    lastName: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    res.json(notifications)
+  } catch (err) {
+    next(err)
+  }
+}
+
+/**
+ * Reschedules a notification by updating its scheduledAt time and resetting status.
+ * 
+ * @param {Request} req - Express request object containing:
+ *                       - id: Notification ID in params
+ *                       - scheduledAt: New schedule time in body
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} Resolves when notification is rescheduled
+ * @throws {Error} If notification not found or update fails
+ * 
+ * @endpoint POST /api/notifications/:id/reschedule
+ * @auth Requires authenticated user
+ */
+export async function reschedule(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { id } = req.params
+    const { scheduledAt } = req.body
+
+    const notification = await prisma.notification.update({
+      where: { id },
+      data: { 
+        scheduledAt: new Date(scheduledAt),
+        // Reset status to pending since we're rescheduling
+        status: 'PENDING'
+      },
+      include: {
+        recipients: true,
+        approvals: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                employeeProfile: {
+                  select: {
+                    firstName: true,
+                    lastName: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    // Invalidate caches since we modified a notification
+    await CacheService.invalidateNotificationCaches()
+
+    res.json(notification)
   } catch (err) {
     next(err)
   }

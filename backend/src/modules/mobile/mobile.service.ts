@@ -1,8 +1,30 @@
+/**
+ * @fileoverview Service layer for mobile app-specific functionality.
+ * Handles dashboard metrics, calendar events, notification preferences,
+ * and user action history for the mobile client interface.
+ * 
+ * Related Prisma Models:
+ * - Notification
+ * - Approval
+ * - User
+ * - UserNotificationPref
+ * - SecurityLog
+ */
+
 import { prisma } from '../../prisma'
 import type { BoxesQuery, CalendarQuery, NotifSettings } from './mobile.dto'
 
 /**
- * ดึงข้อมูล Boxes สำหรับหน้า Dashboard (Mobile)
+ * Retrieves dashboard metrics for the mobile app interface
+ * Includes counts of pending notifications, approvals, and recent team updates
+ * 
+ * @param {BoxesQuery} opts - Query parameters
+ * @param {string} opts.companyCode - Company code to filter metrics by
+ * @returns {Promise<{
+ *   notifications: number,
+ *   approvals: number,
+ *   teamUpdates: number
+ * }>} Dashboard metric counts
  */
 export async function getBoxes(opts: BoxesQuery) {
   const { companyCode } = opts
@@ -10,20 +32,31 @@ export async function getBoxes(opts: BoxesQuery) {
   const [notifications, approvals, teamUpdates] = await Promise.all([
     prisma.notification.count({
       where: {
-        companyCode,
+        recipients: {
+          some: {
+            type: 'COMPANY',
+            companyCode: opts.companyCode
+          }
+        },
         status: 'PENDING'
       }
     }),
     prisma.approval.count({
       where: {
-        companyCode,
-        status: 'PENDING'
+        user: {
+          employeeProfile: {
+            companyCode: opts.companyCode
+          }
+        },
+        response: 'PENDING'
       }
     }),
-    prisma.teamNotification.count({
+    prisma.notification.count({
       where: {
-        team: {
-          companyCode
+        recipients: {
+          some: {
+            type: 'GROUP'
+          }
         },
         createdAt: {
           gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
@@ -40,7 +73,20 @@ export async function getBoxes(opts: BoxesQuery) {
 }
 
 /**
- * ดึงข้อมูลปฏิทิน
+ * Retrieves calendar events for a specific month
+ * Returns notifications with due dates in the specified month
+ * 
+ * @param {CalendarQuery} opts - Calendar query parameters
+ * @param {string} opts.companyCode - Company code to filter events by
+ * @param {number} [opts.month] - Target month (1-12), defaults to current month
+ * @param {number} [opts.year] - Target year, defaults to current year
+ * @returns {Promise<Array<{
+ *   id: string,
+ *   title: string,
+ *   dueDate: Date,
+ *   status: string,
+ *   type: 'notification'
+ * }>>} Calendar events for the month
  */
 export async function getCalendar(opts: CalendarQuery) {
   const { companyCode, month, year } = opts
@@ -54,7 +100,12 @@ export async function getCalendar(opts: CalendarQuery) {
 
   const events = await prisma.notification.findMany({
     where: {
-      companyCode,
+      recipients: {
+        some: {
+          type: 'COMPANY',
+          companyCode
+        }
+      },
       dueDate: {
         gte: startDate,
         lte: endDate
@@ -64,8 +115,7 @@ export async function getCalendar(opts: CalendarQuery) {
       id: true,
       title: true,
       dueDate: true,
-      status: true,
-      priority: true
+      status: true
     },
     orderBy: {
       dueDate: 'asc'
@@ -74,15 +124,26 @@ export async function getCalendar(opts: CalendarQuery) {
 
   return events.map(event => ({
     ...event,
-    type: 'notification'
+    type: 'notification' as const
   }))
 }
 
 /**
- * ดึงข้อมูลการตั้งค่าการแจ้งเตือน
+ * Retrieves notification preferences for a user
+ * Returns default settings if no custom settings exist
+ * 
+ * @param {string} userId - ID of the user
+ * @returns {Promise<{
+ *   emailEnabled: boolean,
+ *   pushEnabled: boolean,
+ *   smsEnabled: boolean,
+ *   digestFreq: string,
+ *   quietStart: string,
+ *   quietEnd: string
+ * }>} User's notification settings
  */
 export async function getNotificationSettings(userId: string) {
-  const settings = await prisma.notificationSettings.findUnique({
+  const settings = await prisma.userNotificationPref.findUnique({
     where: { userId }
   })
 
@@ -91,16 +152,22 @@ export async function getNotificationSettings(userId: string) {
     pushEnabled: true,
     smsEnabled: false,
     digestFreq: 'NEVER',
-    quietStart: '22:00',
-    quietEnd: '07:00'
+    sound: 'Default',
+    quietHoursStart: new Date('2000-01-01T22:00:00Z'),
+    quietHoursEnd: new Date('2000-01-01T07:00:00Z')
   }
 }
 
 /**
- * อัพเดทการตั้งค่าการแจ้งเตือน
+ * Updates notification preferences for a user
+ * Creates new settings or updates existing ones
+ * 
+ * @param {string} userId - ID of the user
+ * @param {NotifSettings} settings - New notification settings
+ * @returns {Promise<UserNotificationPref>} Updated settings
  */
 export async function updateNotificationSettings(userId: string, settings: NotifSettings) {
-  return prisma.notificationSettings.upsert({
+  return prisma.userNotificationPref.upsert({
     where: { userId },
     create: {
       userId,
@@ -111,7 +178,11 @@ export async function updateNotificationSettings(userId: string, settings: Notif
 }
 
 /**
- * ดึงประวัติการทำรายการ
+ * Retrieves recent user actions from security logs
+ * Used for displaying activity history in the mobile app
+ * 
+ * @param {string} userId - ID of the user
+ * @returns {Promise<SecurityLog[]>} Recent security events
  */
 export async function getActionHistory(userId: string) {
   return prisma.securityLog.findMany({

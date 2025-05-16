@@ -1,5 +1,25 @@
+/**
+ * @fileoverview Service layer for administrative functions.
+ * Provides company-wide analytics and metrics for system administrators.
+ * 
+ * Related Prisma Models:
+ * - EmployeeProfile
+ * - Team
+ * - Notification
+ * - Approval
+ */
+
 import { prisma }  from '../../prisma'
 
+/**
+ * Company Overview Statistics
+ * @typedef {Object} CompanyOverview
+ * @property {string} companyCode - Unique identifier for the company
+ * @property {number} employeeCount - Total number of employees in the company
+ * @property {number} teamCount - Number of teams led by company employees
+ * @property {number} notificationCount - Number of notifications created by company employees
+ * @property {number} pendingApprovalCount - Number of pending approvals for company employees
+ */
 export interface CompanyOverview {
   companyCode: string
   employeeCount: number
@@ -9,7 +29,38 @@ export interface CompanyOverview {
 }
 
 class AdminService {
-  /** คืนภาพรวมแบบสรุปตาม companyCode */
+  /**
+   * Retrieves aggregated statistics for each company
+   * Groups and summarizes key metrics by company code
+   * 
+   * Process:
+   * 1. Groups employees by company to get base counts
+   * 2. For each company:
+   *    - Gets list of employee user IDs
+   *    - Counts teams led by company employees
+   *    - Counts notifications created by company employees
+   *    - Counts pending approvals for company employees
+   * 
+   * @returns {Promise<CompanyOverview[]>} Array of company overview statistics
+   * 
+   * @prismaModel EmployeeProfile, Team, Notification, Approval
+   * @aggregation Multiple groupBy and count operations
+   * @performance May be slow with large datasets due to multiple queries per company
+   * 
+   * @example
+   * const overviews = await adminService.getOverview()
+   * // Returns:
+   * // [
+   * //   {
+   * //     companyCode: "SCG001",
+   * //     employeeCount: 150,
+   * //     teamCount: 12,
+   * //     notificationCount: 450,
+   * //     pendingApprovalCount: 23
+   * //   },
+   * //   ...
+   * // ]
+   */
   async getOverview(): Promise<CompanyOverview[]> {
     // 1) สรุปจำนวน employees ต่อ companyCode
     const groups = await prisma.employeeProfile.groupBy({

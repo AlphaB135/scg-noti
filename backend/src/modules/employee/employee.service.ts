@@ -1,9 +1,48 @@
+/**
+ * @fileoverview เซอร์วิสสำหรับจัดการข้อมูลพนักงาน
+ * รองรับการค้นหาและดึงข้อมูลโปรไฟล์พนักงานพร้อมการแบ่งหน้า
+ * 
+ * โมเดลที่เกี่ยวข้อง:
+ * - EmployeeProfile (ข้อมูลพนักงาน)
+ * - User (ข้อมูลผู้ใช้)
+ */
+
 import { prisma } from '../../prisma'
 import { EmployeeProfile } from '@prisma/client'
 import { SearchEmployeeOpts } from './employee.dto'
 
 class EmployeeService {
-  /** ค้นหาพนักงาน พร้อม pagination */
+  /**
+   * ค้นหาพนักงานพร้อมการแบ่งหน้า
+   * สามารถค้นหาจากชื่อ, ชื่อเล่น, รหัสพนักงาน และตำแหน่ง
+   * 
+   * @param {SearchEmployeeOpts} opts - ตัวเลือกในการค้นหา
+   * @param {string} opts.query - คำค้นหา
+   * @param {number} opts.skip - จำนวนรายการที่ต้องการข้าม
+   * @param {number} opts.take - จำนวนรายการที่ต้องการดึง
+   * @returns {Promise<{
+   *   items: Array<{
+   *     userId: string, // รหัสผู้ใช้
+   *     companyCode: string, // รหัสบริษัท
+   *     employeeCode: string, // รหัสพนักงาน
+   *     firstName: string, // ชื่อจริง
+   *     lastName: string, // นามสกุล
+   *     nickname?: string, // ชื่อเล่น (ถ้ามี)
+   *     position?: string, // ตำแหน่ง (ถ้ามี)
+   *     user: {
+   *       status: string, // สถานะผู้ใช้
+   *       role: string // บทบาทในระบบ
+   *     }
+   *   }>,
+   *   total: number, // จำนวนผลลัพธ์ทั้งหมด
+   *   page: number, // หน้าปัจจุบัน
+   *   totalPages: number // จำนวนหน้าทั้งหมด
+   * }>} ผลลัพธ์การค้นหาพร้อมข้อมูลการแบ่งหน้า
+   * 
+   * @prismaModel EmployeeProfile, User
+   * @orderBy เรียงตามชื่อ และนามสกุล (A-Z)
+   * @caseInsensitive ไม่คำนึงถึงตัวพิมพ์เล็ก-ใหญ่ในการค้นหา
+   */
   async searchEmployees(opts: SearchEmployeeOpts) {
     const { query, skip, take } = opts
 
