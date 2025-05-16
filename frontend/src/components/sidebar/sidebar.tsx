@@ -1,6 +1,6 @@
 "use client"
 import { Link, useLocation } from "react-router-dom"
-import { Bell, LogOut, Settings, CheckCircle, ChevronDown, Users } from "lucide-react"
+import { Bell, LogOut, Settings, CheckCircle, ChevronDown, Users, Database } from "lucide-react"
 import { useState } from "react"
 
 interface SidebarProps {
@@ -20,6 +20,10 @@ export default function Sidebar({ onLogout }: SidebarProps) {
     ["/audit-logs", "/teammember"].some((path) => location.pathname.startsWith(path)),
   )
 
+  const [superAdminOpen, setSuperAdminOpen] = useState(
+    ["/superadmin"].some((path) => location.pathname.startsWith(path)),
+  )
+
   // Helper function to check if a path is active
   const isActive = (path: string) => {
     return currentPath === path
@@ -29,6 +33,9 @@ export default function Sidebar({ onLogout }: SidebarProps) {
   const isGroupActive = (paths: string[]) => {
     return paths.some((path) => currentPath.startsWith(path))
   }
+
+  // ตรวจสอบว่าเป็นซุปเปอร์แอดมินหรือไม่ (ในตัวอย่างนี้กำหนดให้เป็น true เพื่อแสดงเมนู)
+  const isSuperAdmin = true
 
   return (
     <aside className="hidden md:flex flex-col w-64 fixed inset-y-0 z-50 shadow-lg bg-gradient-to-b from-red-800 to-red-900">
@@ -68,9 +75,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
             <button
               onClick={() => setNotificationOpen(!notificationOpen)}
               className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
-                isGroupActive(["/dashboard", "/manage", "/userlogs"])
-                  ? "bg-white/10 font-medium"
-                  : "hover:bg-white/5"
+                isGroupActive(["/dashboard", "/manage", "/userlogs"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
               }`}
             >
               <div className="flex items-center">
@@ -201,6 +206,45 @@ export default function Sidebar({ onLogout }: SidebarProps) {
               </div>
             )}
           </div>
+
+          {/* Super Admin (Hidden Menu) */}
+          {isSuperAdmin && (
+            <div className="rounded-md overflow-hidden mt-4 border-t border-red-700/30 pt-4">
+              <button
+                onClick={() => setSuperAdminOpen(!superAdminOpen)}
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
+                  isGroupActive(["/superadmin"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
+                }`}
+              >
+                <div className="flex items-center">
+                  <Database className="h-5 w-5 mr-3" />
+                  <span className="flex items-center">
+                    ซุปเปอร์แอดมิน
+                    <span className="ml-2 text-xs px-1.5 py-0.5 bg-yellow-500 text-black rounded-full">พิเศษ</span>
+                  </span>
+                </div>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-200 ${superAdminOpen ? "transform rotate-180" : ""}`}
+                />
+              </button>
+
+              {superAdminOpen && (
+                <div className="ml-4 mt-1 space-y-1">
+                  <Link
+                    to="/superadmin"
+                    className={`block rounded-md px-4 py-2 text-white transition-colors ${
+                      isActive("/superadmin") ? "bg-white/15 font-medium" : "hover:bg-white/10"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mr-2.5"></div>
+                      ประวัติการดำเนินการทั้งหมด
+                    </div>
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Settings */}
           <Link

@@ -29,6 +29,8 @@ import AddEmployee from "./pages/add-employee-page/page";
 
 import TeamMember from "./pages/team-member/page";
 
+import SuperAdmin from "./pages/super-admin-logs/page";
+
 function App() {
   const [, setRole] = useState("");
 
@@ -88,11 +90,19 @@ function App() {
             </RequireAuth>
           }
         />
-                <Route
+        <Route
           path="/teammember"
           element={
             <RequireAuth>
               <TeamMember />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/superadmin"
+          element={
+            <RequireAuth>
+              <SuperAdmin />
             </RequireAuth>
           }
         />
