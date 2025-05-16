@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import axios from 'axios'
 import { notificationsApi } from '@/lib/real-api'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -61,7 +61,8 @@ export default function AdminNotificationPage() {
     frequency: "no-repeat",
     impact: "",
     hasLogin: false,
-    username: "",    password: "",
+    username: "",
+    password: "",
     link: "",
   })
   
@@ -70,105 +71,67 @@ export default function AdminNotificationPage() {
   const [reopenReason, setReopenReason] = useState("")
   const [rescheduleReason, setRescheduleReason] = useState("")
   const [newDueDate, setNewDueDate] = useState("")
-  
-  // Load notifications on component mount only
-  useEffect(() => {  const loadNotifications = async () => {
-      try {
-        console.log("Fetching notifications...", { selectedMonth, selectedYear })
-        
-        let allNotifications: APINotification[] = []
-        let currentPage = 1
-        let hasMorePages = true
-        let retryCount = 0
-        const maxRetries = 3
-        const delayMs = 1000 // 1 second delay between requests
-        
-        while (hasMorePages && retryCount < maxRetries) {
-          try {
-            // Add delay between requests
-            if (currentPage > 1) {
-              await new Promise(resolve => setTimeout(resolve, delayMs))
-            }
-            
-            const response = await notificationsApi.getAll(currentPage)
-            console.log(`Page ${currentPage} API Response:`, response)
-            
-            if (!response || !response.data || !response.meta) {
-              console.error("Invalid response format:", response)
-              break
-            }
-
-            allNotifications = [...allNotifications, ...response.data]
-            
-            hasMorePages = currentPage < response.meta.totalPages
-            currentPage++
-            retryCount = 0 // Reset retry count on successful request
-          } catch (err) {
-            if (axios.isAxiosError(err) && err.response?.status === 429) {
-              retryCount++
-              console.log(`Rate limited, retry ${retryCount}/${maxRetries}. Waiting ${delayMs}ms...`)
-              await new Promise(resolve => setTimeout(resolve, delayMs))
-              continue
-            }
-            throw err // Re-throw other errors
-          }
-        }
-        
-        console.log(`Found ${allNotifications.length} total notifications`)        // Map API response to Task format with proper date handling
-        const mappedTasks = allNotifications.map((notification: APINotification) => {
-          const dueDate = notification.dueDate || notification.scheduledAt?.split("T")[0]
-          const task: Task = {
-            id: notification.id,
-            title: notification.title,
-            details: notification.message,
-            dueDate,
-            done: notification.status === "DONE",
-            priority: "pending",
-            rescheduleHistory: notification.rescheduleHistory,
-            reopenHistory: notification.reopenHistory
-          }
-          return updateTaskPriority(task)
-        })
-
-        // Store all tasks
-        setAllTasks(mappedTasks)
-
-        // Filter tasks for current month
-        const tasksInCurrentMonth = mappedTasks.filter((task: Task) => {
-          if (!task.dueDate) return false
-          const taskDate = new Date(task.dueDate)
-          const taskMonth = taskDate.getMonth() + 1 // JavaScript months are 0-based
-          const taskYear = taskDate.getFullYear()
-          
-          console.log("Comparing dates:", {
-            task: task.title,
-            taskDate: task.dueDate,
-            taskMonth,
-            taskYear,
-            selectedMonth,
-            selectedYear,
-            match: taskYear === selectedYear && taskMonth === selectedMonth
-          })
-          
-          return taskYear === selectedYear && taskMonth === selectedMonth
-        })
-        
-        console.log("Tasks in current month:", tasksInCurrentMonth)
-        setTasks(tasksInCurrentMonth)
-      } catch (err) {
-        console.error("Failed to fetch notifications:", err)
-        if (axios.isAxiosError(err)) {
-          console.error("API Error Details:", {
-            status: err.response?.status,
-            data: err.response?.data,
-            headers: err.response?.headers
-          })
-        }
+  // แยกฟังก์ชันโหลดข้อมูลเป็นส่วนๆ
+  const loadCurrentMonthData = useCallback(async () => {
+    try {
+      // โหลดข้อมูลพร้อมกันทั้ง calendar และ task list
+      const [monthResponse, allResponse] = await Promise.all([
+        notificationsApi.getCurrentMonthNotifications(selectedMonth, selectedYear),
+        notificationsApi.getAll(1, 100)
+      ])
+      
+      if (!monthResponse?.data) {
+        throw new Error("Invalid response format")
       }
+      
+      const mappedTasks = monthResponse.data.map(notification => ({
+        id: notification.id,
+        title: notification.title,
+        details: notification.message || "",
+        dueDate: notification.scheduledAt?.split("T")[0] || "",
+        done: notification.status === "DONE",
+        priority: "pending" as const,
+        frequency: "no-repeat" as const,
+        impact: "",
+        link: "",
+        hasLogin: false,
+        username: "",
+        password: ""
+      } satisfies Task))
+
+      // อัพเดทสถานะงานก่อนเซ็ตค่า
+      const updatedTasks = mappedTasks.map(task => updateTaskPriority(task))
+      setTasks(updatedTasks)
+      
+      if (allResponse?.data) {
+        const allMappedTasks = allResponse.data.map(notification => ({
+          id: notification.id,
+          title: notification.title,
+          details: notification.message || "",
+          dueDate: notification.scheduledAt?.split("T")[0] || "",
+          done: notification.status === "DONE",
+          priority: "pending" as const,
+          frequency: "no-repeat" as const,
+          impact: "",
+          link: "",
+          hasLogin: false,
+          username: "",
+          password: ""
+        } satisfies Task))
+
+        // อัพเดทสถานะงานก่อนเซ็ตค่า
+        const updatedAllTasks = allMappedTasks.map(task => updateTaskPriority(task))
+        setAllTasks(updatedAllTasks)
+      }
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err)
     }
-    
-    loadNotifications()
   }, [selectedMonth, selectedYear])
+
+  // โหลดข้อมูลตอนเริ่มต้นและเมื่อเปลี่ยนเดือน/ปี
+  useEffect(() => {
+    loadCurrentMonthData()
+  }, [loadCurrentMonthData])
 
   // Handle edit task
   useEffect(() => {
@@ -200,10 +163,10 @@ export default function AdminNotificationPage() {
 
     const diffInDays = Math.floor((due.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24))
 
-    if (diffInDays < 0) return { ...task, priority: "overdue" } 
-    if (diffInDays === 0) return { ...task, priority: "today" }
-    if (diffInDays <= 3) return { ...task, priority: "urgent" }
-    return { ...task, priority: "pending" }
+    if (diffInDays < 0) return { ...task, priority: "overdue" } // งานที่เลยกำหนด
+    if (diffInDays === 0) return { ...task, priority: "today" }  // งานที่ต้องทำวันนี้
+    if (diffInDays <= 3) return { ...task, priority: "urgent" }  // งานด่วนที่ต้องทำภายใน 3 วัน
+    return { ...task, priority: "pending" } // งานปกติที่ยังไม่ถึงกำหนด
   }
 
   // Reset form to initial state
@@ -273,8 +236,9 @@ export default function AdminNotificationPage() {
       return taskYear === year && taskMonth === month
     })
     
-    console.log("Filtered tasks after month change:", filteredTasks)
-    setTasks(filteredTasks)
+    // อัพเดทสถานะงานก่อนเซ็ตค่า
+    const updatedTasks = filteredTasks.map(task => updateTaskPriority(task))
+    setTasks(updatedTasks)
   }
 
   // Handler for reopening a task
@@ -282,7 +246,7 @@ export default function AdminNotificationPage() {
     if (!taskToReopen || !reopenReason.trim()) return
 
     try {
-      const updatedTask = await notificationApi.reopenNotification(
+      const updatedTask = await notificationsApi.reopen(
         taskToReopen.id,
         reopenReason
       )
@@ -306,7 +270,7 @@ export default function AdminNotificationPage() {
     if (!taskToReschedule || !rescheduleReason.trim() || !newDueDate) return
 
     try {
-      const updatedTask = await notificationApi.rescheduleNotification(
+      const updatedTask = await notificationsApi.reschedule(
         taskToReschedule.id,
         newDueDate,
         rescheduleReason
@@ -342,7 +306,7 @@ export default function AdminNotificationPage() {
     }
 
     try {
-      await notificationApi.updateNotificationStatus(id, 'DONE')
+      await notificationsApi.updateStatus(id, 'DONE')
       
       setTasks(prev => prev.map(t => 
         t.id === id 
@@ -481,6 +445,8 @@ export default function AdminNotificationPage() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date())
+      // อัพเดทสถานะงานทุกครั้งที่เวลาเปลี่ยน
+      setTasks(prev => prev.map(task => updateTaskPriority(task)))
     }, 1000)
 
     return () => clearInterval(timer)
@@ -497,12 +463,11 @@ export default function AdminNotificationPage() {
   }
 
   return (
-    <AppLayout title="ระบบเตือนความจำ" description="จัดการงานและการแจ้งเตือนของคุณ">
-      {/* ===== NOTIFICATION CARDS ===== */}
+    <AppLayout title="ระบบเตือนความจำ" description="จัดการงานและการแจ้งเตือนของคุณ">      {/* ===== NOTIFICATION CARDS ===== */}
       <TaskStatusCards notifications={notifications} onCardClick={handleCardClick} />
 
       {/* ===== DASHBOARD MAIN CONTENT ===== */}
-      <div className="flex flex-col md:flex-row gap-6 items-stretch">
+      <div className="flex flex-col md:flex-row gap-6 items-stretch mt-6">
         {/* ===== DONUT CHART ===== */}
         <MonthlyProgress
           doneCount={doneCount}
@@ -512,27 +477,29 @@ export default function AdminNotificationPage() {
           currentMonth={currentTime}
         />
 
-        {/* ===== TO-DO LIST ===== */}
-        <TaskList
-          tasks={tasks}
-          activeFilter={activeFilter}
-          onToggleTaskDone={handleToggleTaskDone}
-          onEditTask={(task) => {
-            resetForm()
-            setEditTask(task)
-            setIsAddDialogOpen(true)
-          }}
-          onRescheduleTask={openRescheduleDialog}
-          onAddTask={() => {
-            resetForm()
-            setIsAddDialogOpen(true)
-          }}
-          onExpandTodo={() => {
-            setExpandTodo(true)
-            setModalActiveFilter("all")
-          }}
-          onFilterChange={setActiveFilter}
-        />
+        {/* ===== TO-DO LIST ===== */}        <div className="w-full">
+          <>
+            <TaskList
+              tasks={tasks}
+              activeFilter={activeFilter}
+              onToggleTaskDone={handleToggleTaskDone}
+              onEditTask={(task) => {
+                resetForm()
+                setEditTask(task)
+                setIsAddDialogOpen(true)
+              }}
+              onRescheduleTask={openRescheduleDialog}
+              onAddTask={() => {
+                resetForm()
+                setIsAddDialogOpen(true)
+              }}                onExpandTodo={() => {
+                setExpandTodo(true)
+                setModalActiveFilter("all")
+              }}
+              onFilterChange={setActiveFilter}
+            />
+          </>
+        </div>
       </div>
 
       {/* ===== FULLSCREEN MODAL ===== */}

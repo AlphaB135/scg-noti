@@ -141,18 +141,30 @@ export async function list(
   res: Response,
   next: NextFunction
 ): Promise<void> {
-  try {
-    // Parse and validate pagination parameters
+  try {    // Parse and validate parameters
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
     const status = req.query.status as Notification['status'] | undefined
+    const month = parseInt(req.query.month as string)
+    const year = parseInt(req.query.year as string)
 
     if (page < 1) throw new BadRequestError('Page must be >= 1')
     if (limit < 1) throw new BadRequestError('Limit must be >= 1')
 
     // Build dynamic where clause for filtering
-    const where = {
+    let where: any = {
       ...(status && { status })
+    }
+
+    // Add date range filter if month and year are provided
+    if (!isNaN(month) && !isNaN(year)) {
+      const startOfMonth = new Date(year, month - 1, 1)
+      const endOfMonth = new Date(year, month, 0, 23, 59, 59)
+      
+      where.scheduledAt = {
+        gte: startOfMonth,
+        lte: endOfMonth
+      }
     }
 
     // Fetch notifications and total count in parallel for efficiency
