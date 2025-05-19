@@ -21,6 +21,7 @@ import AddTeam from "./pages/add-team/page";
 import ImportEmployees from "./pages/add-team/import-excel";
 import TeamMember from "./pages/team-member/page";
 import SuperAdmin from "./pages/super-admin-logs/page";
+import TeamOverview from "./pages/team-overview/page";
 
 // HOC ตรวจสอบสิทธิ์
 import { RequireAuth } from "./components/RequireAuth";
@@ -105,6 +106,14 @@ function App() {
           element={
             <RequireAuth>
               <SuperAdmin />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/team-overview"
+          element={
+            <RequireAuth>
+              <TeamOverview />
             </RequireAuth>
           }
         />

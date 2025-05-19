@@ -108,7 +108,7 @@ export default function AddMemberDialog({ isOpen, setIsOpen, teamId, teamName }:
         <DialogHeader>
           <DialogTitle>เพิ่มสมาชิกใหม่เข้าทีม {teamName}</DialogTitle>
         </DialogHeader>
-        <div className="py-4">
+        <div className="pt-6 pb-4">
           <div className="relative mb-4">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
             <Input

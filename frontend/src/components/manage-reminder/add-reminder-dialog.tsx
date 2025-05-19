@@ -30,8 +30,8 @@ export default function AddReminderDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="w-full max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[60vw] h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>สร้างการแจ้งเตือนใหม่</DialogTitle>
+        <DialogHeader className="border-b pb-4">
+          <DialogTitle className="text-xl font-semibold text-[#2c3e50]">สร้างการแจ้งเตือนใหม่</DialogTitle>
         </DialogHeader>
         <ReminderForm
           formData={formData}
@@ -40,14 +40,17 @@ export default function AddReminderDialog({
           hasLogin={hasLogin}
           setHasLogin={setHasLogin}
         />
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="flex gap-2 sm:gap-0 border-t pt-4">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="flex-1 sm:flex-none border-[#cbd5e0] text-[#4a5568] hover:bg-[#edf2f7]"
+          >
             ยกเลิก
           </Button>
           <Button
             onClick={handleAddReminder}
-            className="bg-red-600 hover:bg-red-700"
-            disabled={!formData.title.trim() || !formData.date || !formData.details.trim() || !formData.impact.trim()}
+            className="flex-1 sm:flex-none bg-[#2c3e50] hover:bg-[#1a2530] text-white"
           >
             สร้างการแจ้งเตือน
           </Button>

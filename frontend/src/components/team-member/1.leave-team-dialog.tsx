@@ -25,7 +25,7 @@ export default function LeaveTeamDialog({
         <DialogHeader>
           <DialogTitle>ยืนยันการออกจากทีม</DialogTitle>
         </DialogHeader>
-        <div className="py-4">
+        <div className="pt-6 pb-4">
           <p className="mb-4">
             คุณต้องการออกจากทีม <span className="font-semibold">{teamName}</span> ใช่หรือไม่?
           </p>

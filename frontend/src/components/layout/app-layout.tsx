@@ -69,14 +69,14 @@ export default function AppLayout({ children, title, description }: AppLayoutPro
       {isMobile && <MobileSidebar isOpen={isMenuOpen} onLogout={handleLogout} />}
 
       {/* Main Content */}
-      <main className={`flex-1 ${!isMobile ? "md:ml-64" : "mt-16"} p-6 ${!isMobile ? "pt-20" : "pt-4"} w-full`}>
+      <main className={`flex-1 ${!isMobile ? "md:ml-64" : "mt-16"} p-6 ${!isMobile ? "pt-24" : "pt-6"} w-full`}>
         {/* Desktop Header - hidden on mobile */}
         {!isMobile && (
           <header className="fixed top-0 left-0 right-0 z-40 bg-white border-b shadow-sm">
-            <div className="flex items-center justify-between px-6 py-4 ml-64">
-              <div>
+            <div className="flex items-center justify-between px-4 py-3 ml-64">
+              <div className="py-1">
                 <h1 className="text-xl font-bold text-gray-800">{title}</h1>
-                {description && <p className="text-sm text-gray-500">{description}</p>}
+                {description && <p className="text-sm text-gray-500 mt-1">{description}</p>}
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right text-sm text-gray-600">
@@ -104,7 +104,7 @@ export default function AppLayout({ children, title, description }: AppLayoutPro
         )}
 
         {/* Page Content */}
-        <div>{children}</div>
+        <div className="mt-1">{children}</div>
       </main>
     </div>
   )

@@ -4,13 +4,12 @@ import type React from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { AlertCircle, Calendar, Clock, Eye, LinkIcon, Lock, Pencil, Trash2, Zap } from "lucide-react"
+import { AlertCircle, Calendar, Clock, ExternalLink, Lock, Pencil, Trash2, Zap } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
 
 type Reminder = {
-  id: number
+  id: number | string
   title: string
   details: string
   date: string
@@ -50,177 +49,150 @@ export default function ReminderList({
 }: ReminderListProps) {
   if (reminders.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="flex flex-col items-center justify-center gap-2">
-          <Calendar className="h-12 w-12 text-gray-400" />
-          <h3 className="text-lg font-medium text-gray-700">ไม่พบรายการแจ้งเตือน</h3>
-          <p className="text-sm text-gray-500">ไม่พบรายการแจ้งเตือนที่ตรงกับเงื่อนไขการค้นหา</p>
-        </div>
+      <div className="flex flex-col items-center justify-center py-20 px-4">
+        <Calendar className="h-20 w-20 text-gray-300 mb-6" />
+        <h3 className="text-2xl font-medium text-[#2c3e50] mb-3">ไม่พบรายการแจ้งเตือน</h3>
+        <p className="text-gray-500 text-center max-w-md">
+          ไม่พบรายการแจ้งเตือนที่ตรงกับเงื่อนไขการค้นหา กรุณาลองเปลี่ยนตัวกรองหรือคำค้นหา
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4">
+    <div className="divide-y divide-gray-200">
       {reminders.map((reminder) => (
-        <Card
+        <div
           key={reminder.id}
-          className={`overflow-hidden transition-all duration-200 hover:shadow-md ${
-            reminder.status === "completed"
-              ? "border-l-4 border-l-green-500"
-              : reminder.status === "overdue"
-                ? "border-l-4 border-l-red-500"
-                : reminder.isUrgent
-                  ? "border-l-4 border-l-orange-500"
-                  : "border-l-4 border-l-yellow-500"
-          }`}
+          className={`p-5 hover:bg-gray-50 transition-colors ${reminder.status === "completed" ? "bg-[#f7fafc]" : ""}`}
         >
-          <CardContent className="p-0">
-            <div className="flex flex-col">
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 bg-gray-50 border-b">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={reminder.status === "completed"}
-                    onChange={() => onToggleStatus(reminder)}
-                    className="h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                  />
-                  <div>
-                    <h3
-                      className={`font-medium text-lg ${
-                        reminder.status === "completed" ? "line-through text-gray-500" : ""
-                      }`}
-                    >
-                      {reminder.title}
-                      {reminder.isUrgent && (
-                        <Badge className="ml-2 bg-orange-100 text-orange-800 hover:bg-orange-200">
-                          <Zap className="h-3 w-3 mr-1" /> ด่วน
-                        </Badge>
-                      )}
-                    </h3>
-                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                      {getStatusBadge(reminder.status)}
-                      {reminder.type && getTypeIcon(reminder.type)}
-                      <Badge
-                        variant="outline"
-                        className="bg-gray-50 text-gray-700 border-gray-200 flex items-center gap-1"
-                      >
-                        <Clock className="h-3 w-3" /> {getFrequencyText(reminder.frequency)}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-gray-500 hover:text-gray-700"
-                          onClick={() => onEdit(reminder)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>แก้ไข</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-red-500 hover:text-red-700"
-                          onClick={() => onDelete(reminder)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>ลบ</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Left side - Checkbox and Title */}
+            <div className="flex items-start gap-3 md:w-1/2">
+              <div className="pt-1">
+                <Checkbox
+                  checked={reminder.status === "completed"}
+                  onCheckedChange={() => onToggleStatus(reminder)}
+                  className={`h-5 w-5 ${
+                    reminder.status === "completed" ? "bg-[#38a169] text-white border-[#38a169]" : "border-gray-300"
+                  }`}
+                />
               </div>
-
-              {/* Content */}
-              <div className="p-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="col-span-2">
-                    <div className="space-y-3">
-                      <div>
-                        <Label className="text-xs text-gray-500">รายละเอียด</Label>
-                        <p className="mt-1 text-sm text-gray-700">{reminder.details}</p>
-                      </div>
-
-                      {reminder.impact && (
-                        <div>
-                          <Label className="text-xs text-gray-500 flex items-center gap-1">
-                            <AlertCircle className="h-3 w-3 text-red-500" /> ผลกระทบหากงานไม่เสร็จ
-                          </Label>
-                          <p className="mt-1 text-sm text-red-600">{reminder.impact}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 bg-gray-50 p-3 rounded-md">
-                    <div>
-                      <Label className="text-xs text-gray-500 flex items-center gap-1">
-                        <Calendar className="h-3 w-3" /> วันที่แจ้งเตือน
-                      </Label>
-                      <div className="mt-1">{getDueDateStatus(reminder.date)}</div>
-                    </div>
-
-                    {reminder.link && (
-                      <div>
-                        <Label className="text-xs text-gray-500 flex items-center gap-1">
-                          <LinkIcon className="h-3 w-3" /> ลิงก์
-                        </Label>
-                        <div className="mt-1">
-                          <a
-                            href={reminder.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline text-sm flex items-center gap-1"
-                          >
-                            <LinkIcon className="h-3 w-3" /> เปิดลิงก์
-                          </a>
-                        </div>
-                      </div>
-                    )}
-
-                    {reminder.password && (
-                      <div>
-                        <Label className="text-xs text-gray-500 flex items-center gap-1">
-                          <Lock className="h-3 w-3" /> ข้อมูลเข้าสู่ระบบ
-                        </Label>
-                        <div className="mt-1">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="text-xs h-7 bg-white"
-                            onClick={() => onViewPassword(reminder)}
-                          >
-                            <Eye className="h-3 w-3 mr-1" /> ดูข้อมูล
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+              <div>
+                <h3
+                  className={`font-medium text-lg ${
+                    reminder.status === "completed" ? "line-through text-gray-500" : "text-[#2c3e50]"
+                  }`}
+                >
+                  {reminder.title}
+                  {reminder.isUrgent && (
+                    <Badge className="ml-2 bg-[#feebc8] text-[#dd6b20] hover:bg-[#fbd38d]">
+                      <Zap className="h-3 w-3 mr-1" /> ด่วน
+                    </Badge>
+                  )}
+                </h3>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  {getStatusBadge(reminder.status)}
+                  {reminder.type && getTypeIcon(reminder.type)}
+                  <Badge
+                    variant="outline"
+                    className="bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0] flex items-center gap-1"
+                  >
+                    <Clock className="h-3 w-3" /> {getFrequencyText(reminder.frequency)}
+                  </Badge>
                 </div>
+
+                <div className="mt-3 text-sm text-gray-700 line-clamp-2">{reminder.details}</div>
+
+                {reminder.impact && (
+                  <div className="mt-3 bg-[#fff5f5] p-2 rounded-md border border-[#fed7d7]">
+                    <div className="flex items-center gap-1 text-[#e53e3e] text-xs font-medium">
+                      <AlertCircle className="h-3 w-3" /> ผลกระทบหากงานไม่เสร็จ
+                    </div>
+                    <p className="text-xs text-[#e53e3e] mt-1 line-clamp-2">{reminder.impact}</p>
+                  </div>
+                )}
               </div>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Right side - Date, Links, Actions */}
+            <div className="flex flex-col md:flex-row justify-between md:w-1/2">
+              <div className="space-y-3">
+                <div>
+                  <div className="flex items-center gap-1 text-[#4a5568] text-sm font-medium">
+                    <Calendar className="h-4 w-4" /> วันที่แจ้งเตือน
+                  </div>
+                  <div className="text-sm mt-1">{getDueDateStatus(reminder.date)}</div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {reminder.link && (
+                    <a
+                      href={reminder.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#ebf8ff] text-[#3182ce] rounded-md text-sm hover:bg-[#bee3f8] transition-colors"
+                    >
+                      <ExternalLink className="h-3 w-3" /> เปิดลิงก์
+                    </a>
+                  )}
+
+                  {reminder.password && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 bg-[#f7fafc] border-[#e2e8f0] text-[#4a5568] hover:bg-[#edf2f7]"
+                      onClick={() => onViewPassword(reminder)}
+                    >
+                      <Lock className="h-3 w-3 mr-1" /> ดูข้อมูลล็อกอิน
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 mt-4 md:mt-0">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 w-9 p-0 border-[#e2e8f0] text-[#4a5568] hover:bg-[#edf2f7] hover:text-[#2c3e50]"
+                        onClick={() => onEdit(reminder)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">แก้ไข</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>แก้ไข</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 w-9 p-0 border-[#e2e8f0] text-[#e53e3e] hover:bg-[#fff5f5] hover:text-[#c53030]"
+                        onClick={() => onDelete(reminder)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">ลบ</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>ลบ</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
+          </div>
+        </div>
       ))}
     </div>
   )
