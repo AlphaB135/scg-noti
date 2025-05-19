@@ -87,11 +87,13 @@ export default function AddEmployeePage() {
       toast.error("ไม่สามารถโหลดข้อมูลทีมได้")
     }
   }
-
-  // Fetch employees with pagination
+  // Fetch employees with infinite scroll
   const fetchEmployees = useCallback(async (page: number = 1) => {
     try {
-      setIsLoading(true);
+      if (page === 1) {
+        setIsLoading(true);
+      }
+      
       const response = await employeesApi.list({ 
         page, 
         size: pageSize,
@@ -110,7 +112,38 @@ export default function AddEmployeePage() {
       setEmployees(prev => 
         page === 1 ? employeesWithSelect : [...prev, ...employeesWithSelect]
       );
-      setFilteredEmployees(employeesWithSelect);
+      
+      // อัพเดท filtered employees โดยรวมกับข้อมูลเดิม
+      setFilteredEmployees(prev => {
+        const newFiltered = page === 1 ? employeesWithSelect : [...prev, ...employeesWithSelect];
+        
+        // กรองตามการค้นหาและทีมปัจจุบัน
+        if (searchQuery || currentTeam) {
+          return newFiltered.filter(emp => {
+            // กรองสมาชิกที่อยู่ในทีมออก
+            if (currentTeam && currentTeam.members.some(member => member.id === emp.id)) {
+              return false;
+            }
+
+            // กรองตามคำค้นหา
+            if (searchQuery) {
+              const query = searchQuery.toLowerCase();
+              const name = `${emp.employeeProfile.firstName} ${emp.employeeProfile.lastName}`.toLowerCase();
+              const position = emp.employeeProfile.position?.toLowerCase() || '';
+              const code = emp.employeeProfile.employeeCode.toLowerCase();
+              
+              return name.includes(query) ||
+                position.includes(query) ||
+                code.includes(query);
+            }
+
+            return true;
+          });
+        }
+
+        return newFiltered;
+      });
+
       setTotalPages(response.meta.totalPages);
       setCurrentPage(page);
     } catch (error) {
@@ -119,12 +152,13 @@ export default function AddEmployeePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [pageSize]);
-
-  // Handle page change
-  const handlePageChange = (newPage: number) => {
-    fetchEmployees(newPage);
-  };
+  }, [pageSize, searchQuery, currentTeam]);
+  // Handle infinite scroll
+  const handleLoadMore = useCallback(() => {
+    if (currentPage < totalPages && !isLoading) {
+      fetchEmployees(currentPage + 1);
+    }
+  }, [currentPage, totalPages, isLoading, fetchEmployees]);
 
   // Initial fetch
   useEffect(() => {
@@ -453,7 +487,8 @@ export default function AddEmployeePage() {
                 handleEmployeeSelection={handleEmployeeSelection}
                 currentPage={currentPage}
                 totalPages={totalPages}
-                onPageChange={handlePageChange}
+                onLoadMore={handleLoadMore}
+                isLoading={isLoading}
               />
             </CardContent>
           </Card>

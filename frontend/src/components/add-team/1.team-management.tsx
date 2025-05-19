@@ -1,13 +1,14 @@
 "use client"
 
-import { Users, Plus, Trash2 } from "lucide-react"
+import { Users, Plus, Trash2, Settings2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { type Team, type TeamMember, permissionColors, permissionDescriptions } from "@/components/types/team"
+import { toast } from "react-toastify"
+import { teamsApi } from "@/api/teams"
 
 interface TeamManagementProps {
   teams: Team[]
@@ -155,6 +156,17 @@ function TeamDetails({
   handleRemoveMember,
   handleDeleteTeam,
 }: TeamDetailsProps) {
+  const handleTeamNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value;
+    try {
+      const updatedTeam = await teamsApi.updateTeam(currentTeam.id, { name: newName });
+      setCurrentTeam(updatedTeam);
+    } catch (error) {
+      console.error('Error updating team name:', error);
+      toast.error('ไม่สามารถแก้ไขชื่อทีมได้');
+    }
+  };
+
   return (
     <div className="mt-6">
       <div className="flex justify-between items-center mb-3">
@@ -166,28 +178,130 @@ function TeamDetails({
               ...currentTeam,
               name: e.target.value,
             }
-            // This is a simplified approach - in a real app, you'd update the state in the parent component
-            setCurrentTeam(updatedTeam)
+            setCurrentTeam(updatedTeam);
           }}
+          onBlur={handleTeamNameChange}
           className="max-w-[200px] text-sm"
           placeholder="ชื่อทีม"
         />
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
         {/* Team Leaders */}
-        <TeamLeaders
-          leaders={currentTeam.members.filter((m) => m.isLeader)}
-          handleOpenRemoveLeaderDialog={handleOpenRemoveLeaderDialog}
-          handleOpenPermissionDialog={handleOpenPermissionDialog}
-        />
+        <div>
+          <h4 className="text-sm font-medium mb-2 text-gray-700">หัวหน้าทีม</h4>
+          {currentTeam.members.filter((m) => m.isLeader).length === 0 ? (
+            <p className="text-sm text-gray-500 italic">ยังไม่มีหัวหน้าทีม</p>
+          ) : (
+            <div className="space-y-2">
+              {currentTeam.members.filter((m) => m.isLeader).map((leader) => (
+                <div
+                  key={leader.id}
+                  className="flex justify-between items-center p-2 rounded-md bg-gray-50 hover:bg-gray-100"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm">{leader.name}</p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge className={`text-xs ${permissionColors[leader.permissionLevel]}`}>
+                              {leader.permissionLevel === "admin"
+                                ? "แอดมินทีม"
+                                : leader.permissionLevel === "leader"
+                                  ? "หัวหน้าทีม"
+                                  : "สมาชิก"}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{permissionDescriptions[leader.permissionLevel]}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <p className="text-xs text-gray-500">{leader.department}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-500 hover:text-blue-600"
+                      onClick={() => handleOpenPermissionDialog(leader)}
+                    >
+                      <Settings2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-500 hover:text-red-600"
+                      onClick={() => handleOpenRemoveLeaderDialog(leader)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Team Members */}
-        <TeamMembers
-          members={currentTeam.members.filter((m) => !m.isLeader)}
-          handleOpenPermissionDialog={handleOpenPermissionDialog}
-          handleRemoveMember={handleRemoveMember}
-        />
+        <div>
+          <h4 className="text-sm font-medium mb-2 text-gray-700">สมาชิกทีม</h4>
+          {currentTeam.members.filter((m) => !m.isLeader).length === 0 ? (
+            <p className="text-sm text-gray-500 italic">ยังไม่มีสมาชิกทีม</p>
+          ) : (
+            <div className="space-y-2">
+              {currentTeam.members.filter((m) => !m.isLeader).map((member) => (
+                <div
+                  key={member.id}
+                  className="flex justify-between items-center p-2 rounded-md bg-gray-50 hover:bg-gray-100"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm">{member.name}</p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge className={`text-xs ${permissionColors[member.permissionLevel]}`}>
+                              {member.permissionLevel === "admin"
+                                ? "แอดมินทีม"
+                                : member.permissionLevel === "leader"
+                                  ? "หัวหน้าทีม"
+                                  : "สมาชิก"}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{permissionDescriptions[member.permissionLevel]}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <p className="text-xs text-gray-500">{member.department}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-500 hover:text-blue-600"
+                      onClick={() => handleOpenPermissionDialog(member)}
+                    >
+                      <Settings2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-500 hover:text-red-600"
+                      onClick={() => handleRemoveMember(member.membershipId)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Delete Team Button */}
         <div className="mt-6">
@@ -202,172 +316,6 @@ function TeamDetails({
           </Button>
         </div>
       </div>
-    </div>
-  )
-}
-
-interface TeamLeadersProps {
-  leaders: TeamMember[]
-  handleOpenRemoveLeaderDialog: (leader: TeamMember) => void
-  handleOpenPermissionDialog: (member: TeamMember) => void
-}
-
-function TeamLeaders({ leaders, handleOpenRemoveLeaderDialog, handleOpenPermissionDialog }: TeamLeadersProps) {
-  return (
-    <div>
-      <h4 className="text-sm font-medium mb-2 text-gray-700">หัวหน้าทีม</h4>
-      {leaders.length === 0 ? (
-        <p className="text-sm text-gray-500 italic">ยังไม่มีหัวหน้าทีม</p>
-      ) : (
-        <ScrollArea className="h-[120px] rounded-md border p-2">
-          <div className="space-y-2">
-            {leaders.map((leader) => (
-              <div
-                key={leader.id}
-                className="flex justify-between items-center p-2 rounded-md bg-gray-50 hover:bg-gray-100"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-sm">{leader.name}</p>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge className={`text-xs ${permissionColors[leader.permissionLevel]}`}>
-                            {leader.permissionLevel === "admin"
-                              ? "แอดมินทีม"
-                              : leader.permissionLevel === "leader"
-                                ? "หัวหน้าทีม"
-                                : "สมาชิก"}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{permissionDescriptions[leader.permissionLevel]}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <p className="text-xs text-gray-500">{leader.department}</p>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-gray-500 hover:text-blue-600"
-                    onClick={() => handleOpenPermissionDialog(leader)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-pencil"
-                    >
-                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                      <path d="m15 5 4 4" />
-                    </svg>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-gray-500 hover:text-red-600"
-                    onClick={() => handleOpenRemoveLeaderDialog(leader)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      )}
-    </div>
-  )
-}
-
-interface TeamMembersProps {
-  members: TeamMember[]
-  handleOpenPermissionDialog: (member: TeamMember) => void
-  handleRemoveMember: (memberId: string) => void
-}
-
-function TeamMembers({ members, handleOpenPermissionDialog, handleRemoveMember }: TeamMembersProps) {
-  return (
-    <div>
-      <h4 className="text-sm font-medium mb-2 text-gray-700">สมาชิกทีม</h4>
-      {members.length === 0 ? (
-        <p className="text-sm text-gray-500 italic">ยังไม่มีสมาชิกทีม</p>
-      ) : (
-        <ScrollArea className="h-[200px] rounded-md border p-2">
-          <div className="space-y-2">
-            {members.map((member) => (
-              <div
-                key={member.id}
-                className="flex justify-between items-center p-2 rounded-md bg-gray-50 hover:bg-gray-100"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-sm">{member.name}</p>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge className={`text-xs ${permissionColors[member.permissionLevel]}`}>
-                            {member.permissionLevel === "admin"
-                              ? "แอดมินทีม"
-                              : member.permissionLevel === "leader"
-                                ? "หัวหน้าทีม"
-                                : "สมาชิก"}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{permissionDescriptions[member.permissionLevel]}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <p className="text-xs text-gray-500">{member.department}</p>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-gray-500 hover:text-blue-600"
-                    onClick={() => handleOpenPermissionDialog(member)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-pencil"
-                    >
-                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                      <path d="m15 5 4 4" />
-                    </svg>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-gray-500 hover:text-red-600"
-                    onClick={() => handleRemoveMember(member.membershipId)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      )}
     </div>
   )
 }

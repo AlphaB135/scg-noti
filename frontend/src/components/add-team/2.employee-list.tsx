@@ -1,10 +1,8 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useEffect, useRef, useCallback } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Checkbox } from "@/components/ui/checkbox"
 import EmployeeTable from "./employee-table"
 import type { Employee } from "@/lib/api/employees"
 
@@ -17,7 +15,8 @@ interface EmployeeListProps {
   handleEmployeeSelection: (id: string) => void
   currentPage: number
   totalPages: number
-  onPageChange: (page: number) => void
+  onLoadMore: () => void
+  isLoading: boolean
 }
 
 export default function EmployeeList({
@@ -27,12 +26,33 @@ export default function EmployeeList({
   setActiveTab,
   handleSelectAll,
   handleEmployeeSelection,
-  currentPage,
-  totalPages,
-  onPageChange,
-}: EmployeeListProps) {
+  isLoading,
+  onLoadMore,
+}: EmployeeListProps) {  const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Handle scroll for infinite loading
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current) return
+
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current
+    const threshold = 100 // ระยะห่างจากด้านล่างที่จะโหลดข้อมูลเพิ่ม
+
+    // เมื่อ scroll ใกล้ถึงด้านล่าง
+    if (scrollHeight - scrollTop - clientHeight < threshold && !isLoading) {
+      onLoadMore()
+    }
+  }, [onLoadMore, isLoading])
+
+  useEffect(() => {
+    const scrollElement = scrollRef.current
+    if (scrollElement) {
+      scrollElement.addEventListener('scroll', handleScroll)
+      return () => scrollElement.removeEventListener('scroll', handleScroll)
+    }
+  }, [handleScroll])
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
@@ -43,62 +63,43 @@ export default function EmployeeList({
           ))}
         </TabsList>
 
-        <TabsContent value="all" className="m-0">
-          <EmployeeTable
-            employees={filteredEmployees}
-            handleSelectAll={handleSelectAll}
-            handleEmployeeSelection={handleEmployeeSelection}
-            allSelected={filteredEmployees.length > 0 && filteredEmployees.every((emp) => emp.selected)}
-          />
-        </TabsContent>
-
-        {departments.map((dept) => (
-          <TabsContent key={dept} value={dept} className="m-0">
+        <div ref={scrollRef} style={{ maxHeight: "60vh", overflowY: "auto" }}>
+          <TabsContent value="all" className="m-0">
             <EmployeeTable
-              employees={filteredEmployees.filter((emp) => emp.employeeProfile.position === dept)}
-              handleSelectAll={() => {
-                const allSelected = filteredEmployees
-                  .filter((emp) => emp.employeeProfile.position === dept)
-                  .every((emp) => emp.selected)
-                handleSelectAll()
-              }}
+              employees={filteredEmployees}
+              handleSelectAll={handleSelectAll}
               handleEmployeeSelection={handleEmployeeSelection}
-              allSelected={
-                filteredEmployees.filter((emp) => emp.employeeProfile.position === dept).length > 0 &&
-                filteredEmployees.filter((emp) => emp.employeeProfile.position === dept).every((emp) => emp.selected)
-              }
-              departmentName={dept}
+              allSelected={filteredEmployees.length > 0 && filteredEmployees.every((emp) => emp.selected)}
             />
           </TabsContent>
-        ))}
-      </Tabs>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage <= 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-            <span className="sr-only">Previous</span>
-          </Button>
-          <div className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage >= totalPages}
-          >
-            <ChevronRight className="h-4 w-4" />
-            <span className="sr-only">Next</span>
-          </Button>
+          {departments.map((dept) => (
+            <TabsContent key={dept} value={dept} className="m-0">
+              <EmployeeTable
+                employees={filteredEmployees.filter((emp) => emp.employeeProfile.position === dept)}
+                handleSelectAll={() => {
+                  const deptEmployees = filteredEmployees.filter((emp) => emp.employeeProfile.position === dept)
+                  const allSelected = deptEmployees.every((emp) => emp.selected)
+                  deptEmployees.forEach((emp) => handleEmployeeSelection(emp.id))
+                }}
+                handleEmployeeSelection={handleEmployeeSelection}
+                allSelected={
+                  filteredEmployees.filter((emp) => emp.employeeProfile.position === dept).length > 0 &&
+                  filteredEmployees.filter((emp) => emp.employeeProfile.position === dept).every((emp) => emp.selected)
+                }
+                departmentName={dept}
+              />
+            </TabsContent>
+          ))}
+
+          {/* Loading indicator */}
+          {isLoading && (
+            <div className="flex justify-center py-4">
+              <div className="animate-spin h-5 w-5 border-2 border-red-700 border-t-transparent rounded-full"></div>
+            </div>
+          )}
         </div>
-      )}
+      </Tabs>
     </div>
   )
 }
