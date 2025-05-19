@@ -1,8 +1,8 @@
 "use client"
-
 import { Link, useLocation } from "react-router-dom"
-import { Bell, LogOut, Settings, CheckCircle, ChevronDown } from "lucide-react"
+import { Bell, LogOut, Settings, CheckCircle, ChevronDown, Users, Database } from "lucide-react"
 import { useState, useEffect } from "react"
+import { useAuth } from "@/hooks/use-auth"
 
 interface MobileSidebarProps {
   isOpen: boolean
@@ -12,9 +12,24 @@ interface MobileSidebarProps {
 export default function MobileSidebar({ isOpen, onLogout }: MobileSidebarProps) {
   const location = useLocation()
   const currentPath = location.pathname
-  const [notificationOpen, setNotificationOpen] = useState(true)
-  const [adminOpen, setAdminOpen] = useState(false)
-  const [teamOpen, setTeamOpen] = useState(false)
+  const [notificationOpen, setNotificationOpen] = useState(
+    ["/dashboard", "/manage", "/userlogs"].some((path) => location.pathname.startsWith(path)),
+  )
+
+  const [adminOpen, setAdminOpen] = useState(
+    ["/addemployee", "/add-team", "/import-employees"].some((path) => location.pathname.startsWith(path)),
+  )
+
+  const [teamOpen, setTeamOpen] = useState(
+    ["/audit-logs", "/teammember"].some((path) => location.pathname.startsWith(path)),
+  )
+
+  const [superAdminOpen, setSuperAdminOpen] = useState(
+    ["/superadmin"].some((path) => location.pathname.startsWith(path)),
+  )
+
+  // Get user data from useAuth hook
+  const { user } = useAuth()
 
   // Helper function to check if a path is active
   const isActive = (path: string) => {
@@ -24,6 +39,35 @@ export default function MobileSidebar({ isOpen, onLogout }: MobileSidebarProps) 
   // Helper function to check if a path is part of a group
   const isGroupActive = (paths: string[]) => {
     return paths.some((path) => currentPath.startsWith(path))
+  }
+
+  // Helper function to get initials from name
+  const getInitials = (name: string) => {
+    if (!name) return ""
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+  }
+
+  // Check if user is superadmin
+  const isSuperAdmin = user?.role === "SUPERADMIN"
+
+  // Format role for display
+  const getDisplayRole = (role: string) => {
+    switch (role) {
+      case "SUPERADMIN":
+        return "ซุปเปอร์แอดมิน"
+      case "ADMIN":
+        return "ผู้ดูแลระบบ"
+      case "USER":
+        return "ผู้ใช้งาน"
+      case "TEAM_LEAD":
+        return "หัวหน้าทีม"
+      default:
+        return role
+    }
   }
 
   // Close sidebar when clicking outside on mobile
@@ -52,12 +96,21 @@ export default function MobileSidebar({ isOpen, onLogout }: MobileSidebarProps) 
         {/* User info */}
         <div className="p-4 border-b border-red-700/50">
           <div className="flex items-center">
-            <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center text-white font-medium text-lg border border-white/20">
-              ปฉ
+            <div className="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center text-white font-medium text-xl border border-white/20">
+              {user?.employeeProfile
+                ? getInitials(`${user.employeeProfile.firstName} ${user.employeeProfile.lastName}`)
+                : getInitials(user?.name || "")}
             </div>
             <div className="ml-3">
-              <p className="text-white font-medium">ปัณณธร ฉิมเรือง</p>
-              <p className="text-white/60 text-xs">ผู้ดูแลระบบ</p>
+              <p className="text-white font-medium">
+                {user?.employeeProfile
+                  ? `${user.employeeProfile.firstName} ${user.employeeProfile.lastName}`
+                  : user?.name || ""}
+              </p>
+              <p className="text-white/60 text-xs">
+                {user?.role ? getDisplayRole(user.role) : ""}
+                {user?.employeeProfile?.position && ` • ${user.employeeProfile.position}`}
+              </p>
             </div>
           </div>
         </div>
@@ -70,9 +123,7 @@ export default function MobileSidebar({ isOpen, onLogout }: MobileSidebarProps) 
               <button
                 onClick={() => setNotificationOpen(!notificationOpen)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
-                  isGroupActive(["/dashboard", "/manage", "/auditperson"])
-                    ? "bg-white/10 font-medium"
-                    : "hover:bg-white/5"
+                  isGroupActive(["/dashboard", "/manage", "/userlogs"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
                 }`}
               >
                 <div className="flex items-center">
@@ -107,7 +158,7 @@ export default function MobileSidebar({ isOpen, onLogout }: MobileSidebarProps) 
                   >
                     <div className="flex items-center">
                       <div className="w-1.5 h-1.5 rounded-full bg-white/60 mr-2.5"></div>
-                      จัดการการแจ้งเตือน
+                      ตั้งค่าการแจ้งเตือน
                     </div>
                   </Link>
                   <Link
@@ -118,7 +169,7 @@ export default function MobileSidebar({ isOpen, onLogout }: MobileSidebarProps) 
                   >
                     <div className="flex items-center">
                       <div className="w-1.5 h-1.5 rounded-full bg-white/60 mr-2.5"></div>
-                      ประวัติการแจ้งเตือน
+                      ประวัติการดำเนินการ
                     </div>
                   </Link>
                 </div>
@@ -130,19 +181,15 @@ export default function MobileSidebar({ isOpen, onLogout }: MobileSidebarProps) 
               <button
                 onClick={() => setTeamOpen(!teamOpen)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
-                  isGroupActive(["/audit-logs", "/teammember"])
-                    ? "bg-white/10 font-medium"
-                    : "hover:bg-white/5"
+                  isGroupActive(["/audit-logs", "/teammember"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
                 }`}
               >
                 <div className="flex items-center">
-                  <CheckCircle className="h-5 w-5 mr-3" />
+                  <Users className="h-5 w-5 mr-3" />
                   <span>จัดการทีม</span>
                 </div>
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-200 ${
-                    teamOpen ? "transform rotate-180" : ""
-                  }`}
+                  className={`h-4 w-4 transition-transform duration-200 ${teamOpen ? "transform rotate-180" : ""}`}
                 />
               </button>
 
@@ -167,7 +214,7 @@ export default function MobileSidebar({ isOpen, onLogout }: MobileSidebarProps) 
                   >
                     <div className="flex items-center">
                       <div className="w-1.5 h-1.5 rounded-full bg-white/60 mr-2.5"></div>
-                      รายชื่อสมาชิกในทีม
+                      สมาชิกในทีม
                     </div>
                   </Link>
                 </div>
@@ -179,7 +226,9 @@ export default function MobileSidebar({ isOpen, onLogout }: MobileSidebarProps) 
               <button
                 onClick={() => setAdminOpen(!adminOpen)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
-                  isGroupActive(["/add-team", "/import-employees"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
+                  isGroupActive(["/addemployee", "/add-team", "/import-employees"])
+                    ? "bg-white/10 font-medium"
+                    : "hover:bg-white/5"
                 }`}
               >
                 <div className="flex items-center">
@@ -218,10 +267,60 @@ export default function MobileSidebar({ isOpen, onLogout }: MobileSidebarProps) 
                 </div>
               )}
             </div>
+
+            {/* Super Admin (Hidden Menu) */}
+            {isSuperAdmin && (
+              <div className="rounded-md overflow-hidden mt-4 border-t border-red-700/30 pt-4">
+                <button
+                  onClick={() => setSuperAdminOpen(!superAdminOpen)}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
+                    isGroupActive(["/superadmin"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <Database className="h-5 w-5 mr-3" />
+                    <span className="flex items-center">
+                      ซุปเปอร์แอดมิน
+                      <span className="ml-2 text-xs px-1.5 py-0.5 bg-yellow-500 text-black rounded-full">พิเศษ</span>
+                    </span>
+                  </div>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${superAdminOpen ? "transform rotate-180" : ""}`}
+                  />
+                </button>
+
+                {superAdminOpen && (
+                  <div className="ml-4 mt-1 space-y-1">
+                    <Link
+                      to="/superadmin"
+                      className={`block rounded-md px-4 py-2 text-white transition-colors ${
+                        isActive("/superadmin") ? "bg-white/15 font-medium" : "hover:bg-white/10"
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mr-2.5"></div>
+                        ประวัติการดำเนินการทั้งหมด
+                      </div>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Settings */}
+            <Link
+              to="/settings"
+              className={`flex items-center px-3 py-2.5 rounded-md text-white transition-colors ${
+                isActive("/settings") ? "bg-white/15 font-medium" : "hover:bg-white/10"
+              }`}
+            >
+              <Settings className="h-5 w-5 mr-3" />
+              การตั้งค่า
+            </Link>
           </nav>
         </div>
 
-        {/* Logout Button */}
+        {/* Logout button */}
         <div className="p-3 border-t border-red-700/50">
           <button
             onClick={onLogout}
@@ -233,5 +332,5 @@ export default function MobileSidebar({ isOpen, onLogout }: MobileSidebarProps) 
         </div>
       </div>
     </>
-  );
+  )
 }

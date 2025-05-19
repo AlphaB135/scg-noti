@@ -1,8 +1,12 @@
 "use client"
 
+import type React from "react"
+
 import { useEffect, useState } from "react"
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
 import type { Task } from "@/lib/types/task"
 
 interface MonthCalendarProps {
@@ -15,18 +19,27 @@ interface MonthCalendarProps {
   currentYear: number
 }
 
-export function MonthCalendar({ 
-  tasks, 
-  onMonthChange, 
-  setIsAddDialogOpen, 
-  setEditTask, 
+export function MonthCalendar({
+  tasks,
+  onMonthChange,
+  setIsAddDialogOpen,
+  setEditTask,
   resetForm,
   currentMonth,
-  currentYear 
+  currentYear,
 }: MonthCalendarProps) {
   const [isMobileView, setIsMobileView] = useState(false)
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({})
+  const [dayTasksDialogOpen, setDayTasksDialogOpen] = useState(false)
+  const [selectedDateTasks, setSelectedDateTasks] = useState<Task[]>([])
+  const [selectedDateStr, setSelectedDateStr] = useState("")
+
+  // Drag and reschedule states
+  const [draggedTask, setDraggedTask] = useState<Task | null>(null)
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false)
+  const [newTaskDate, setNewTaskDate] = useState("")
+  const [rescheduleReason, setRescheduleReason] = useState("")
 
   // Initialize month and year state from props
   const now = new Date(currentYear, currentMonth - 1)
@@ -79,18 +92,18 @@ export function MonthCalendar({
   }, {})
 
   // Date handling
-  const formatDateStr = (year: number, month: number, day: number) => 
+  const formatDateStr = (year: number, month: number, day: number) =>
     `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 
   const getTasksForDate = (date: string) => taskMap[date] || []
 
   const handleDayClick = (day: number) => {
-    if (isMobileView) {
-      setSelectedDay(selectedDay === day ? null : day)
-      return
-    }
-    // Open add task dialog for non-mobile view
-    openAddTaskDialog()
+    const dateStr = formatDateStr(year, month, day)
+    const tasksForDay = getTasksForDate(dateStr)
+
+    setSelectedDateStr(dateStr)
+    setSelectedDateTasks(tasksForDay)
+    setDayTasksDialogOpen(true)
   }
 
   const openAddTaskDialog = () => {
@@ -101,17 +114,58 @@ export function MonthCalendar({
 
   const toggleExpandDay = (e: React.MouseEvent, dateStr: string) => {
     e.stopPropagation()
-    setExpandedDays(prev => ({
+    setExpandedDays((prev) => ({
       ...prev,
-      [dateStr]: !prev[dateStr]
+      [dateStr]: !prev[dateStr],
     }))
+  }
+
+  // Drag and drop handlers
+  const handleDragStart = (e: React.DragEvent, task: Task) => {
+    e.dataTransfer.setData("text/plain", task.id)
+    setDraggedTask(task)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const handleDrop = (e: React.DragEvent, targetDate: string) => {
+    e.preventDefault()
+    if (!draggedTask) return
+
+    // Don't reschedule if dropped on the same date
+    if (draggedTask.dueDate === targetDate) {
+      setDraggedTask(null)
+      return
+    }
+
+    setNewTaskDate(targetDate)
+    setRescheduleDialogOpen(true)
+  }
+
+  const handleRescheduleConfirm = () => {
+    // This would typically call an API to reschedule the task
+    // For now, we'll just close the dialog
+    setRescheduleDialogOpen(false)
+    setDraggedTask(null)
+    setRescheduleReason("")
   }
 
   // UI Constants
   const thaiMonths = [
-    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
-    "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
-    "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    "มกราคม",
+    "กุมภาพันธ์",
+    "มีนาคม",
+    "เมษายน",
+    "พฤษภาคม",
+    "มิถุนายน",
+    "กรกฎาคม",
+    "สิงหาคม",
+    "กันยายน",
+    "ตุลาคม",
+    "พฤศจิกายน",
+    "ธันวาคม",
   ]
   const thaiDays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"]
   const englishDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -167,18 +221,18 @@ export function MonthCalendar({
             return (
               <div
                 key={`day-${day}`}
-                className={`min-h-[100px] p-2 bg-white relative group
+                className={`min-h-[100px] p-2 bg-white relative group cursor-pointer
                   ${isToday ? "bg-red-50 border border-red-200" : ""}
                   ${isSelected ? "ring-2 ring-red-500" : ""}`}
                 onClick={() => handleDayClick(day)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, formattedDate)}
               >
                 <div className="flex justify-between items-start">
-                  <span className={`text-sm font-medium ${isToday ? "text-red-700" : ""}`}>
-                    {day}
-                  </span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <span className={`text-sm font-medium ${isToday ? "text-red-700" : ""}`}>{day}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => {
                       e.stopPropagation()
@@ -196,12 +250,26 @@ export function MonthCalendar({
                       {(expandedDays[formattedDate] ? dayTasks : dayTasks.slice(0, 2)).map((task, index) => (
                         <div
                           key={index}
-                          className={`px-1.5 py-0.5 text-[10px] font-medium truncate rounded
-                            ${task.done ? "bg-green-100 text-green-700" :
-                            task.priority === "overdue" ? "bg-red-100 text-red-700" :
-                            task.priority === "urgent" ? "bg-orange-100 text-orange-700" :
-                            task.priority === "today" ? "bg-yellow-100 text-yellow-700" :
-                            "bg-blue-100 text-blue-700"}`}
+                          className={`px-1.5 py-0.5 text-[10px] font-medium truncate rounded cursor-move
+                            ${
+                              task.done
+                                ? "bg-green-100 text-green-700"
+                                : task.priority === "overdue"
+                                  ? "bg-red-100 text-red-700"
+                                  : task.priority === "urgent"
+                                    ? "bg-orange-100 text-orange-700"
+                                    : task.priority === "today"
+                                      ? "bg-yellow-100 text-yellow-700"
+                                      : "bg-blue-100 text-blue-700"
+                            }`}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, task)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            resetForm()
+                            setEditTask(task)
+                            setIsAddDialogOpen(true)
+                          }}
                         >
                           {task.title}
                         </div>
@@ -222,6 +290,127 @@ export function MonthCalendar({
           })}
         </div>
       </div>
+
+      {/* Day Tasks Dialog */}
+      <Dialog open={dayTasksDialogOpen} onOpenChange={setDayTasksDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>งานวันที่ {selectedDateStr}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedDateTasks.length > 0 ? (
+              <div className="space-y-3">
+                {selectedDateTasks.map((task, index) => (
+                  <div
+                    key={index}
+                    className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => {
+                      setDayTasksDialogOpen(false)
+                      resetForm()
+                      setEditTask(task)
+                      setIsAddDialogOpen(true)
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={task.done}
+                        onChange={(e) => {
+                          e.stopPropagation()
+                          // This would typically call the handleToggleTaskDone function
+                        }}
+                        className="h-4 w-4"
+                      />
+                      <div className="flex-1">
+                        <p className={`font-medium ${task.done ? "line-through text-gray-400" : ""}`}>{task.title}</p>
+                        <p className="text-sm text-gray-500 truncate">{task.details}</p>
+                      </div>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full
+                          ${
+                            task.done
+                              ? "bg-green-100 text-green-700"
+                              : task.priority === "overdue"
+                                ? "bg-red-100 text-red-700"
+                                : task.priority === "urgent"
+                                  ? "bg-orange-100 text-orange-700"
+                                  : task.priority === "today"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-blue-100 text-blue-700"
+                          }`}
+                      >
+                        {task.done
+                          ? "เสร็จแล้ว"
+                          : task.priority === "overdue"
+                            ? "เลยกำหนด"
+                            : task.priority === "urgent"
+                              ? "ด่วน"
+                              : task.priority === "today"
+                                ? "วันนี้"
+                                : "ปกติ"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 text-gray-500">
+                <p>ไม่มีงานในวันนี้</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setDayTasksDialogOpen(false)
+                resetForm()
+                setIsAddDialogOpen(true)
+              }}
+            >
+              เพิ่มงานใหม่
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reschedule Dialog */}
+      <Dialog open={rescheduleDialogOpen} onOpenChange={setRescheduleDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>เลื่อนกำหนดการ</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="space-y-4">
+              <div>
+                <p className="font-medium">งาน: {draggedTask?.title}</p>
+                <p className="text-sm text-gray-500">วันที่เดิม: {draggedTask?.dueDate}</p>
+                <p className="text-sm text-gray-500">วันที่ใหม่: {newTaskDate}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">เหตุผลในการเลื่อนกำหนด</label>
+                <Textarea
+                  value={rescheduleReason}
+                  onChange={(e) => setRescheduleReason(e.target.value)}
+                  placeholder="ระบุเหตุผลในการเลื่อนกำหนด"
+                  className="min-h-[100px]"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRescheduleDialogOpen(false)}>
+              ยกเลิก
+            </Button>
+            <Button
+              onClick={handleRescheduleConfirm}
+              disabled={!rescheduleReason.trim()}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              บันทึกการเปลี่ยนแปลง
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

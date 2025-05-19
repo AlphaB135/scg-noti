@@ -1,339 +1,598 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { UserPlus, Plus } from "lucide-react"
+import { UserPlus, UserMinus, LogOut, Users, UserCog } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import AppLayout from "@/components/layout/app-layout"
-import EmployeeList from "@/components/team-member/employee-list"
-import { type Team } from "@/components/types/team" 
-import { useAuth } from "@/hooks/use-auth"
-import { teamsApi } from "@/lib/api/teams"
-import { employeesApi, type Employee } from "@/lib/api/employees"
-import { toast } from "sonner"
+import { type Team, type TeamMember, permissionColors , roleColors } from "@/components/types/team"
+import LeaveTeamDialog from "@/components/team-member/1.leave-team-dialog"
+import RemoveMemberDialog from "@/components/team-member/2.remove-member-dialog"
+import AddMemberDialog from "@/components/team-member/3.add-member-dialog"
 
-export default function TeamMember() {
-  // State for teams
+export default function TeamMembersPage() {
+  // State
   const [teams, setTeams] = useState<Team[]>([])
   const [currentTeam, setCurrentTeam] = useState<Team | null>(null)
-  const [isCreateTeamDialogOpen, setIsCreateTeamDialogOpen] = useState(false)
-  const [newTeamName, setNewTeamName] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
-
-  // State for employees
-  const [employees, setEmployees] = useState<Employee[]>([])
-  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([])
+  const [filteredMembers, setFilteredMembers] = useState<TeamMember[]>([])
+  const [isLeaveTeamDialogOpen, setIsLeaveTeamDialogOpen] = useState(false)
+  const [isRemoveMemberDialogOpen, setIsRemoveMemberDialogOpen] = useState(false)
+  const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
+  const [currentUserRole, setCurrentUserRole] = useState<"admin" | "leader" | "member">("member")
 
-  const { user: currentUser } = useAuth()
+  // Mock current user (in a real app, this would come from authentication)
+  const currentUser = {
+    id: "emp-1",
+    name: "พนักงาน 1",
+    department: "แผนก 1",
+    position: "ผู้จัดการ",
+    email: "employee1@selfsync.com",
+  }
 
-  // Fetch teams data
+  const roleColors: { [key: string]: string } = {
+    หัวหน้างาน: "bg-amber-100 text-amber-800",
+    พนักงาน: "bg-blue-100 text-blue-800",
+  }
+
+  // Fetch teams data (mock data for demo)
   useEffect(() => {
-    const fetchTeams = async () => {
-      try {
-        setIsLoading(true)
-        const { data } = await teamsApi.list()
-        
-        if (!data) {
-          console.error("No data received from teams API")
-          toast.error("ไม่สามารถโหลดข้อมูลทีมได้")
-          return
-        }
-        
-        console.log("Teams data received:", data)
-        setTeams(data)
-        
-        if (data.length > 0) {
-          setCurrentTeam(data[0])
-        }
-      } catch (error) {
-        console.error("Error fetching teams:", error)
-        if (error instanceof Error) {
-          toast.error(`ไม่สามารถโหลดข้อมูลทีมได้: ${error.message}`)
-        } else {
-          toast.error("ไม่สามารถโหลดข้อมูลทีมได้")
-        }
-      } finally {
-        setIsLoading(false)
-      }
-    }
+    // In a real application, you would fetch this data from an API
+    const mockTeams: Team[] = [
+      {
+        id: "team-1",
+        name: "ทีมพัฒนา",
+        members: [
+          {
+            id: "emp-1",
+            name: "พนักงาน 1",
+            department: "แผนก 1",
+            position: "ผู้จัดการ",
+            email: "employee1@selfsync.com",
+            isLeader: true,
+            permissionLevel: "leader",
+            role: "หัวหน้างาน",
+          },
+          {
+            id: "emp-2",
+            name: "พนักงาน 2",
+            department: "แผนก 1",
+            position: "พนักงาน",
+            email: "employee2@selfsync.com",
+            isLeader: false,
+            permissionLevel: "member",
+            role: "พนักงาน",
+          },
+          {
+            id: "emp-3",
+            name: "พนักงาน 3",
+            department: "แผนก 2",
+            position: "พนักงาน",
+            email: "employee3@selfsync.com",
+            isLeader: false,
+            permissionLevel: "member",
+            role: "พนักงาน",
+          },
+        ],
+      },
+      {
+        id: "team-2",
+        name: "ทีมการตลาด",
+        members: [
+          {
+            id: "emp-5",
+            name: "พนักงาน 5",
+            department: "แผนก 3",
+            position: "ผู้จัดการ",
+            email: "employee5@selfsync.com",
+            isLeader: true,
+            permissionLevel: "leader",
+            role: "หัวหน้างาน",
+          },
+          {
+            id: "emp-6",
+            name: "พนักงาน 6",
+            department: "แผนก 3",
+            position: "พนักงาน",
+            email: "employee6@selfsync.com",
+            isLeader: false,
+            permissionLevel: "member",
+            role: "พนักงาน",
+          },
+        ],
+      },
+      {
+        id: "team-3",
+        name: "ทีมบัญชี",
+        members: [
+          {
+            id: "emp-10",
+            name: "พนักงาน 10",
+            department: "แผนก 4",
+            position: "ผู้จัดการ",
+            email: "employee10@selfsync.com",
+            isLeader: true,
+            permissionLevel: "leader",
+            role: "หัวหน้างาน",
+          },
+          {
+            id: "emp-11",
+            name: "พนักงาน 11",
+            department: "แผนก 4",
+            position: "พนักงาน",
+            email: "employee11@selfsync.com",
+            isLeader: false,
+            permissionLevel: "member",
+            role: "พนักงาน",
+          },
+          {
+            id: "emp-12",
+            name: "พนักงาน 12",
+            department: "แผนก 4",
+            position: "พนักงาน",
+            email: "employee12@selfsync.com",
+            isLeader: false,
+            permissionLevel: "member",
+            role: "พนักงาน",
+          },
+          {
+            id: "emp-13",
+            name: "พนักงาน 13",
+            department: "แผนก 5",
+            position: "พนักงาน",
+            email: "employee13@selfsync.com",
+            isLeader: false,
+            permissionLevel: "member",
+            role: "พนักงาน",
+          },
+        ],
+      },
+    ]
 
-    if (currentUser) {
-      fetchTeams()
+    setTeams(mockTeams)
+    if (mockTeams.length > 0) {
+      setCurrentTeam(mockTeams[0])
     }
-  }, [currentUser])
-
-  // Fetch employees data
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        setIsLoading(true)
-        const response = await employeesApi.list()
-        const employeeList = response.data || []
-        setEmployees(employeeList)
-        setFilteredEmployees(employeeList.map(emp => ({
-          ...emp,
-          name: `${emp.firstName} ${emp.lastName}`
-        })))
-      } catch (error) {
-        console.error("Error fetching employees:", error)
-        toast.error("ไม่สามารถโหลดข้อมูลพนักงานได้")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchEmployees()
   }, [])
 
-  // Filter employees based on search
+  // Set filtered members when current team changes
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredEmployees(employees.map(emp => ({
-        ...emp,
-        name: emp.name || `${emp.firstName} ${emp.lastName}`
-      })))
-      return
+    if (currentTeam) {
+      setFilteredMembers(currentTeam.members)
+
+      // Set current user role based on their membership in the team
+      const userMember = currentTeam.members.find((member) => member.id === currentUser.id)
+      if (userMember) {
+        setCurrentUserRole(userMember.permissionLevel)
+      } else {
+        setCurrentUserRole("member")
+      }
+    }
+  }, [currentTeam])
+
+  // Filter members based on search query
+  useEffect(() => {
+    if (!currentTeam) return
+
+    if (searchQuery.trim() === "") {
+      setFilteredMembers(currentTeam.members)
+    } else {
+      const query = searchQuery.toLowerCase()
+      const filtered = currentTeam.members.filter(
+        (member) =>
+          member.name.toLowerCase().includes(query) ||
+          member.department.toLowerCase().includes(query) ||
+          member.position.toLowerCase().includes(query),
+      )
+      setFilteredMembers(filtered)
+    }
+  }, [searchQuery, currentTeam])
+
+  // Handle leave team
+  const handleLeaveTeam = () => {
+    if (!currentTeam) return
+
+    // Remove current user from team
+    const updatedMembers = currentTeam.members.filter((member) => member.id !== currentUser.id)
+    const updatedTeam = {
+      ...currentTeam,
+      members: updatedMembers,
     }
 
-    const query = searchQuery.toLowerCase()
-    const filtered = employees.filter(
-      (emp) =>
-        emp.firstName.toLowerCase().includes(query) ||
-        emp.lastName.toLowerCase().includes(query) ||
-        (emp.nickname?.toLowerCase().includes(query) ?? false) ||
-        emp.employeeCode.toLowerCase().includes(query) ||
-        (emp.position?.toLowerCase().includes(query) ?? false) ||
-        (emp.department?.toLowerCase().includes(query) ?? false)
-    )
-    
-    setFilteredEmployees(filtered.map(emp => ({
-      ...emp,
-      name: emp.name || `${emp.firstName} ${emp.lastName}`
-    })))
-  }, [searchQuery, employees])
+    // Update teams list
+    setTeams(teams.map((team) => (team.id === currentTeam.id ? updatedTeam : team)))
 
-  // Handle employee selection
-  const handleSelectEmployee = (id: string) => {
-    setSelectedEmployeeIds((prev) =>
-      prev.includes(id) ? prev.filter((empId) => empId !== id) : [...prev, id]
-    )
-  }
-
-  // Handle select all employees
-  const handleSelectAllEmployees = () => {
-    setSelectedEmployeeIds((prev) =>
-      prev.length === filteredEmployees.length ? [] : filteredEmployees.map((emp) => emp.id)
-    )
-  }
-
-  // Handle add selected employees to team
-  const handleAddSelectedToTeam = async (asLeader: boolean) => {
-    if (!currentTeam || selectedEmployeeIds.length === 0) return
-
-    try {      
-      // Add all members in parallel
-      await Promise.all(
-        selectedEmployeeIds.map(employeeId =>
-          teamsApi.addMember(currentTeam.id, employeeId, asLeader)
-        )
-      )
-      
-      // Refresh team data once after all additions
-      const updatedTeam = await teamsApi.get(currentTeam.id)
-      
-      // Update teams list with the latest team data
-      setTeams((prevTeams) =>
-        prevTeams.map((team) => (team.id === currentTeam.id ? updatedTeam : team))
-      )
+    // If user was the only member, remove the team
+    if (updatedMembers.length === 0) {
+      const remainingTeams = teams.filter((team) => team.id !== currentTeam.id)
+      setTeams(remainingTeams)
+      setCurrentTeam(remainingTeams.length > 0 ? remainingTeams[0] : null)
+    } else {
       setCurrentTeam(updatedTeam)
-
-      // Clear selection
-      setSelectedEmployeeIds([])
-      toast.success("เพิ่มสมาชิกเรียบร้อยแล้ว")
-    } catch (error) {
-      console.error("Error adding members:", error)
-      toast.error("ไม่สามารถเพิ่มสมาชิกได้")
     }
+
+    setIsLeaveTeamDialogOpen(false)
   }
 
-  // Add loading state UI
-  if (isLoading) {
+  // Handle remove member
+  const handleRemoveMember = () => {
+    if (!currentTeam || !selectedMember) return
+
+    // Remove selected member from team
+    const updatedMembers = currentTeam.members.filter((member) => member.id !== selectedMember.id)
+    const updatedTeam = {
+      ...currentTeam,
+      members: updatedMembers,
+    }
+
+    // Update teams list
+    setTeams(teams.map((team) => (team.id === currentTeam.id ? updatedTeam : team)))
+    setCurrentTeam(updatedTeam)
+    setIsRemoveMemberDialogOpen(false)
+    setSelectedMember(null)
+  }
+
+  // Handle add member (mock implementation)
+  const handleAddMember = () => {
+    // In a real app, this would open a dialog to select employees to add
+    setIsAddMemberDialogOpen(true)
+  }
+
+  // Get initials for avatar
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2)
+  }
+
+  // Check if current user is in the team
+  const isUserInTeam = currentTeam?.members.some((member) => member.id === currentUser.id) || false
+
+  // Check if current user is a leader
+  const isUserLeader = currentTeam?.members.some((member) => member.id === currentUser.id && member.isLeader) || false
+
+  return (
+    <AppLayout title="สมาชิกในทีม" description="ดูรายละเอียดและจัดการสมาชิกในทีม">
+      <div className="space-y-6">
+        {/* Current User Profile */}
+        {currentTeam && (
+          <Card className="border-l-4 border-l-red-600">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16 border-2 border-gray-200">
+                  <AvatarImage src={`/placeholder.svg?height=64&width=64`} alt={currentUser.name} />
+                  <AvatarFallback className="text-lg bg-red-100 text-red-800">
+                    {getInitials(currentUser.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                      <h2 className="text-xl font-semibold">{currentUser.name}</h2>
+                      <p className="text-sm text-gray-500">
+                        {currentUser.position} • {currentUser.department}
+                      </p>
+                    </div>
+                    {currentTeam.members.some((member) => member.id === currentUser.id) ? (
+                      <div className="flex flex-wrap gap-2">
+                        {currentTeam.members.find((member) => member.id === currentUser.id)?.isLeader ? (
+                          <Badge className="bg-amber-600 hover:bg-amber-700">
+                            <UserCog className="h-3 w-3 mr-1" />
+                            หัวหน้าทีม {currentTeam.name}
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-blue-600 hover:bg-blue-700">
+                            <Users className="h-3 w-3 mr-1" />
+                            สมาชิกทีม {currentTeam.name}
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <Badge variant="outline" className="border-gray-300 text-gray-500">
+                        ไม่ได้เป็นสมาชิกในทีมนี้
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <p className="text-sm text-gray-600">
+                      {currentTeam.members.some((member) => member.id === currentUser.id)
+                        ? currentTeam.members.find((member) => member.id === currentUser.id)?.isLeader
+                          ? "คุณมีสิทธิ์ในการจัดการสมาชิกและเพิ่มตำแหน่งในทีมนี้"
+                          : "คุณสามารถดูข้อมูลและออกจากทีมได้"
+                        : "คุณไม่มีสิทธิ์ในการจัดการทีมนี้"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Team Selection */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-bold">เลือกทีม</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {teams.length === 0 ? (
+                <p className="text-gray-500">ไม่พบข้อมูลทีม</p>
+              ) : (
+                teams.map((team) => (
+                  <Badge
+                    key={team.id}
+                    variant={currentTeam?.id === team.id ? "default" : "outline"}
+                    className={`cursor-pointer text-sm py-1 px-3 ${
+                      currentTeam?.id === team.id
+                        ? "bg-red-700 hover:bg-red-800"
+                        : "hover:bg-red-100 hover:text-red-800"
+                    }`}
+                    onClick={() => setCurrentTeam(team)}
+                  >
+                    {team.name} ({team.members.length})
+                  </Badge>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Team Members */}
+        {currentTeam && (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg font-bold">สมาชิกในทีม: {currentTeam.name}</CardTitle>
+                <div className="flex gap-2">
+                  {isUserInTeam && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                      onClick={() => setIsLeaveTeamDialogOpen(true)}
+                    >
+                      <LogOut className="h-4 w-4 mr-1" />
+                      ออกจากทีม
+                    </Button>
+                  )}
+                  {/* Only show Add Member button if user is a leader */}
+                  {isUserLeader && (
+                    <Button className="bg-red-700 hover:bg-red-800 text-white" size="sm" onClick={handleAddMember}>
+                      <UserPlus className="h-4 w-4 mr-1" />
+                      เพิ่มสมาชิก
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="mt-2 flex gap-2 items-center">
+                <div className="relative flex-1">
+                  <Input
+                    placeholder="ค้นหาสมาชิก..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="all">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="all">ทั้งหมด ({currentTeam.members.length})</TabsTrigger>
+                  <TabsTrigger value="leaders">
+                    หัวหน้าทีม ({currentTeam.members.filter((m) => m.isLeader).length})
+                  </TabsTrigger>
+                  <TabsTrigger value="members">
+                    สมาชิก ({currentTeam.members.filter((m) => !m.isLeader).length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="all" className="m-0">
+                  <MembersList
+                    members={filteredMembers}
+                    currentUserId={currentUser.id}
+                    isUserLeader={isUserLeader}
+                    onRemoveMember={(member) => {
+                      setSelectedMember(member)
+                      setIsRemoveMemberDialogOpen(true)
+                    }}
+                    getInitials={getInitials}
+                    setIsLeaveTeamDialogOpen={setIsLeaveTeamDialogOpen}
+                  />
+                </TabsContent>
+
+                <TabsContent value="leaders" className="m-0">
+                  <MembersList
+                    members={filteredMembers.filter((m) => m.isLeader)}
+                    currentUserId={currentUser.id}
+                    isUserLeader={isUserLeader}
+                    onRemoveMember={(member) => {
+                      setSelectedMember(member)
+                      setIsRemoveMemberDialogOpen(true)
+                    }}
+                    getInitials={getInitials}
+                    setIsLeaveTeamDialogOpen={setIsLeaveTeamDialogOpen}
+                  />
+                </TabsContent>
+
+                <TabsContent value="members" className="m-0">
+                  <MembersList
+                    members={filteredMembers.filter((m) => !m.isLeader)}
+                    currentUserId={currentUser.id}
+                    isUserLeader={isUserLeader}
+                    onRemoveMember={(member) => {
+                      setSelectedMember(member)
+                      setIsRemoveMemberDialogOpen(true)
+                    }}
+                    getInitials={getInitials}
+                    setIsLeaveTeamDialogOpen={setIsLeaveTeamDialogOpen}
+                  />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Leave Team Dialog */}
+      <LeaveTeamDialog
+        isOpen={isLeaveTeamDialogOpen}
+        setIsOpen={setIsLeaveTeamDialogOpen}
+        teamName={currentTeam?.name || ""}
+        onConfirm={handleLeaveTeam}
+      />
+
+      {/* Remove Member Dialog */}
+      <RemoveMemberDialog
+        isOpen={isRemoveMemberDialogOpen}
+        setIsOpen={setIsRemoveMemberDialogOpen}
+        memberName={selectedMember?.name || ""}
+        onConfirm={handleRemoveMember}
+      />
+
+      {/* Add Member Dialog */}
+      <AddMemberDialog
+        isOpen={isAddMemberDialogOpen}
+        setIsOpen={setIsAddMemberDialogOpen}
+        teamId={currentTeam?.id || ""}
+        teamName={currentTeam?.name || ""}
+      />
+    </AppLayout>
+  )
+}
+
+interface MembersListProps {
+  members: TeamMember[]
+  currentUserId: string
+  isUserLeader: boolean
+  onRemoveMember: (member: TeamMember) => void
+  getInitials: (name: string) => string
+  setIsLeaveTeamDialogOpen: (isOpen: boolean) => void
+}
+
+function MembersList({
+  members,
+  currentUserId,
+  isUserLeader,
+  onRemoveMember,
+  getInitials,
+  setIsLeaveTeamDialogOpen,
+}: MembersListProps) {
+  if (members.length === 0) {
     return (
-      <AppLayout title="Team Members" description="จัดการสมาชิกทีม">
-        <div className="flex items-center justify-center h-96">
-          <p className="text-gray-500">กำลังโหลดข้อมูล...</p>
-        </div>
-      </AppLayout>
+      <div className="text-center py-8 text-gray-500">
+        <Users className="h-12 w-12 mx-auto mb-2 opacity-30" />
+        <p>ไม่พบข้อมูลสมาชิก</p>
+      </div>
     )
   }
 
   return (
-    <AppLayout title="Team Members" description="จัดการสมาชิกทีม">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column - Teams */}
-        <div className="space-y-4">
-          {/* Team Actions */}
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">รายชื่อทีม</h2>
-            <Button
-              onClick={() => setIsCreateTeamDialogOpen(true)}
-              className="bg-red-700 hover:bg-red-800 text-white"
-              size="sm"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              สร้างทีมใหม่
-            </Button>
-          </div>
-
-          {/* Team List */}
-          <div className="flex gap-2 flex-wrap">
-            {teams.map((team) => (
-              <Badge
-                key={team.id}
-                variant={currentTeam?.id === team.id ? "default" : "secondary"}
-                className="cursor-pointer"
-                onClick={() => setCurrentTeam(team)}
-              >
-                {team.name} ({team.members.length})
-              </Badge>
-            ))}
-          </div>
-
-          {/* Current Team Details */}
-          {currentTeam && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{currentTeam.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {currentTeam.members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50"
+    <ScrollArea className="h-[500px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {members.map((member) => (
+          <Card key={member.id} className="overflow-hidden">
+            <div className={`h-2 ${member.isLeader ? "bg-amber-500" : "bg-blue-500"}`} />
+            <CardContent className="p-4">
+              <div className="flex items-start gap-4">
+                <Avatar className="h-16 w-16 border-2 border-gray-200">
+                  <AvatarImage src={`/placeholder.svg?height=64&width=64`} alt={member.name} />
+                  <AvatarFallback
+                    className={`text-lg ${member.isLeader ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-800"}`}
                   >
+                    {getInitials(member.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">{member.name}</p>
+                      <h3 className="font-medium text-base">{member.name}</h3>
                       <p className="text-sm text-gray-500">{member.position}</p>
                     </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-        </div>
+                    <div className="flex flex-col gap-1">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge className={`${permissionColors[member.permissionLevel]}`}>
+                              {member.isLeader ? (
+                                <UserCog className="h-3 w-3 mr-1" />
+                              ) : (
+                                <Users className="h-3 w-3 mr-1" />
+                              )}
+                              {member.permissionLevel === "admin"
+                                ? "แอดมินทีม"
+                                : member.permissionLevel === "leader"
+                                  ? "หัวหน้าทีม"
+                                  : "สมาชิก"}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {member.permissionLevel === "admin" && "สามารถจัดการพนักงานและทีมทั้งหมดได้"}
+                            {member.permissionLevel === "leader" && "สามารถเพิ่ม/ลบสมาชิกในทีมตัวเองได้"}
+                            {member.permissionLevel === "member" && "สามารถแก้ไขข้อมูลทีมได้"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
 
-        {/* Right Column - Employees */}
-        <div>
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>รายชื่อพนักงานทั้งหมด</CardTitle>
-                {currentTeam && selectedEmployeeIds.length > 0 && (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => handleAddSelectedToTeam(true)}
-                      className="bg-red-700 hover:bg-red-800 text-white"
-                      size="sm"
-                    >
-                      <UserPlus className="h-4 w-4 mr-1" />
-                      เพิ่มเป็นหัวหน้าทีม
-                    </Button>
-                    <Button
-                      onClick={() => handleAddSelectedToTeam(false)}
-                      className="bg-red-700 hover:bg-red-800 text-white"
-                      size="sm"
-                    >
-                      <UserPlus className="h-4 w-4 mr-1" />
-                      เพิ่มเป็นสมาชิก
-                    </Button>
+                      {/* Add role badge */}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge className={`${roleColors[member.role]}`}>{member.role}</Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {member.role === "หัวหน้างาน" ? "สามารถเพิ่มตำแหน่งในทีมได้" : "สมาชิกในทีม"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                   </div>
-                )}
+                  <div className="mt-2 space-y-1">
+                    <p className="text-xs text-gray-500">แผนก: {member.department}</p>
+                    <p className="text-xs text-gray-500">อีเมล: {member.email}</p>
+                  </div>
+                  <div className="mt-3 flex justify-end">
+                    {/* Show remove button only if current user is leader and not removing themselves */}
+                    {isUserLeader && member.id !== currentUserId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => onRemoveMember(member)}
+                      >
+                        <UserMinus className="h-4 w-4 mr-1" />
+                        นำออกจากทีม
+                      </Button>
+                    )}
+
+                    {/* Show leave team button if this is the current user */}
+                    {member.id === currentUserId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => setIsLeaveTeamDialogOpen(true)}
+                      >
+                        <LogOut className="h-4 w-4 mr-1" />
+                        ออกจากทีม
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="relative">
-                <Input
-                  placeholder="ค้นหาพนักงาน..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-3"
-                />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <EmployeeList
-                employees={filteredEmployees}
-                selectedIds={selectedEmployeeIds}
-                onSelect={handleSelectEmployee}
-                onSelectAll={handleSelectAllEmployees}
-              />
             </CardContent>
           </Card>
-        </div>
+        ))}
       </div>
-
-      {/* Create Team Dialog */}
-      <Dialog open={isCreateTeamDialogOpen} onOpenChange={setIsCreateTeamDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>สร้างทีมใหม่</DialogTitle>
-            <DialogDescription>กรอกชื่อทีมที่ต้องการสร้าง</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="teamname">ชื่อทีม</Label>
-              <Input
-                id="teamname"
-                placeholder="กรอกชื่อทีม..."
-                value={newTeamName}
-                onChange={(e) => setNewTeamName(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsCreateTeamDialogOpen(false)
-                setNewTeamName("")
-              }}
-            >
-              ยกเลิก
-            </Button>
-            <Button
-              className="bg-red-700 hover:bg-red-800 text-white"
-              onClick={async () => {
-                if (!newTeamName.trim()) return
-                try {
-                  const newTeam = await teamsApi.create({ name: newTeamName })
-                  setTeams([...teams, newTeam])
-                  setCurrentTeam(newTeam)
-                  setNewTeamName("")
-                  setIsCreateTeamDialogOpen(false)
-                  toast.success("สร้างทีมเรียบร้อยแล้ว")
-                } catch (error) {
-                  console.error("Error creating team:", error)
-                  toast.error("ไม่สามารถสร้างทีมได้")
-                }
-              }}
-              disabled={!newTeamName.trim()}
-            >
-              สร้างทีม
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </AppLayout>
+    </ScrollArea>
   )
 }

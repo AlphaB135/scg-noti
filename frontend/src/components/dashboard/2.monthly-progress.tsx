@@ -5,7 +5,8 @@ type MonthlyProgressProps = {
   incompleteCnt: number
   totalTasks: number
   progressPercent: number
-  currentMonth: Date
+  selectedMonth: number
+  selectedYear: number
 }
 
 export default function MonthlyProgress({
@@ -13,10 +14,11 @@ export default function MonthlyProgress({
   incompleteCnt,
   totalTasks,
   progressPercent,
-  currentMonth,
+  selectedMonth,
+  selectedYear,
 }: MonthlyProgressProps) {
   // แปลงเดือนเป็นภาษาไทย
-  const getThaiMonthName = (date: Date) => {
+  const getThaiMonthName = (month: number) => {
     const monthNames = [
       "มกราคม",
       "กุมภาพันธ์",
@@ -31,7 +33,8 @@ export default function MonthlyProgress({
       "พฤศจิกายน",
       "ธันวาคม",
     ]
-    return monthNames[date.getMonth()]
+    // เนื่องจาก selectedMonth เริ่มจาก 1 (มกราคม = 1) แต่ array เริ่มจาก 0
+    return monthNames[month - 1]
   }
 
   // คอมโพเนนต์สำหรับแสดง tooltip ในกราฟ
@@ -51,14 +54,17 @@ export default function MonthlyProgress({
   }
 
   return (
-    <section className="relative isolate w-full md:w-1/3 overflow-hidden rounded-3xl border border-gray-100/70 bg-white/70 backdrop-blur-sm shadow-xl ring-1 ring-black/5 transition hover:scale-[1.02] duration-300 md:flex md:flex-col">
+    <section className="relative isolate w-full flex-1 overflow-hidden rounded-3xl border border-gray-100/70 bg-white/70 backdrop-blur-sm shadow-xl ring-1 ring-black/5 transition hover:scale-[1.02] duration-300 flex flex-col">
       {/* light gradient tint */}
       <div className="absolute inset-0 pointer-events-none" />
       <div className="relative z-10 p-6 flex-1 flex flex-col">
         {/* Heading */}
-        <h2 className="mb-4 text-center text-xl font-bold tracking-tight text-gray-800">
-          สรุปความคืบหน้างานเดือน : {getThaiMonthName(currentMonth)}
-        </h2>
+        <div className="mb-4 text-center">
+          <h2 className="text-xl font-bold tracking-tight text-gray-800">สรุปความคืบหน้างานเดือน :</h2>
+          <h3 className="text-xl font-bold tracking-tight text-gray-800 mt-1">
+            {getThaiMonthName(selectedMonth)} {selectedYear}
+          </h3>
+        </div>
 
         {/* Donut chart - ปรับให้ขยายตามพื้นที่ */}
         <div className="relative mx-auto flex flex-1 items-center justify-center w-full">

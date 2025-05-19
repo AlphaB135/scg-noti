@@ -18,9 +18,11 @@ import {
   getStatusBadge,
   getTypeIcon,
 } from "@/components/manage-reminder/7.reminder-utils"
+import { unifiedApi, type UnifiedTask } from "@/lib/api-integration"
 
+// Convert UnifiedTask to Reminder type for the UI
 type Reminder = {
-  id: number
+  id: number | string
   title: string
   details: string
   date: string
@@ -33,9 +35,31 @@ type Reminder = {
   isUrgent?: boolean
 }
 
+const convertTaskToReminder = (task: UnifiedTask): Reminder => {
+  // Create password string from username and password if they exist
+  let passwordData = ""
+  if (task.hasLogin && (task.username || task.password)) {
+    passwordData = `user: ${task.username || ""}\npassword: ${task.password || ""}`
+  }
+
+  return {
+    id: task.id,
+    title: task.title,
+    details: task.details,
+    date: task.dueDate,
+    frequency: task.frequency,
+    link: task.link,
+    password: passwordData,
+    impact: task.impact,
+    status: task.status,
+    type: task.type,
+    isUrgent: task.isUrgent,
+  }
+}
+
 export default function ManageReminderPage() {
   const [reminders, setReminders] = useState<Reminder[]>([])
-  const [cycleReminders, setCycleReminders] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -63,207 +87,38 @@ export default function ManageReminderPage() {
     hasLogin: false,
   })
 
+  // Load reminders from API
+  const loadReminders = async () => {
+    setIsLoading(true)
+    try {
+      const tasks = await unifiedApi.getAll()
+      const convertedReminders = tasks.map(convertTaskToReminder)
+      setReminders(convertedReminders)
+    } catch (error) {
+      console.error("Failed to load reminders:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
-    // 2.1) ดึงงาน manual
-    const fetchManualReminders = async () => {
-      try {
-        // คอมเม้น API ไว้ก่อน
-        // const { data } = await axios.get("/api/notifications", {
-        //   withCredentials: true,
-        //   params: { skip: 0, take: 100 },
-        // })
-
-        // Get today's date for urgent tasks
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-
-        // Calculate date for 3 days from now
-        const threeDaysFromNow = new Date(today)
-        threeDaysFromNow.setDate(today.getDate() + 3)
-
-        // Format dates for mock data
-        const todayStr = today.toISOString().split("T")[0]
-        const tomorrowStr = new Date(today.getTime() + 86400000).toISOString().split("T")[0]
-        const dayAfterTomorrowStr = new Date(today.getTime() + 2 * 86400000).toISOString().split("T")[0]
-
-        // Mock data สำหรับการแจ้งเตือนแบบ manual
-        const mockManualReminders = [
-          {
-            id: 1,
-            title: "ต่อสัญญาเช่าสำนักงาน",
-            date: "2025-06-15",
-            frequency: "no-repeat",
-            details: "ติดต่อตัวแทนอสังหาริมทรัพย์เพื่อต่อสัญญาเช่าสำนักงานสาขาบางนา",
-            link: "https://scg-property.com/contracts",
-            password: "user: property_admin\npassword: SCGprop2025!",
-            impact: "หากไม่ต่อสัญญาภายในกำหนด อาจต้องจ่ายค่าปรับ 15% หรือสูญเสียพื้นที่สำนักงาน",
-            status: "incomplete",
-            type: "document",
-          },
-          {
-            id: 2,
-            title: "ชำระภาษีประจำปี",
-            date: "2025-05-30",
-            frequency: "yearly",
-            details: "ชำระภาษีนิติบุคคลประจำปี 2025 ผ่านระบบกรมสรรพากร",
-            link: "https://www.rd.go.th/",
-            password: "user: scg_tax\npassword: Tax2025@SCG\nรหัส OTP จะส่งไปที่เบอร์ 08x-xxx-xxxx (คุณสมศักดิ์)",
-            impact: "หากชำระล่าช้าจะมีค่าปรับ 1.5% ต่อเดือน และอาจส่งผลต่อการตรวจสอบบัญชีประจำปี",
-            status: "incomplete",
-            type: "finance",
-          },
-          {
-            id: 3,
-            title: "ประชุมคณะกรรมการบริษัท",
-            date: "2025-05-20",
-            frequency: "no-repeat",
-            details: "ประชุมคณะกรรมการบริษัทประจำเดือนพฤษภาคม ห้องประชุมใหญ่ ชั้น 15",
-            link: "https://scg-meeting.zoom.us/j/123456789",
-            password: "Meeting ID: 123 456 789\nPasscode: SCG2025",
-            impact: "การไม่จัดประชุมตามกำหนดอาจส่งผลต่อการตัดสินใจเชิงกลยุทธ์และการดำเนินงานของบริษัท",
-            status: "incomplete",
-            type: "meeting",
-          },
-          {
-            id: 4,
-            title: "ตรวจสอบและบำรุงรักษาเครื���องจักร",
-            date: "2025-05-10",
-            frequency: "no-repeat",
-            details: "ตรวจสอบและบำรุงรักษาเครื่องจักรในสายการผลิต A ตามแผนการบำรุงรักษาเชิงป้องกัน",
-            link: "",
-            password: "",
-            impact: "หากไม่ดำเนินการตามแผน อาจทำให้เครื่องจักรเสียหายและกระทบต่อการผลิต ทำให้ส่งมอบสินค้าล่าช้า",
-            status: "completed",
-            type: "maintenance",
-          },
-          {
-            id: 5,
-            title: "ส่งรายงานความยั่งยืน",
-            date: "2025-07-15",
-            frequency: "monthly",
-            details: "จัดทำและส่งรายงานความยั่งยืนประจำไตรมาสที่ 2 ปี 2025 ให้กับตลาดหลักทรัพย์",
-            link: "https://scg-sustainability.com/reports",
-            password: "user: report_admin\npassword: Sus@SCG2025",
-            impact: "การไม่ส่งรายงานตามกำหนดอาจส่งผลต่อความน่าเชื่อถือและภาพลักษณ์ของบริษัทในด้านความยั่งยืน",
-            status: "incomplete",
-            type: "report",
-          },
-          {
-            id: 6,
-            title: "อบรมความปลอดภัยในการทำงาน",
-            date: "2025-06-05",
-            frequency: "yearly",
-            details: "จัดอบรมความปลอดภัยในการทำงานประจำปีให้กับพนักงานทุกคนตามข้อกำหนด ISO 45001",
-            link: "https://scg-training.com/safety2025",
-            password: "user: training_admin\npassword: Safety2025!",
-            impact: "การไม่จัดอบรมตามกำหนดอาจส่งผลต่อการรับรองมาตรฐาน ISO และความปลอดภัยของพนักงาน",
-            status: "incomplete",
-            type: "training",
-          },
-          {
-            id: 7,
-            title: "สั่งซื้อวัตถุดิบหลัก",
-            date: "2025-05-25",
-            frequency: "monthly",
-            details: "สั่งซื้อวัตถุดิบหลักสำหรับการผลิตเดือนมิถุนายน 2025 จากซัพพลายเออร์หลัก",
-            link: "https://scg-procurement.com",
-            password: "user: procurement_manager\npassword: Proc@SCG2025\nรหัสอนุมัติ: 7890-ABCD",
-            impact: "การสั่งซื้อล่าช้าอาจทำให้วัตถุดิบไม่เพียงพอต่อการผลิต ส่งผลให้ไม่สามารถส่งมอบสินค้าได้ตามกำหนด",
-            status: "incomplete",
-            type: "purchase",
-          },
-          // เพิ่มงานด่วน 2 งาน
-          {
-            id: 8,
-            title: "ส่งเอกสารประมูลโครงการใหม่",
-            date: todayStr, // วันนี้
-            frequency: "no-repeat",
-            details: "จัดเตรียมและส่งเอกสารประมูลโครงการก่อสร้างสาขาใหม่ภายในวันนี้",
-            link: "https://scg-bidding.com/projects",
-            password: "user: bid_manager\npassword: Bid2025!",
-            impact: "หากไม่ส่งเอกสารภายในวันนี้ บริษัทจะหมดสิทธิ์ในการเข้าร่วมประมูลโครงการมูลค่า 50 ล้านบาท",
-            status: "incomplete",
-            type: "document",
-            isUrgent: true,
-          },
-          {
-            id: 9,
-            title: "ตรวจสอบระบบความปลอดภัยหลังเหตุการณ์น้ำรั่ว",
-            date: tomorrowStr, // พรุ่งนี้
-            frequency: "no-repeat",
-            details: "ตรวจสอบระบบความปลอดภัยและความเสียหายหลังเหตุการณ์น้ำรั่วในโรงงานเมื่อวานนี้",
-            link: "",
-            password: "",
-            impact: "หากไม่ตรวจสอบและแก้ไขอย่างเร่งด่วน อาจเกิดความเสียหายต่อเครื่องจักรและระบบไฟฟ้าเพิ่มเติม",
-            status: "incomplete",
-            type: "maintenance",
-            isUrgent: true,
-          },
-        ]
-
-        setReminders(mockManualReminders)
-      } catch (e) {
-        console.error("Failed to load manual reminders", e)
-      }
-    }
-
-    // 2.2) ดึงงาน cycle
-    const fetchCycleReminders = async () => {
-      try {
-        // คอมเม้น API ไว้ก่อน
-        // const { data } = await axios.get("/api/notifications/cycles", {
-        //   withCredentials: true,
-        //   params: { skip: 0, take: 100 },
-        // })
-
-        // Mock data สำหรับการแจ้งเตือนแบบ cycle
-        const mockCycleReminders = [
-          {
-            id: 101,
-            title: "อัปเดตข้อมูลความปลอดภัยระบบ IT",
-            message: "ตรวจสอบและอัปเดตระบบความปลอดภัย IT ตามนโยบายความปลอดภัยข้อมูล",
-            scheduledAt: "2025-05-18T09:00:00",
-            frequency: "monthly",
-            status: "incomplete",
-            type: "data",
-          },
-          {
-            id: 102,
-            title: "ส่งรายงานยอดขายประจำวัน",
-            message: "รวบรวมและส่งรายงานยอดขายประจำวันให้ผู้บริหาร",
-            scheduledAt: "2025-05-15T17:00:00",
-            frequency: "daily",
-            status: "overdue",
-            type: "report",
-          },
-          {
-            id: 103,
-            title: "ประชุมทีมการตลาด",
-            message: "ประชุมทีมการตลาดเพื่อติดตามความคืบหน้าแคมเปญไตรมาส 2",
-            scheduledAt: "2025-05-22T13:00:00",
-            frequency: "weekly",
-            status: "incomplete",
-            type: "meeting",
-          },
-        ]
-
-        setCycleReminders(mockCycleReminders)
-      } catch (e) {
-        console.error("Failed to load cycle reminders", e)
-      }
-    }
-
-    fetchManualReminders()
-    fetchCycleReminders()
-  }, []) // รันแค่ครั้งเดียวตอน mount
+    loadReminders()
+  }, [])
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value,
-    })
+    const { name, value, type } = e.target
+    if (type === "checkbox") {
+      setFormData({
+        ...formData,
+        [name]: (e.target as HTMLInputElement).checked,
+      })
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      })
+    }
   }
 
   // Handle select changes
@@ -275,69 +130,92 @@ export default function ManageReminderPage() {
   }
 
   // Add new reminder
-  const handleAddReminder = () => {
+  const handleAddReminder = async () => {
     // Validate required fields
     if (!formData.title.trim() || !formData.date || !formData.details.trim() || !formData.impact.trim()) {
-      // Show error or return
       return
     }
 
-    // สร้างข้อมูล password จาก username และ password ถ้ามีการติ๊กช่อง hasLogin
-    let passwordData = ""
-    if (formData.hasLogin && (formData.username || formData.password)) {
-      passwordData = `user: ${formData.username}\npassword: ${formData.password}`
-    }
+    try {
+      // Create a new task from form data
+      const newTask: Omit<UnifiedTask, "id"> = {
+        title: formData.title,
+        details: formData.details,
+        dueDate: formData.date,
+        status: "incomplete",
+        priority: "pending", // Will be calculated by API
+        done: false,
+        frequency: formData.frequency as UnifiedTask["frequency"],
+        impact: formData.impact,
+        link: formData.link,
+        hasLogin: formData.hasLogin,
+        username: formData.username,
+        password: formData.password,
+        isUrgent: checkIsUrgent(formData.date),
+      }
 
-    // Check if task is urgent (today or within next 3 days)
-    const isUrgent = checkIsUrgent(formData.date)
+      // Create the task via API
+      await unifiedApi.create(newTask)
 
-    const newReminder = {
-      id: reminders.length + 1,
-      ...formData,
-      password: passwordData,
-      status: "incomplete" as const,
-      isUrgent: isUrgent,
+      // Reload reminders to get the updated list
+      await loadReminders()
+
+      // Close dialog and reset form
+      setIsAddDialogOpen(false)
+      resetForm()
+    } catch (error) {
+      console.error("Failed to create reminder:", error)
     }
-    setReminders([...reminders, newReminder])
-    setIsAddDialogOpen(false)
-    resetForm()
   }
 
   // Edit reminder
-  const handleEditReminder = () => {
+  const handleEditReminder = async () => {
     if (!currentReminder) return
 
-    // สร้างข้อมูล password จาก username และ password ถ้ามีการติ๊กช่อง hasLogin
-    let passwordData = ""
-    if (formData.hasLogin && (formData.username || formData.password)) {
-      passwordData = `user: ${formData.username}\npassword: ${formData.password}`
+    try {
+      // Create updated task from form data
+      const updatedTask: Partial<UnifiedTask> = {
+        title: formData.title,
+        details: formData.details,
+        dueDate: formData.date,
+        frequency: formData.frequency as UnifiedTask["frequency"],
+        impact: formData.impact,
+        link: formData.link,
+        hasLogin: formData.hasLogin,
+        username: formData.username,
+        password: formData.password,
+      }
+
+      // Update the task via API
+      await unifiedApi.update(String(currentReminder.id), updatedTask)
+
+      // Reload reminders to get the updated list
+      await loadReminders()
+
+      // Close dialog and reset form
+      setIsEditDialogOpen(false)
+      resetForm()
+    } catch (error) {
+      console.error("Failed to update reminder:", error)
     }
-
-    // Check if task is urgent (today or within next 3 days)
-    const isUrgent = checkIsUrgent(formData.date)
-
-    const updatedReminders = reminders.map((reminder) =>
-      reminder.id === currentReminder.id
-        ? {
-            ...formData,
-            id: reminder.id,
-            password: passwordData,
-            status: reminder.status,
-            isUrgent: isUrgent,
-          }
-        : reminder,
-    )
-    setReminders(updatedReminders)
-    setIsEditDialogOpen(false)
-    resetForm()
   }
 
   // Delete reminder
-  const handleDeleteReminder = () => {
+  const handleDeleteReminder = async () => {
     if (!currentReminder) return
-    const updatedReminders = reminders.filter((reminder) => reminder.id !== currentReminder.id)
-    setReminders(updatedReminders)
-    setIsDeleteDialogOpen(false)
+
+    try {
+      // Delete the task via API
+      await unifiedApi.delete(String(currentReminder.id))
+
+      // Reload reminders to get the updated list
+      await loadReminders()
+
+      // Close dialog
+      setIsDeleteDialogOpen(false)
+    } catch (error) {
+      console.error("Failed to delete reminder:", error)
+    }
   }
 
   // Open edit dialog and set current reminder
@@ -348,15 +226,31 @@ export default function ManageReminderPage() {
     const hasLoginValue = reminder.password ? true : false
     setHasLogin(hasLoginValue)
 
-    // Initialize form data without username and password
+    // Extract username and password from the reminder's password field
+    let username = ""
+    let password = ""
+
+    if (reminder.password) {
+      const passwordLines = reminder.password.split("\n")
+
+      for (const line of passwordLines) {
+        if (line.toLowerCase().startsWith("user:")) {
+          username = line.substring(line.indexOf(":") + 1).trim()
+        } else if (line.toLowerCase().startsWith("password:")) {
+          password = line.substring(line.indexOf(":") + 1).trim()
+        }
+      }
+    }
+
+    // Initialize form data
     setFormData({
       title: reminder.title,
       date: reminder.date,
       frequency: reminder.frequency,
       details: reminder.details,
       link: reminder.link || "",
-      username: "",
-      password: "",
+      username: username,
+      password: password,
       impact: reminder.impact || "",
       hasLogin: hasLoginValue,
     })
@@ -377,29 +271,7 @@ export default function ManageReminderPage() {
   const handleEditAuthenticate = () => {
     // In a real system, verify the password against backend
     // For this example, we'll just accept any password
-
-    // Extract username and password from the reminder's password field
-    let username = ""
-    let password = ""
-
-    if (currentReminder?.password) {
-      const passwordLines = currentReminder.password.split("\n")
-
-      for (const line of passwordLines) {
-        if (line.toLowerCase().startsWith("user:")) {
-          username = line.substring(line.indexOf(":") + 1).trim()
-        } else if (line.toLowerCase().startsWith("password:")) {
-          password = line.substring(line.indexOf(":") + 1).trim()
-        }
-      }
-    }
-
     setIsEditPasswordAuthenticated(true)
-    setFormData({
-      ...formData,
-      username: username,
-      password: password,
-    })
   }
 
   // Open delete dialog and set current reminder
@@ -434,38 +306,20 @@ export default function ManageReminderPage() {
   }
 
   // Toggle reminder status
-  const toggleReminderStatus = (reminder: Reminder) => {
-    const updatedReminders = reminders.map((r) =>
-      r.id === reminder.id ? { ...r, status: r.status === "completed" ? "incomplete" : "completed" } : r,
-    )
-    setReminders(updatedReminders)
+  const toggleReminderStatus = async (reminder: Reminder) => {
+    try {
+      const newStatus = reminder.status === "completed" ? "PENDING" : "DONE"
+      await unifiedApi.updateStatus(String(reminder.id), newStatus)
+
+      // Reload reminders to get the updated list
+      await loadReminders()
+    } catch (error) {
+      console.error("Failed to toggle reminder status:", error)
+    }
   }
 
-  const mappedCycle = cycleReminders.map((c) => ({
-    id: c.id,
-    title: c.title,
-    details: c.message,
-    date: c.scheduledAt?.split("T")[0],
-    frequency: c.frequency,
-    status: c.status,
-    type: c.type,
-    isUrgent: false, // Default for cycle reminders
-  }))
-
-  // รวม manual + cycle
-  const allReminders = [...reminders, ...mappedCycle]
-
-  // Mark urgent tasks
-  const remindersWithUrgentFlag = allReminders.map((reminder) => {
-    if (reminder.isUrgent !== undefined) return reminder
-    return {
-      ...reminder,
-      isUrgent: checkIsUrgent(reminder.date),
-    }
-  })
-
-  // กรอง search / filter บน allReminders
-  const filteredReminders = remindersWithUrgentFlag
+  // Filter reminders
+  const filteredReminders = reminders
     .filter((reminder) => {
       const matchesSearch =
         reminder.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -479,7 +333,30 @@ export default function ManageReminderPage() {
         (activeTab === "incomplete" && reminder.status === "incomplete") ||
         (activeTab === "completed" && reminder.status === "completed")
 
-      return matchesSearch && matchesStatus && matchesType && matchesTab
+      // Filter by date if needed
+      let matchesDate = true
+      if (filterDate !== "all") {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        const reminderDate = new Date(reminder.date)
+        reminderDate.setHours(0, 0, 0, 0)
+
+        if (filterDate === "today") {
+          matchesDate = reminderDate.getTime() === today.getTime()
+        } else if (filterDate === "thisWeek") {
+          const weekStart = new Date(today)
+          weekStart.setDate(today.getDate() - today.getDay())
+          const weekEnd = new Date(weekStart)
+          weekEnd.setDate(weekStart.getDate() + 6)
+          matchesDate = reminderDate >= weekStart && reminderDate <= weekEnd
+        } else if (filterDate === "thisMonth") {
+          matchesDate =
+            reminderDate.getMonth() === today.getMonth() && reminderDate.getFullYear() === today.getFullYear()
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesType && matchesTab && matchesDate
     })
     .sort((a, b) => {
       // Sort by priority: overdue > urgent > incomplete > completed
@@ -496,11 +373,11 @@ export default function ManageReminderPage() {
 
   // Count reminders by status
   const reminderCounts = {
-    all: remindersWithUrgentFlag.length,
-    overdue: remindersWithUrgentFlag.filter((r) => r.status === "overdue").length,
-    urgent: remindersWithUrgentFlag.filter((r) => r.isUrgent).length,
-    incomplete: remindersWithUrgentFlag.filter((r) => r.status === "incomplete").length,
-    completed: remindersWithUrgentFlag.filter((r) => r.status === "completed").length,
+    all: reminders.length,
+    overdue: reminders.filter((r) => r.status === "overdue").length,
+    urgent: reminders.filter((r) => r.isUrgent).length,
+    incomplete: reminders.filter((r) => r.status === "incomplete").length,
+    completed: reminders.filter((r) => r.status === "completed").length,
   }
 
   return (
@@ -524,26 +401,33 @@ export default function ManageReminderPage() {
             }}
           />
 
-          {/* Tabs */}
-          <ReminderTabs
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            reminderCounts={reminderCounts}
-            filteredReminders={filteredReminders}
-            onEdit={openEditDialog}
-            onDelete={openDeleteDialog}
-            onToggleStatus={toggleReminderStatus}
-            onViewPassword={(reminder) => {
-              setCurrentReminder(reminder)
-              setIsPasswordVisible(false)
-              setIsForgotPasswordDialogOpen(true)
-            }}
-            getStatusBadge={getStatusBadge}
-            getFrequencyText={getFrequencyText}
-            getTypeIcon={getTypeIcon}
-            getDueDateStatus={getDueDateStatus}
-            formatThaiDate={formatThaiDate}
-          />
+          {/* Loading state */}
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-700"></div>
+            </div>
+          ) : (
+            /* Tabs */
+            <ReminderTabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              reminderCounts={reminderCounts}
+              filteredReminders={filteredReminders}
+              onEdit={openEditDialog}
+              onDelete={openDeleteDialog}
+              onToggleStatus={toggleReminderStatus}
+              onViewPassword={(reminder) => {
+                setCurrentReminder(reminder)
+                setIsPasswordVisible(false)
+                setIsForgotPasswordDialogOpen(true)
+              }}
+              getStatusBadge={getStatusBadge}
+              getFrequencyText={getFrequencyText}
+              getTypeIcon={getTypeIcon}
+              getDueDateStatus={getDueDateStatus}
+              formatThaiDate={formatThaiDate}
+            />
+          )}
         </div>
       </div>
 

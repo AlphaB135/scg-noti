@@ -9,16 +9,20 @@ type TaskCalendarProps = {
   selectedMonth: number
   selectedYear: number
   onMonthChange: (month: number, year: number) => void
+  onToggleTaskDone?: (id: string) => void
+  onRescheduleTask?: (task: Task) => void
 }
 
-export default function TaskCalendar({ 
-  tasks, 
-  setIsAddDialogOpen, 
-  setEditTask, 
+export default function TaskCalendar({
+  tasks,
+  setIsAddDialogOpen,
+  setEditTask,
   resetForm,
   selectedMonth,
   selectedYear,
-  onMonthChange 
+  onMonthChange,
+  onToggleTaskDone,
+  onRescheduleTask,
 }: TaskCalendarProps) {
   return (
     <section className="mt-6">
@@ -31,6 +35,8 @@ export default function TaskCalendar({
           setIsAddDialogOpen={setIsAddDialogOpen}
           setEditTask={setEditTask}
           resetForm={resetForm}
+          onToggleTaskDone={onToggleTaskDone}
+          onRescheduleTask={onRescheduleTask}
         />
       </div>
     </section>

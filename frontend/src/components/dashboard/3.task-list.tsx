@@ -25,7 +25,7 @@ export default function TaskList({
   onFilterChange,
 }: TaskListProps) {
   return (
-    <section className="w-full md:w-2/3 rounded-[20px] border border-gray-100 bg-white shadow-sm backdrop-blur-sm shadow-xl ring-1 ring-black/5 transition hover:scale-[1.02] transition duration-300 shadow-md">
+    <section className="w-full h-full rounded-[20px] border border-gray-100 bg-white shadow-sm backdrop-blur-sm shadow-xl ring-1 ring-black/5 transition hover:scale-[1.02] duration-300 shadow-md flex flex-col">
       <div className="p-6 ">
         <div className="flex justify-between items-center mb-4 ">
           <h2 className="text-lg font-bold text-gray-800">สิ่งที่ต้องทำ</h2>
