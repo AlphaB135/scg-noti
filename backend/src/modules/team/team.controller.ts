@@ -32,7 +32,12 @@ export async function listTeams(
 ): Promise<void> {
   try {
     const opts = paginationSchema.parse(req.query)
-    const result = await TeamService.listTeams(opts)
+    // Pass company code if not SUPERADMIN
+    const result = await TeamService.listTeams(
+      opts, 
+      req.companyCode,
+      (req.user as any)?.role
+    )
     res.json(result)
     return
   } catch (err) {
@@ -97,8 +102,8 @@ export async function addTeamMember(
 ): Promise<void> {
   try {
     const { id: teamId } = req.params
-    const { employeeId } = addMemberSchema.parse(req.body)
-    const data = await TeamService.addMember(teamId, employeeId)
+    const { employeeId, role } = addMemberSchema.parse(req.body)
+    const data = await TeamService.addMember(teamId, employeeId, role)
     res.status(201).json(data)
     return
   } catch (err) {

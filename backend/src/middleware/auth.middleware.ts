@@ -109,21 +109,23 @@ function checkUserRateLimit(userId: string): boolean {
 }
 
 // เช็คและบันทึกความพยายามเข้าสู่ระบบที่ล้มเหลว
+// Temporarily disabled failed login attempt counter for development
 function handleFailedAttempt(identifier: string): boolean {
-  const attempt = caches.failedAttempts.get(identifier) || { count: 0, lockUntil: 0 }
-  const now = Date.now()
+  // const attempt = caches.failedAttempts.get(identifier) || { count: 0, lockUntil: 0 }
+  // const now = Date.now()
 
-  if (now < attempt.lockUntil) {
-    return false
-  }
+  // if (now < attempt.lockUntil) {
+  //   return false
+  // }
 
-  attempt.count++
-  if (attempt.count >= CONSTANTS.MAX_FAILED_ATTEMPTS) {
-    attempt.lockUntil = now + CONSTANTS.LOCK_TIME
-  }
+  // attempt.count++
+  // if (attempt.count >= CONSTANTS.MAX_FAILED_ATTEMPTS) {
+  //   attempt.lockUntil = now + CONSTANTS.LOCK_TIME
+  // }
 
-  caches.failedAttempts.set(identifier, attempt)
-  return attempt.count < CONSTANTS.MAX_FAILED_ATTEMPTS
+  // caches.failedAttempts.set(identifier, attempt)
+  // return attempt.count < CONSTANTS.MAX_FAILED_ATTEMPTS
+  return true  // Always allow attempts during development
 }
 
 export async function authMiddleware(
@@ -231,15 +233,13 @@ export async function authMiddleware(
         error: 'Unauthorized',
         detail: errorDetail
       })
-    }
-
-    // ตรวจสอบ rate limit ต่อผู้ใช้
-    if (!checkUserRateLimit(decoded.userId)) {
-      return res.status(429).json({
-        error: 'Too Many Requests',
-        detail: 'Rate limit exceeded'
-      })
-    }
+    }    // Temporarily disabled rate limiting for development
+    // if (!checkUserRateLimit(decoded.userId)) {
+    //   return res.status(429).json({
+    //     error: 'Too Many Requests',
+    //     detail: 'Rate limit exceeded'
+    //   })
+    // }
 
     let session = caches.sessions.get(decoded.sessionId)
 

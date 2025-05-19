@@ -1,29 +1,40 @@
 export type PermissionLevel = "admin" | "leader" | "member"
 
-export type Employee = {
-  id: string
-  name: string
-  department: string
-  position: string
-  email: string
-  selected?: boolean
+export interface EmployeeProfile {
+  employeeCode: string;
+  firstName: string;
+  lastName: string;
+  nickname?: string;
+  position?: string;
 }
 
-export type TeamMember = {
-  id: string
-  name: string
-  department: string
-  position: string
-  email: string
-  isLeader: boolean
-  permissionLevel: PermissionLevel
-  role: "หัวหน้างาน" | "พนักงาน" // Add this line to indicate role
+export interface Employee {
+  id: string;
+  email: string;
+  status: string;
+  role: string;
+  employeeProfile: EmployeeProfile;
+  selected?: boolean;
+  name?: string;
+  department?: string;
 }
 
-export type Team = {
-  id: string
-  name: string
-  members: TeamMember[]
+export interface TeamMember {
+  id: string;
+  membershipId: string;
+  name: string;
+  department: string;
+  position: string;
+  email: string;
+  isLeader: boolean;
+  permissionLevel: PermissionLevel;
+  role: string;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  members: TeamMember[];
 }
 
 // Permission descriptions

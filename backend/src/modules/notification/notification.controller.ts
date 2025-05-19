@@ -156,6 +156,37 @@ export async function list(
       ...(status && { status })
     }
 
+    // Add company-based filtering if not SUPERADMIN
+    if (req.user?.role !== 'SUPERADMIN' && req.companyCode) {
+      where.OR = [
+        { recipients: { some: { type: 'ALL' } } },
+        { recipients: { some: { type: 'COMPANY', companyCode: req.companyCode } } },
+        {
+          recipients: { 
+            some: { 
+              type: 'GROUP',
+              groupId: {
+                in: (await prisma.team.findMany({
+                  where: {
+                    members: {
+                      some: {
+                        user: {
+                          employeeProfile: {
+                            companyCode: req.companyCode
+                          }
+                        }
+                      }
+                    }
+                  },
+                  select: { id: true }
+                })).map(t => t.id)
+              }
+            }
+          }
+        }
+      ]
+    }
+
     // Add date range filter if month and year are provided
     if (!isNaN(month) && !isNaN(year)) {
       const startOfMonth = new Date(year, month - 1, 1)
@@ -233,6 +264,17 @@ export async function listMyNotifications(
 ): Promise<void> {
   try {
     const userId = req.user!.id
+    const companyCode = req.companyCode
+
+    if (!companyCode) {
+      throw new BadRequestError('Company code is required')
+    }
+
+    // Get user's team IDs
+    const teamIds = (await prisma.teamMember.findMany({
+      where: { employeeId: userId },
+      select: { teamId: true }
+    })).map(tm => tm.teamId)
 
     // Complex query to fetch notifications based on multiple recipient types
     const notifications = await prisma.notification.findMany({
@@ -240,20 +282,14 @@ export async function listMyNotifications(
         recipients: {
           some: {
             OR: [
-              { userId }, // Direct notifications
-              { 
-                type: 'ALL' // Global notifications
-              },
-              {
-                // Team notifications - fetch user's teams first
-                type: 'GROUP',
-                groupId: {
-                  in: (await prisma.teamMember.findMany({
-                    where: { employeeId: userId },
-                    select: { teamId: true }
-                  })).map(tm => tm.teamId)
-                }
-              }
+              // Direct notifications to user
+              { userId },
+              // Global notifications (if SUPERADMIN)
+              ...(req.user?.role === 'SUPERADMIN' ? [{ type: 'ALL' }] : []),
+              // Company notifications for user's company
+              { type: 'COMPANY', companyCode },
+              // Team notifications for user's teams
+              { type: 'GROUP', groupId: { in: teamIds } }
             ]
           }
         }

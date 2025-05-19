@@ -55,9 +55,25 @@ class TeamService {
    * }>} รายการทีมพร้อมข้อมูลสมาชิกและการแบ่งหน้า
    * 
    * @prismaModel Team, TeamMember, User
-   */
-  async listTeams(opts: Pagination) {
+   */  async listTeams(opts: Pagination, companyCode?: string, role?: string) {
+    // Build where clause based on role and company
+    let where = {}
+    if (role !== 'SUPERADMIN' && companyCode) {
+      where = {
+        members: {
+          some: {
+            user: {
+              employeeProfile: {
+                companyCode
+              }
+            }
+          }
+        }
+      }
+    }
+
     const teams = await prisma.team.findMany({
+      where,
       skip: opts.skip,
       take: opts.take,
       include: {
@@ -77,8 +93,8 @@ class TeamService {
       }
     })
     
-    // Also return total count for pagination
-    const total = await prisma.team.count() 
+    // Also return total count for pagination, using same where clause
+    const total = await prisma.team.count({ where }) 
 
     return { data: teams, total }
   }
@@ -156,6 +172,7 @@ class TeamService {
    * 
    * @param {string} teamId - รหัสทีม
    * @param {string} employeeId - รหัสพนักงานที่จะเพิ่ม
+   * @param {'TEAM_LEAD' | 'MEMBER'} [role='MEMBER'] - บทบาทของสมาชิกในทีม
    * @returns {Promise<TeamMember & {
    *   user: { id: string, email: string, employeeProfile: any }
    * }>} ข้อมูลการเป็นสมาชิกทีมที่สร้างขึ้น
@@ -163,11 +180,12 @@ class TeamService {
    * @prismaModel TeamMember, User
    * @throws {PrismaClientKnownRequestError} หากไม่พบทีมหรือพนักงาน
    */
-  async addMember(teamId: string, employeeId: string): Promise<TeamMember> {
+  async addMember(teamId: string, employeeId: string, role: 'TEAM_LEAD' | 'MEMBER' = 'MEMBER'): Promise<TeamMember> {
     return prisma.teamMember.create({
       data: {
         teamId,
-        employeeId
+        employeeId,
+        role
       },
       include: {
         user: {

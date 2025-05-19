@@ -24,7 +24,8 @@ export const paginationSchema = z.object({
 export type Pagination = z.output<typeof paginationSchema>
 
 export const addMemberSchema = z.object({
-  employeeId: z.string().uuid()
+  employeeId: z.string().uuid(),
+  role: z.enum(['TEAM_LEAD', 'MEMBER'])
 })
 export type AddMemberInput = z.infer<typeof addMemberSchema>
 

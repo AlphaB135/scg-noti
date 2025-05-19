@@ -130,7 +130,7 @@ if (process.env.NODE_ENV === 'development') {
  * - express.json(): Parse JSON request bodies with 10kb limit
  * - cookieParser: Parse cookies for auth tokens
  */
-app.use(express.json())
+app.use(express.json({ limit: '5mb' })) // เพิ่มขนาด payload เป็น 5MB
 app.use(cookieParser())
 
 /**
@@ -140,9 +140,10 @@ app.use(cookieParser())
  * 2. API limiter: General API request limits (100 per 5min)
  * 3. Burst limiter: Protection against rapid-fire requests (20 per min)
  */
-app.use('/api/auth/login', authLimiter)
-app.use('/api', apiLimiter)
-app.use('/api', burstLimiter)
+// Temporarily disabled rate limiting for development
+// app.use('/api/auth/login', authLimiter)
+// app.use('/api', apiLimiter)
+// app.use('/api', burstLimiter)
 
 /**
  * Mount API routes with proper prefixes

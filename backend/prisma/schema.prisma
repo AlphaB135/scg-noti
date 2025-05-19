@@ -13,7 +13,7 @@ model User {
   id                String                @id @default(uuid()) @db.UniqueIdentifier
   email             String                @unique @db.NVarChar(160)
   passwordHash      String                @db.NVarChar(255)
-  role              String                @db.VarChar(20) // e.g. "EMPLOYEE", "ADMIN", "SUPERADMIN", "AUDITOR"
+  role              String                @db.VarChar(20) // e.g. "EMPLOYEE", "SUPERVISOR", "ADMIN", "SUPERADMIN", "AUDITOR"
   status            String                @default("ACTIVE") @db.VarChar(10) // e.g. "ACTIVE", "LOCKED", "DISABLED"
   lastLoginAt       DateTime?             @db.DateTime2
   lastLoginIp       String?               @db.VarChar(45)
@@ -30,6 +30,10 @@ model User {
   appearancePref    UserAppearancePref?
   securityLogs      SecurityLog[]
   teamMemberships   TeamMember[]
+  analytics         EmployeeAnalytics[]
+  uploadedFiles     FileStorage[]
+  auditLogs         AuditLog[]
+  systemChanges     SystemChangeLog[]
 }
 
 // Profiles
@@ -42,7 +46,7 @@ model EmployeeProfile {
   lastName        String  @db.NVarChar(80)
   nickname        String? @db.NVarChar(60)
   position        String? @db.NVarChar(120)
-  profileImageUrl String? @db.NVarChar(255)
+  profileImageUrl String? @db.NVarChar(255) // URL pointing to FileStorage
   lineToken       String? @db.NVarChar(255)
 }
 
@@ -53,7 +57,7 @@ model AdminProfile {
   lastName        String  @db.NVarChar(80)
   nickname        String? @db.NVarChar(60)
   position        String? @db.NVarChar(120)
-  profileImageUrl String? @db.NVarChar(255)
+  profileImageUrl String? @db.NVarChar(255) // URL pointing to FileStorage
 }
 
 // SECURITY LOG
@@ -160,12 +164,28 @@ model Notification {
   message            String    @db.NVarChar(2000)
   scheduledAt        DateTime?
   status             String    @default("PENDING") @db.VarChar(20)
-  type               String    @db.VarChar(20) // SYSTEM / TODO / REMINDER
+  type               String    @db.VarChar(20) // SYSTEM / TODO / REMINDER / RECURRING
   category           String?   @db.NVarChar(80)
   link               String?   @db.NVarChar(255)
   urgencyDays        Int       @default(0)
   repeatIntervalDays Int       @default(0)
   dueDate            DateTime?
+
+  // Task Status fields
+  taskStatus      String?   @default("PENDING") @db.VarChar(20) // PENDING, IN_PROGRESS, COMPLETED, POSTPONED
+  taskCompletedAt DateTime? @db.DateTime2
+  taskCompletedBy String?   @db.UniqueIdentifier
+  postponeCount   Int       @default(0) // จำนวนครั้งที่เลื่อน
+  postponeReason  String?   @db.NVarChar(500)
+  lastPostponedAt DateTime? @db.DateTime2
+  originalDueDate DateTime? // เก็บ due date เดิมก่อนเลื่อน
+
+  // AI-related fields
+  aiGenerated      Boolean   @default(false)
+  aiPrompt         String?   @db.NVarChar(2000)
+  scheduleMonthDay Int? // 1-31 สำหรับแจ้งเตือนรายเดือน
+  scheduleWeekDay  Int? // 0-6 (อาทิตย์-เสาร์) สำหรับแจ้งเตือนรายสัปดาห์
+  scheduleTime     DateTime? @db.Time // เวลาที่จะส่งในแต่ละวัน
 
   createdBy String   @db.UniqueIdentifier
   createdAt DateTime @default(now()) @db.DateTime2
@@ -176,6 +196,8 @@ model Notification {
   attachments NotificationAttachment[]
 
   @@index([status])
+  @@index([taskStatus])
+  @@index([taskCompletedBy])
 }
 
 model Approval {
@@ -225,6 +247,7 @@ model TeamMember {
   id         String @id @default(uuid()) @db.UniqueIdentifier
   teamId     String @db.UniqueIdentifier
   employeeId String @db.UniqueIdentifier // user.id ของพนักงาน
+  role       String @default("MEMBER") @db.VarChar(20) // TEAM_LEAD or MEMBER
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
   user User @relation(fields: [employeeId], references: [id])
@@ -232,4 +255,97 @@ model TeamMember {
   @@index([teamId], map: "TeamMember_teamId_idx")
   @@index([employeeId], map: "TeamMember_userId_idx")
   @@index([employeeId])
+}
+
+// Employee Analytics
+model EmployeeAnalytics {
+  id         String @id @default(uuid()) @db.UniqueIdentifier
+  employeeId String @db.UniqueIdentifier
+  employee   User   @relation(fields: [employeeId], references: [id])
+  period     String @db.VarChar(7) // Format: YYYY-MM
+
+  // Task Performance
+  totalTasks      Int   @default(0)
+  completedTasks  Int   @default(0)
+  completedOnTime Int   @default(0)
+  completedLate   Int   @default(0)
+  postponedTasks  Int   @default(0)
+  avgPostponeDays Float @default(0)
+
+  // Time Management
+  avgCompletionTime Float @default(0) // Average days to complete tasks
+  urgentTasksCount  Int   @default(0)
+  urgentTasksOnTime Int   @default(0)
+
+  // Patterns
+  commonPostponeReason String? @db.NVarChar(500)
+  workloadScore        Float   @default(0) // 0-100
+  timeManagementScore  Float   @default(0) // 0-100
+
+  // Report
+  aiAnalysis      String? @db.NVarChar(2000) // AI-generated analysis
+  recommendations String? @db.NVarChar(1000)
+  alertLevel      String  @default("NORMAL") @db.VarChar(20) // NORMAL, WARNING, CRITICAL
+
+  createdAt DateTime @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
+  updatedAt DateTime @updatedAt @db.DateTime2
+
+  @@unique([employeeId, period])
+  @@index([employeeId, period])
+  @@index([alertLevel])
+}
+
+// File Storage
+model FileStorage {
+  id         String    @id @default(uuid()) @db.UniqueIdentifier
+  fileName   String    @db.NVarChar(255)
+  fileUrl    String    @db.NVarChar(255)
+  mimeType   String    @db.NVarChar(100)
+  fileSize   Int
+  bucket     String    @db.VarChar(100) // e.g. "profile-images", "attachments"
+  path       String    @db.NVarChar(500) // path in storage
+  uploadedBy String    @db.UniqueIdentifier
+  uploader   User      @relation(fields: [uploadedBy], references: [id])
+  createdAt  DateTime  @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
+  updatedAt  DateTime  @updatedAt @db.DateTime2
+  deleted    Boolean   @default(false)
+  deletedAt  DateTime? @db.DateTime2
+
+  @@index([bucket, uploadedBy])
+  @@index([deleted])
+}
+
+// Audit Logging
+model AuditLog {
+  id         String   @id @default(uuid()) @db.UniqueIdentifier
+  adminId    String   @db.UniqueIdentifier
+  admin      User     @relation(fields: [adminId], references: [id])
+  action     String   @db.VarChar(50) // e.g. USER_CREATED, ROLE_CHANGED, TEAM_CREATED
+  module     String   @db.VarChar(30) // e.g. USER, TEAM, SYSTEM_SETTINGS
+  targetType String   @db.VarChar(30) // e.g. USER, TEAM, SETTING
+  targetId   String?  @db.NVarChar(100)
+  oldValue   String?  @db.NVarChar(MAX) // JSON string of old state
+  newValue   String?  @db.NVarChar(MAX) // JSON string of new state
+  ipAddress  String   @db.VarChar(45)
+  userAgent  String   @db.NVarChar(255)
+  createdAt  DateTime @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
+
+  @@index([adminId, createdAt])
+  @@index([module, targetType])
+  @@index([targetType, targetId])
+}
+
+// System Change History
+model SystemChangeLog {
+  id          String   @id @default(uuid()) @db.UniqueIdentifier
+  changedBy   String   @db.UniqueIdentifier
+  user        User     @relation(fields: [changedBy], references: [id])
+  component   String   @db.VarChar(50) // e.g. SMTP_CONFIG, SYSTEM_SETTINGS, INTEGRATION
+  changeType  String   @db.VarChar(20) // e.g. UPDATED, ENABLED, DISABLED
+  description String   @db.NVarChar(500)
+  details     String?  @db.NVarChar(MAX) // JSON string of changes
+  createdAt   DateTime @default(dbgenerated("SYSUTCDATETIME()")) @db.DateTime2
+
+  @@index([changedBy, createdAt])
+  @@index([component])
 }

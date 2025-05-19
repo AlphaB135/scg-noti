@@ -31,3 +31,17 @@ export function truncateText(text: string, maxLength: number) {
   if (text.length <= maxLength) return text
   return text.slice(0, maxLength) + "..."
 }
+
+/**
+ * Get initials from a full name
+ * @example
+ * getInitials("John Doe") // returns "JD"
+ */
+export function getInitials(name: string): string {
+  if (!name) return ""
+  return name
+    .split(" ")
+    .map(part => part[0])
+    .join("")
+    .toUpperCase()
+}

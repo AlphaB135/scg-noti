@@ -2,6 +2,7 @@
 import { Link, useLocation } from "react-router-dom"
 import { Bell, LogOut, Settings, CheckCircle, ChevronDown, Users, Database } from "lucide-react"
 import { useState } from "react"
+import { useAuth } from "@/hooks/use-auth"
 
 interface SidebarProps {
   onLogout: () => void
@@ -14,7 +15,9 @@ export default function Sidebar({ onLogout }: SidebarProps) {
     ["/dashboard", "/manage", "/userlogs"].some((path) => location.pathname.startsWith(path)),
   )
 
-  const [adminOpen, setAdminOpen] = useState(["/addemployee"].some((path) => location.pathname.startsWith(path)))
+  const [adminOpen, setAdminOpen] = useState(
+    ["/addemployee", "/add-team", "/import-employees"].some((path) => location.pathname.startsWith(path)),
+  )
 
   const [teamOpen, setTeamOpen] = useState(
     ["/audit-logs", "/teammember"].some((path) => location.pathname.startsWith(path)),
@@ -23,6 +26,9 @@ export default function Sidebar({ onLogout }: SidebarProps) {
   const [superAdminOpen, setSuperAdminOpen] = useState(
     ["/superadmin"].some((path) => location.pathname.startsWith(path)),
   )
+
+  // Get user data from useAuth hook
+  const { user } = useAuth()
 
   // Helper function to check if a path is active
   const isActive = (path: string) => {
@@ -34,8 +40,34 @@ export default function Sidebar({ onLogout }: SidebarProps) {
     return paths.some((path) => currentPath.startsWith(path))
   }
 
-  // ตรวจสอบว่าเป็นซุปเปอร์แอดมินหรือไม่ (ในตัวอย่างนี้กำหนดให้เป็น true เพื่อแสดงเมนู)
-  const isSuperAdmin = true
+  // Helper function to get initials from name
+  const getInitials = (name: string) => {
+    if (!name) return ""
+    return name
+      .split(" ")
+      .map(part => part[0])
+      .join("")
+      .toUpperCase()
+  }
+
+  // Check if user is superadmin
+  const isSuperAdmin = user?.role === "SUPERADMIN"
+
+  // Format role for display
+  const getDisplayRole = (role: string) => {
+    switch (role) {
+      case "SUPERADMIN":
+        return "ซุปเปอร์แอดมิน"
+      case "ADMIN":
+        return "ผู้ดูแลระบบ"
+      case "USER":
+        return "ผู้ใช้งาน"
+      case "TEAM_LEAD":
+        return "หัวหน้าทีม"
+      default:
+        return role
+    }
+  }
 
   return (
     <aside className="hidden md:flex flex-col w-64 fixed inset-y-0 z-50 shadow-lg bg-gradient-to-b from-red-800 to-red-900">
@@ -58,11 +90,20 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       <div className="p-4 border-b border-red-700/50">
         <div className="flex items-center">
           <div className="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center text-white font-medium text-xl border border-white/20">
-            ปฉ
+            {user?.employeeProfile ? 
+              getInitials(`${user.employeeProfile.firstName} ${user.employeeProfile.lastName}`) :
+              getInitials(user?.name || "")}
           </div>
           <div className="ml-3">
-            <p className="text-white font-medium">ปัณณธร ฉิมเรือง</p>
-            <p className="text-white/60 text-xs">ผู้ดูแลระบบ</p>
+            <p className="text-white font-medium">
+              {user?.employeeProfile ? 
+                `${user.employeeProfile.firstName} ${user.employeeProfile.lastName}` :
+                user?.name || ""}
+            </p>
+            <p className="text-white/60 text-xs">
+              {user?.role ? getDisplayRole(user.role) : ""}
+              {user?.employeeProfile?.position && ` • ${user.employeeProfile.position}`}
+            </p>
           </div>
         </div>
       </div>
@@ -178,7 +219,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
             <button
               onClick={() => setAdminOpen(!adminOpen)}
               className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
-                isGroupActive(["/addemployee"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
+                isGroupActive(["/addemployee", "/add-team", "/import-employees"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
               }`}
             >
               <div className="flex items-center">
@@ -193,14 +234,25 @@ export default function Sidebar({ onLogout }: SidebarProps) {
             {adminOpen && (
               <div className="ml-4 mt-1 space-y-1">
                 <Link
-                  to="/addemployee"
+                  to="/add-team"
                   className={`block rounded-md px-4 py-2 text-white transition-colors ${
-                    isActive("/addemployee") ? "bg-white/15 font-medium" : "hover:bg-white/10"
+                    isActive("/add-team") ? "bg-white/15 font-medium" : "hover:bg-white/10"
                   }`}
                 >
                   <div className="flex items-center">
                     <div className="w-1.5 h-1.5 rounded-full bg-white/60 mr-2.5"></div>
-                    เพิ่มพนักงานใหม่
+                    สร้างทีม
+                  </div>
+                </Link>
+                <Link
+                  to="/import-employees"
+                  className={`block rounded-md px-4 py-2 text-white transition-colors ${
+                    isActive("/import-employees") ? "bg-white/15 font-medium" : "hover:bg-white/10"
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <div className="w-1.5 h-1.5 rounded-full bg-white/60 mr-2.5"></div>
+                    นำเข้ารายชื่อพนักงาน
                   </div>
                 </Link>
               </div>

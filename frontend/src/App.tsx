@@ -15,21 +15,15 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/dashboard/page";
 import Audit from "./pages/audit-logs/page";
 import Settings from "./pages/settings/page";
-
-// **ตรงนี้ต้อง import ให้ตรงกับไฟล์ของคุณ**
-// สมมติโฟลเดอร์ชื่อ manage_reminder/page.tsx และ default export เป็น component ชื่อ Manage
 import Manage from "./pages/manage_reminder/page";
-
 import UserLogs from "./pages/user-logs/page";
+import AddTeam from "./pages/add-team/page";
+import ImportEmployees from "./pages/add-team/import-excel";
+import TeamMember from "./pages/team-member/page";
+import SuperAdmin from "./pages/super-admin-logs/page";
 
 // HOC ตรวจสอบสิทธิ์
 import { RequireAuth } from "./components/RequireAuth";
-
-import AddEmployee from "./pages/add-employee-page/page";
-
-import TeamMember from "./pages/team-member/page";
-
-import SuperAdmin from "./pages/super-admin-logs/page";
 
 function App() {
   const [, setRole] = useState("");
@@ -83,10 +77,18 @@ function App() {
           }
         />
         <Route
-          path="/addemployee"
+          path="/add-team"
           element={
             <RequireAuth>
-              <AddEmployee />
+              <AddTeam />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/import-employees"
+          element={
+            <RequireAuth>
+              <ImportEmployees />
             </RequireAuth>
           }
         />

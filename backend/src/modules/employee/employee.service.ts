@@ -91,6 +91,69 @@ class EmployeeService {
       totalPages: Math.ceil(total / take)
     }
   }
+
+  /**
+   * Check for duplicate employees based on employeeCode and email
+   * 
+   * @param employeeCodes Array of employee codes to check
+   * @param emails Array of emails to check
+   * @returns Filtered array of duplicate employeeCodes and emails
+   */
+  async checkDuplicates(employeeCodes: string[], emails: string[]) {
+    const duplicates: { employeeCode: string; email: string }[] = []
+
+    // Check employeeCode duplicates
+    const existingByCode = await prisma.employeeProfile.findMany({
+      where: {
+        employeeCode: {
+          in: employeeCodes
+        }
+      },
+      select: {
+        employeeCode: true,
+        user: {
+          select: {
+            email: true
+          }
+        }
+      }
+    })
+    
+    existingByCode.forEach(emp => {
+      duplicates.push({
+        employeeCode: emp.employeeCode,
+        email: emp.user.email
+      })
+    })
+
+    // Check email duplicates
+    const existingByEmail = await prisma.user.findMany({
+      where: {
+        email: {
+          in: emails
+        }
+      },
+      select: {
+        email: true,
+        employeeProfile: {
+          select: {
+            employeeCode: true
+          }
+        }
+      }
+    })
+
+    existingByEmail.forEach(user => {
+      if (user.employeeProfile && !duplicates.some(d => d.email === user.email)) {
+        duplicates.push({
+          employeeCode: user.employeeProfile.employeeCode,
+          email: user.email
+        })
+      }
+    })
+
+    return duplicates
+  }
 }
 
 export default new EmployeeService()

@@ -7,7 +7,7 @@ interface MobileHeaderProps {
 
 export default function MobileHeader({ isMenuOpen, toggleMenu }: MobileHeaderProps) {
   return (
-    <div className="md:hidden fixed top-0 left-0 right-0 bg-red-800 text-white flex items-center justify-between px-4 py-3 shadow-lg z-50">
+    <div className="fixed top-0 left-0 right-0 bg-red-800 text-white flex items-center justify-between px-4 py-3 shadow-lg z-50">
       <div className="flex items-center">
         <img src="https://storage.googleapis.com/be8website.appspot.com/logo-scg-white.png" alt="SCG Logo" className="h-9 mr-3" />
         <div className="border-l-2 border-white/30 pl-3">

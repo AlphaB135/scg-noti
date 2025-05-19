@@ -12,11 +12,13 @@ import {
 } from '../modules/team/team.controller'
 import { authMiddleware } from '../middleware/auth.middleware'
 import { authorize } from '../middleware/authz'
+import { companyAuth } from '../middleware/company-auth'
 
 const router = Router()
 
-// Protect all team routes with authentication
+// Protect all team routes with authentication and company authorization
 router.use(authMiddleware as RequestHandler)
+router.use(companyAuth(false) as RequestHandler)
 
 // Team CRUD
 router.post('/', 

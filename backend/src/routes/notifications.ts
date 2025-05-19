@@ -40,11 +40,15 @@ router.use(jwtGuard)
  * เส้นทางการจัดการการแจ้งเตือน
  * @security JWT
  */
-router.get('/mine', listMyNotifications) // ดูรายการแจ้งเตือนของตนเอง
-router.get('/', list)                   // ดูรายการแจ้งเตือนทั้งหมด
-router.post('/', createNotification)     // สร้างการแจ้งเตือนใหม่
-router.patch('/:id', updateStatus)       // อัพเดทสถานะการแจ้งเตือน
-router.post('/:id/reschedule', reschedule) // กำหนดเวลาใหม่
+import { companyAuth } from '../middleware/company-auth'
+import { authorize } from '../middleware/authz'
+
+// Routes with company auth
+router.get('/mine', companyAuth(true), listMyNotifications) 
+router.get('/', companyAuth(false), list)
+router.post('/', companyAuth(true), authorize(['ADMIN', 'SUPERADMIN']), createNotification)
+router.patch('/:id', companyAuth(true), authorize(['ADMIN', 'SUPERADMIN']), updateStatus)
+router.post('/:id/reschedule', companyAuth(true), authorize(['ADMIN', 'SUPERADMIN']), reschedule)
 
 /**
  * เส้นทางการจัดการการอนุมัติ
