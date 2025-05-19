@@ -28,6 +28,7 @@ export default function AddEmployeePage() {
   const [employees, setEmployees] = useState<(Employee & { selected?: boolean })[]>([])
   const [filteredEmployees, setFilteredEmployees] = useState<(Employee & { selected?: boolean })[]>([])
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedPosition, setSelectedPosition] = useState<string>("all") // เพิ่ม state สำหรับตำแหน่ง
   const [teams, setTeams] = useState<Team[]>([])
   const [currentTeam, setCurrentTeam] = useState<Team | null>(null)
   const [newTeamName, setNewTeamName] = useState("")
@@ -101,36 +102,37 @@ export default function AddEmployeePage() {
         sortOrder: 'asc'
       });
 
-      // Map response data to add selected flag
+      // Map response data to add selected flag and default role
       const employeesWithSelect = response.data.map(emp => ({
         ...emp,
         selected: false,
-        name: `${emp.employeeProfile.firstName} ${emp.employeeProfile.lastName}`,
-        department: emp.employeeProfile.position || 'ไม่ระบุตำแหน่ง'
+        name: `${emp.firstName} ${emp.lastName}`,
+        department: emp.position || 'ไม่ระบุตำแหน่ง',
+        role: 'EMPLOYEE' // Set default role for all employees
       }));
 
       setEmployees(prev => 
         page === 1 ? employeesWithSelect : [...prev, ...employeesWithSelect]
       );
       
-      // อัพเดท filtered employees โดยรวมกับข้อมูลเดิม
+      // Update filtered employees
       setFilteredEmployees(prev => {
         const newFiltered = page === 1 ? employeesWithSelect : [...prev, ...employeesWithSelect];
         
-        // กรองตามการค้นหาและทีมปัจจุบัน
+        // Filter by search and current team
         if (searchQuery || currentTeam) {
           return newFiltered.filter(emp => {
-            // กรองสมาชิกที่อยู่ในทีมออก
+            // Filter out team members
             if (currentTeam && currentTeam.members.some(member => member.id === emp.id)) {
               return false;
             }
 
-            // กรองตามคำค้นหา
+            // Filter by search query
             if (searchQuery) {
               const query = searchQuery.toLowerCase();
-              const name = `${emp.employeeProfile.firstName} ${emp.employeeProfile.lastName}`.toLowerCase();
-              const position = emp.employeeProfile.position?.toLowerCase() || '';
-              const code = emp.employeeProfile.employeeCode.toLowerCase();
+              const name = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+              const position = emp.position?.toLowerCase() || '';
+              const code = emp.employeeCode.toLowerCase();
               
               return name.includes(query) ||
                 position.includes(query) ||
@@ -142,9 +144,7 @@ export default function AddEmployeePage() {
         }
 
         return newFiltered;
-      });
-
-      setTotalPages(response.meta.totalPages);
+      });      setTotalPages(Math.ceil(response.total / pageSize));
       setCurrentPage(page);
     } catch (error) {
       console.error("Error fetching employees:", error);
@@ -164,10 +164,9 @@ export default function AddEmployeePage() {
   useEffect(() => {
     fetchTeams()
   }, [currentTeam, fetchTeams])
-
   useEffect(() => {
     fetchEmployees(1)
-  }, [])  
+  }, [fetchEmployees])  
 
   // Filter employees based on search and current team
   useEffect(() => {
@@ -189,9 +188,9 @@ export default function AddEmployeePage() {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(emp => {
-        const name = `${emp.employeeProfile.firstName} ${emp.employeeProfile.lastName}`.toLowerCase();
-        const position = emp.employeeProfile.position?.toLowerCase() || '';
-        const code = emp.employeeProfile.employeeCode.toLowerCase();
+        const name = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+        const position = emp.position?.toLowerCase() || '';
+        const code = emp.employeeCode.toLowerCase();
         
         return name.includes(query) ||
           position.includes(query) ||

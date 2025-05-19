@@ -1,0 +1,1704 @@
+{
+  "users": [
+    {
+      "id": "e719ffaa-e646-4cab-bca3-cf2f16e7f2fe",
+      "email": "c001-1000@example.com",
+      "password": "123456",
+      "role": "SUPERADMIN",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1000",
+        "firstName": "ธนพล",
+        "lastName": "ศรีสุข",
+        "nickname": "แชมป์",
+        "position": "หัวหน้าระบบ",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1000.jpg",
+        "lineToken": "line_token_C001-1000"
+      }
+    },
+    {
+      "id": "2d7f66b3-1b4a-4e7b-9a58-e1359c0d3516",
+      "email": "c002-1000@example.com",
+      "password": "123456",
+      "role": "SUPERADMIN",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1000",
+        "firstName": "อลิษา",
+        "lastName": "สวัสดิ์",
+        "nickname": "ปุ้ม",
+        "position": "หัวหน้าระบบ",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1000.jpg",
+        "lineToken": "line_token_C002-1000"
+      }
+    },
+    {
+      "id": "a7741247-3761-4b21-9288-a7fc75476ffa",
+      "email": "c001-1001@example.com",
+      "password": "123456",
+      "role": "ADMIN",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1001",
+        "firstName": "ภาณุพล",
+        "lastName": "ศรีสุข",
+        "nickname": "ตาล",
+        "position": "เจ้าหน้าที่ระบบ",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1001.jpg",
+        "lineToken": "line_token_C001-1001"
+      }
+    },
+    {
+      "id": "4b17e6a3-475c-4b3e-85d0-d7bf819ee6b6",
+      "email": "c002-1001@example.com",
+      "password": "123456",
+      "role": "ADMIN",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1001",
+        "firstName": "สุทธิพงษ์",
+        "lastName": "สำราญ",
+        "nickname": "ตาล",
+        "position": "เจ้าหน้าที่ระบบ",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1001.jpg",
+        "lineToken": "line_token_C002-1001"
+      }
+    },
+    {
+      "id": "28fc558d-2872-4f2d-ac62-66868d1fb9b4",
+      "email": "c003-1001@example.com",
+      "password": "123456",
+      "role": "ADMIN",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1001",
+        "firstName": "รัชตะ",
+        "lastName": "งามวงศ์",
+        "nickname": "เอ็ม",
+        "position": "เจ้าหน้าที่ระบบ",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1001.jpg",
+        "lineToken": "line_token_C003-1001"
+      }
+    },
+    {
+      "id": "ce59cd00-2201-4494-b28b-e11349e7b2e4",
+      "email": "c004-1001@example.com",
+      "password": "123456",
+      "role": "ADMIN",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1001",
+        "firstName": "อลิษา",
+        "lastName": "ฉิมพาลี",
+        "nickname": "อาร์ต",
+        "position": "เจ้าหน้าที่ระบบ",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1001.jpg",
+        "lineToken": "line_token_C004-1001"
+      }
+    },
+    {
+      "id": "7566d94f-91ed-4db3-a3ea-c18d87040388",
+      "email": "c005-1001@example.com",
+      "password": "123456",
+      "role": "ADMIN",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1001",
+        "firstName": "อัมพร",
+        "lastName": "อรุณมณี",
+        "nickname": "อาร์ต",
+        "position": "เจ้าหน้าที่ระบบ",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1001.jpg",
+        "lineToken": "line_token_C005-1001"
+      }
+    },
+    {
+      "id": "5c9aef27-cd02-44b9-8093-0ec11c8b2883",
+      "email": "c001-1002@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1002",
+        "firstName": "สุภาวดี",
+        "lastName": "สำราญ",
+        "nickname": "แจ็ค",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1002.jpg",
+        "lineToken": "line_token_C001-1002"
+      }
+    },
+    {
+      "id": "9557e442-c086-46b1-b4cb-a78e1cea44b9",
+      "email": "c001-1003@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1003",
+        "firstName": "ภาณุพล",
+        "lastName": "ใจดี",
+        "nickname": "บูม",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1003.jpg",
+        "lineToken": "line_token_C001-1003"
+      }
+    },
+    {
+      "id": "c499f48e-5694-4ed3-9515-f5c0d9fbcbdf",
+      "email": "c001-1004@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1004",
+        "firstName": "วิทวัส",
+        "lastName": "งามวงศ์",
+        "nickname": "เจมส์",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1004.jpg",
+        "lineToken": "line_token_C001-1004"
+      }
+    },
+    {
+      "id": "dd2524d5-e0eb-4d56-ab8a-c5e1abb00c09",
+      "email": "c001-1005@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1005",
+        "firstName": "วัฒนา",
+        "lastName": "ชัยชนะ",
+        "nickname": "บูม",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1005.jpg",
+        "lineToken": "line_token_C001-1005"
+      }
+    },
+    {
+      "id": "a1de926d-aa1e-4154-a59c-6b24715ace3a",
+      "email": "c001-1006@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1006",
+        "firstName": "วิสูตร",
+        "lastName": "ศรีสุข",
+        "nickname": "แชมป์",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1006.jpg",
+        "lineToken": "line_token_C001-1006"
+      }
+    },
+    {
+      "id": "5dfc7752-0196-4fe9-b0db-988d358844dc",
+      "email": "c001-1007@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1007",
+        "firstName": "รัชตะ",
+        "lastName": "บุญส่ง",
+        "nickname": "เต้",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1007.jpg",
+        "lineToken": "line_token_C001-1007"
+      }
+    },
+    {
+      "id": "de74af32-305a-4675-b29d-6f6f29ea996f",
+      "email": "c001-1008@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1008",
+        "firstName": "สุทธิพงษ์",
+        "lastName": "สำโรง",
+        "nickname": "ปุ้ย",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1008.jpg",
+        "lineToken": "line_token_C001-1008"
+      }
+    },
+    {
+      "id": "eabed98b-7df8-4c74-95ac-196db7168592",
+      "email": "c001-1009@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1009",
+        "firstName": "ภาณุพล",
+        "lastName": "ใจดี",
+        "nickname": "ตาล",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1009.jpg",
+        "lineToken": "line_token_C001-1009"
+      }
+    },
+    {
+      "id": "61017956-90fa-46a8-a6ec-a3427fe80a15",
+      "email": "c001-1010@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1010",
+        "firstName": "สุนีย์",
+        "lastName": "งามวงศ์",
+        "nickname": "อาร์ต",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1010.jpg",
+        "lineToken": "line_token_C001-1010"
+      }
+    },
+    {
+      "id": "ce4b6feb-1b77-41d4-882f-c430f689ccd2",
+      "email": "c001-1011@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1011",
+        "firstName": "วัฒนา",
+        "lastName": "สุนทร",
+        "nickname": "ตาล",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1011.jpg",
+        "lineToken": "line_token_C001-1011"
+      }
+    },
+    {
+      "id": "2853dfdf-16c3-4ff2-acde-ff2533b5b10e",
+      "email": "c001-1012@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1012",
+        "firstName": "ธนพล",
+        "lastName": "วิริยะ",
+        "nickname": "โฟล์ค",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1012.jpg",
+        "lineToken": "line_token_C001-1012"
+      }
+    },
+    {
+      "id": "9947cf65-1cbd-4b1a-82d9-8cc3da2c4f77",
+      "email": "c001-1013@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1013",
+        "firstName": "สุทธิพงษ์",
+        "lastName": "ทองคำ",
+        "nickname": "เฟิร์ส",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1013.jpg",
+        "lineToken": "line_token_C001-1013"
+      }
+    },
+    {
+      "id": "cde351c3-6838-45b6-b8ec-ad9476d50153",
+      "email": "c001-1014@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1014",
+        "firstName": "วิทวัส",
+        "lastName": "ฉิมพาลี",
+        "nickname": "ฟ้า",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1014.jpg",
+        "lineToken": "line_token_C001-1014"
+      }
+    },
+    {
+      "id": "4e79e5c9-b55d-461a-a04b-9c2d97f441cb",
+      "email": "c001-1015@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1015",
+        "firstName": "สมชาย",
+        "lastName": "อรุณมณี",
+        "nickname": "คิม",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1015.jpg",
+        "lineToken": "line_token_C001-1015"
+      }
+    },
+    {
+      "id": "af688b43-bcf8-4c75-8f99-30413248c411",
+      "email": "c001-1016@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1016",
+        "firstName": "สุนีย์",
+        "lastName": "พิชญ์มล",
+        "nickname": "ตาล",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1016.jpg",
+        "lineToken": "line_token_C001-1016"
+      }
+    },
+    {
+      "id": "81626c9e-9fc8-4204-b367-f13786d07585",
+      "email": "c001-1017@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1017",
+        "firstName": "วิไล",
+        "lastName": "พิชญ์มล",
+        "nickname": "เจมส์",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1017.jpg",
+        "lineToken": "line_token_C001-1017"
+      }
+    },
+    {
+      "id": "9168bb0f-9f75-474d-add0-248a966d7ebe",
+      "email": "c001-1018@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1018",
+        "firstName": "สมชาย",
+        "lastName": "ฉิมพาลี",
+        "nickname": "ปุ้ย",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1018.jpg",
+        "lineToken": "line_token_C001-1018"
+      }
+    },
+    {
+      "id": "ea33eed8-7567-4f7c-bd79-3ad20ff7332b",
+      "email": "c001-1019@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1019",
+        "firstName": "วิทวัส",
+        "lastName": "จันทรา",
+        "nickname": "นนท์",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1019.jpg",
+        "lineToken": "line_token_C001-1019"
+      }
+    },
+    {
+      "id": "f113ba3d-cb22-4f00-ab9e-6ca5daab49a3",
+      "email": "c001-1020@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C001",
+        "employeeCode": "C001-1020",
+        "firstName": "สุทธิพงษ์",
+        "lastName": "ฉิมพาลี",
+        "nickname": "ตาล",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C001-1020.jpg",
+        "lineToken": "line_token_C001-1020"
+      }
+    },
+    {
+      "id": "c56fb8a0-5105-4f45-9831-9d6c7d19a7b7",
+      "email": "c002-1002@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1002",
+        "firstName": "สุทธิพงษ์",
+        "lastName": "ทองคำ",
+        "nickname": "นนท์",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1002.jpg",
+        "lineToken": "line_token_C002-1002"
+      }
+    },
+    {
+      "id": "fe8771e6-1103-480d-9883-ba74735c31c3",
+      "email": "c002-1003@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1003",
+        "firstName": "กิตติ",
+        "lastName": "ฉิมพาลี",
+        "nickname": "โฟล์ค",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1003.jpg",
+        "lineToken": "line_token_C002-1003"
+      }
+    },
+    {
+      "id": "fff60ddf-8397-403e-99eb-a6490f67b615",
+      "email": "c002-1004@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1004",
+        "firstName": "สุภาวดี",
+        "lastName": "ศรีสุข",
+        "nickname": "ปุ้ย",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1004.jpg",
+        "lineToken": "line_token_C002-1004"
+      }
+    },
+    {
+      "id": "36e3bde1-023d-4e00-8608-3ff8e0354ac5",
+      "email": "c002-1005@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1005",
+        "firstName": "สุนีย์",
+        "lastName": "สวัสดิ์",
+        "nickname": "ปุ้ย",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1005.jpg",
+        "lineToken": "line_token_C002-1005"
+      }
+    },
+    {
+      "id": "52855b1a-06ff-4f8a-8751-384373440eff",
+      "email": "c002-1006@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1006",
+        "firstName": "วัฒนา",
+        "lastName": "ฉิมพาลี",
+        "nickname": "นนท์",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1006.jpg",
+        "lineToken": "line_token_C002-1006"
+      }
+    },
+    {
+      "id": "e69b89c7-0d7f-4ee6-844d-29dd9993dc03",
+      "email": "c002-1007@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1007",
+        "firstName": "รัชตะ",
+        "lastName": "ทองคำ",
+        "nickname": "เอ็ม",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1007.jpg",
+        "lineToken": "line_token_C002-1007"
+      }
+    },
+    {
+      "id": "51030c59-22e8-4647-9a4a-884e459be82f",
+      "email": "c002-1008@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1008",
+        "firstName": "อนุชา",
+        "lastName": "จันทรา",
+        "nickname": "ฟ้า",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1008.jpg",
+        "lineToken": "line_token_C002-1008"
+      }
+    },
+    {
+      "id": "9d24e672-e997-46f1-9ceb-a57692c1a3c5",
+      "email": "c002-1009@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1009",
+        "firstName": "อัมพร",
+        "lastName": "ใจดี",
+        "nickname": "ฟ้า",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1009.jpg",
+        "lineToken": "line_token_C002-1009"
+      }
+    },
+    {
+      "id": "723781d4-03ff-4e98-9c35-1a43c08a5132",
+      "email": "c002-1010@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1010",
+        "firstName": "สมชาย",
+        "lastName": "สำโรง",
+        "nickname": "ปุ้ม",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1010.jpg",
+        "lineToken": "line_token_C002-1010"
+      }
+    },
+    {
+      "id": "c7f1abcc-ce72-4052-8f58-d864c090b8f7",
+      "email": "c002-1011@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1011",
+        "firstName": "จิราภรณ์",
+        "lastName": "งามวงศ์",
+        "nickname": "ตูน",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1011.jpg",
+        "lineToken": "line_token_C002-1011"
+      }
+    },
+    {
+      "id": "0c6fcea5-bafe-4d99-9944-93deb0792cdf",
+      "email": "c002-1012@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1012",
+        "firstName": "วิทวัส",
+        "lastName": "ศรีสุข",
+        "nickname": "เฟิร์ส",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1012.jpg",
+        "lineToken": "line_token_C002-1012"
+      }
+    },
+    {
+      "id": "1a48709d-3e3b-40a9-a32f-0adf20d64b07",
+      "email": "c002-1013@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1013",
+        "firstName": "สุภาวดี",
+        "lastName": "วิริยะ",
+        "nickname": "มิว",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1013.jpg",
+        "lineToken": "line_token_C002-1013"
+      }
+    },
+    {
+      "id": "4ecae41b-64d3-4336-9e90-2e13aa76a5ca",
+      "email": "c002-1014@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1014",
+        "firstName": "ณรงค์",
+        "lastName": "งามวงศ์",
+        "nickname": "บูม",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1014.jpg",
+        "lineToken": "line_token_C002-1014"
+      }
+    },
+    {
+      "id": "1b002d9c-b7e9-464e-bd70-5779f0944630",
+      "email": "c002-1015@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1015",
+        "firstName": "สุนีย์",
+        "lastName": "งามวงศ์",
+        "nickname": "คิม",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1015.jpg",
+        "lineToken": "line_token_C002-1015"
+      }
+    },
+    {
+      "id": "2b7b3e4b-15ce-42e1-ae7d-f5e66b8503f8",
+      "email": "c002-1016@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1016",
+        "firstName": "ณรงค์",
+        "lastName": "บุญส่ง",
+        "nickname": "นนท์",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1016.jpg",
+        "lineToken": "line_token_C002-1016"
+      }
+    },
+    {
+      "id": "fcfb6d6e-fa70-4e7a-9a42-9d25a78b3ac2",
+      "email": "c002-1017@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1017",
+        "firstName": "วิทวัส",
+        "lastName": "ฉิมพาลี",
+        "nickname": "แชมป์",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1017.jpg",
+        "lineToken": "line_token_C002-1017"
+      }
+    },
+    {
+      "id": "09c72ca7-023b-4dfa-bf21-cfe322001abd",
+      "email": "c002-1018@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1018",
+        "firstName": "สุภาวดี",
+        "lastName": "ศรีสุข",
+        "nickname": "คิม",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1018.jpg",
+        "lineToken": "line_token_C002-1018"
+      }
+    },
+    {
+      "id": "a2ed6949-851a-42ec-a502-50e52c8304c5",
+      "email": "c002-1019@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1019",
+        "firstName": "ธนพล",
+        "lastName": "วิริยะ",
+        "nickname": "เต้",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1019.jpg",
+        "lineToken": "line_token_C002-1019"
+      }
+    },
+    {
+      "id": "f988e9a3-e488-44bc-a82e-91aa4f3287ef",
+      "email": "c002-1020@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C002",
+        "employeeCode": "C002-1020",
+        "firstName": "ณรงค์",
+        "lastName": "ชัยชนะ",
+        "nickname": "แชมป์",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C002-1020.jpg",
+        "lineToken": "line_token_C002-1020"
+      }
+    },
+    {
+      "id": "a9b7f760-7d76-41cc-b948-0883881d4c45",
+      "email": "c003-1002@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1002",
+        "firstName": "วิทวัส",
+        "lastName": "วิริยะ",
+        "nickname": "ปุ้ย",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1002.jpg",
+        "lineToken": "line_token_C003-1002"
+      }
+    },
+    {
+      "id": "0fbf0097-b681-41a1-968e-21af41d28869",
+      "email": "c003-1003@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1003",
+        "firstName": "จิราภรณ์",
+        "lastName": "อรุณมณี",
+        "nickname": "เฟิร์ส",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1003.jpg",
+        "lineToken": "line_token_C003-1003"
+      }
+    },
+    {
+      "id": "46ce0803-e195-42d7-bad8-14e2c667bdee",
+      "email": "c003-1004@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1004",
+        "firstName": "อนุชา",
+        "lastName": "วิริยะ",
+        "nickname": "เฟิร์ส",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1004.jpg",
+        "lineToken": "line_token_C003-1004"
+      }
+    },
+    {
+      "id": "a48ed623-111a-48ff-8a83-6e6a948aace7",
+      "email": "c003-1005@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1005",
+        "firstName": "วิไล",
+        "lastName": "ใจดี",
+        "nickname": "บูม",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1005.jpg",
+        "lineToken": "line_token_C003-1005"
+      }
+    },
+    {
+      "id": "556830fa-a8d9-437e-9ac7-c7106c4857ac",
+      "email": "c003-1006@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1006",
+        "firstName": "ปาริฉัตร",
+        "lastName": "สุนทร",
+        "nickname": "คิม",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1006.jpg",
+        "lineToken": "line_token_C003-1006"
+      }
+    },
+    {
+      "id": "8ed3f180-6117-482a-a7c5-2cae8107a90f",
+      "email": "c003-1007@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1007",
+        "firstName": "วิทวัส",
+        "lastName": "บุญส่ง",
+        "nickname": "มิว",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1007.jpg",
+        "lineToken": "line_token_C003-1007"
+      }
+    },
+    {
+      "id": "b7356cab-ce42-4731-b917-bc2c5ff7eeee",
+      "email": "c003-1008@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1008",
+        "firstName": "ภาณุพล",
+        "lastName": "พิชญ์มล",
+        "nickname": "ตูน",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1008.jpg",
+        "lineToken": "line_token_C003-1008"
+      }
+    },
+    {
+      "id": "84ae5bf2-1918-473f-937e-899c7afaa5f3",
+      "email": "c003-1009@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1009",
+        "firstName": "พิมพ์ใจ",
+        "lastName": "ชัยชนะ",
+        "nickname": "ฟ้า",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1009.jpg",
+        "lineToken": "line_token_C003-1009"
+      }
+    },
+    {
+      "id": "ca6d81d7-f033-469e-8866-7915225e7af2",
+      "email": "c003-1010@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1010",
+        "firstName": "กิตติ",
+        "lastName": "ศรีสุข",
+        "nickname": "แชมป์",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1010.jpg",
+        "lineToken": "line_token_C003-1010"
+      }
+    },
+    {
+      "id": "3965a869-eeaf-4f8e-b428-35bb2e85227e",
+      "email": "c003-1011@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1011",
+        "firstName": "วิสูตร",
+        "lastName": "จันทรา",
+        "nickname": "ฟ้า",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1011.jpg",
+        "lineToken": "line_token_C003-1011"
+      }
+    },
+    {
+      "id": "d08b3d17-059d-48ce-9846-7889eae4e91a",
+      "email": "c003-1012@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1012",
+        "firstName": "ปาริฉัตร",
+        "lastName": "ประเสริฐ",
+        "nickname": "เอ็ม",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1012.jpg",
+        "lineToken": "line_token_C003-1012"
+      }
+    },
+    {
+      "id": "804baa27-18de-47e9-9754-681323e907b4",
+      "email": "c003-1013@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1013",
+        "firstName": "จิราภรณ์",
+        "lastName": "สวัสดิ์",
+        "nickname": "ปุ้ม",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1013.jpg",
+        "lineToken": "line_token_C003-1013"
+      }
+    },
+    {
+      "id": "d8fb88e9-a4ee-49f7-81f6-f29b9f5909f1",
+      "email": "c003-1014@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1014",
+        "firstName": "จิราภรณ์",
+        "lastName": "ปรารถนา",
+        "nickname": "เอ็ม",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1014.jpg",
+        "lineToken": "line_token_C003-1014"
+      }
+    },
+    {
+      "id": "59627403-faa7-4acd-82ed-a3e9f9660a41",
+      "email": "c003-1015@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1015",
+        "firstName": "สุนีย์",
+        "lastName": "อรุณมณี",
+        "nickname": "ตูน",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1015.jpg",
+        "lineToken": "line_token_C003-1015"
+      }
+    },
+    {
+      "id": "48a96f15-733e-4981-84c5-a707caa91c3e",
+      "email": "c003-1016@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1016",
+        "firstName": "จิราภรณ์",
+        "lastName": "สำราญ",
+        "nickname": "เอ็ม",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1016.jpg",
+        "lineToken": "line_token_C003-1016"
+      }
+    },
+    {
+      "id": "69403b18-777e-4876-804b-bbf045da7919",
+      "email": "c003-1017@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1017",
+        "firstName": "วัฒนา",
+        "lastName": "สวัสดิ์",
+        "nickname": "บูม",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1017.jpg",
+        "lineToken": "line_token_C003-1017"
+      }
+    },
+    {
+      "id": "01687e86-0375-47f2-ad90-4012969127e9",
+      "email": "c003-1018@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1018",
+        "firstName": "อลิษา",
+        "lastName": "ใจดี",
+        "nickname": "ปุ้ย",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1018.jpg",
+        "lineToken": "line_token_C003-1018"
+      }
+    },
+    {
+      "id": "fcdaa889-0496-41ad-8e0f-847ac60e7a42",
+      "email": "c003-1019@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1019",
+        "firstName": "ธนพล",
+        "lastName": "ฉิมพาลี",
+        "nickname": "ตาล",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1019.jpg",
+        "lineToken": "line_token_C003-1019"
+      }
+    },
+    {
+      "id": "1b99607b-0c8c-4e8f-9a7e-c65b185fb43b",
+      "email": "c003-1020@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C003",
+        "employeeCode": "C003-1020",
+        "firstName": "จิราภรณ์",
+        "lastName": "ศรีสุข",
+        "nickname": "มิว",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C003-1020.jpg",
+        "lineToken": "line_token_C003-1020"
+      }
+    },
+    {
+      "id": "0e8e4abf-a30d-4b8b-a453-e4653b2a50db",
+      "email": "c004-1002@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1002",
+        "firstName": "สุนีย์",
+        "lastName": "ทองคำ",
+        "nickname": "อาร์ต",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1002.jpg",
+        "lineToken": "line_token_C004-1002"
+      }
+    },
+    {
+      "id": "7c8619cb-d286-4a85-9d93-c4cc72fbc6b2",
+      "email": "c004-1003@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1003",
+        "firstName": "ภาณุพล",
+        "lastName": "สำโรง",
+        "nickname": "อาร์ต",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1003.jpg",
+        "lineToken": "line_token_C004-1003"
+      }
+    },
+    {
+      "id": "063baecf-9554-44ad-b800-54135a12aa8d",
+      "email": "c004-1004@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1004",
+        "firstName": "สุภาวดี",
+        "lastName": "ปรารถนา",
+        "nickname": "แจ็ค",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1004.jpg",
+        "lineToken": "line_token_C004-1004"
+      }
+    },
+    {
+      "id": "8f46b436-5f7e-4380-b5b6-d7468ee065e9",
+      "email": "c004-1005@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1005",
+        "firstName": "สุนีย์",
+        "lastName": "จันทรา",
+        "nickname": "เบน",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1005.jpg",
+        "lineToken": "line_token_C004-1005"
+      }
+    },
+    {
+      "id": "c9456875-6fe0-4aeb-8b4e-7bd5dbd961f9",
+      "email": "c004-1006@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1006",
+        "firstName": "วิทวัส",
+        "lastName": "ใจดี",
+        "nickname": "ตาล",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1006.jpg",
+        "lineToken": "line_token_C004-1006"
+      }
+    },
+    {
+      "id": "d730b38b-9431-46d3-8a56-d9cb857ff591",
+      "email": "c004-1007@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1007",
+        "firstName": "สุภาวดี",
+        "lastName": "วิริยะ",
+        "nickname": "อาร์ต",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1007.jpg",
+        "lineToken": "line_token_C004-1007"
+      }
+    },
+    {
+      "id": "9cee84c6-cb09-4f89-9b1c-54e97a9b170a",
+      "email": "c004-1008@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1008",
+        "firstName": "วิสูตร",
+        "lastName": "จิระเดช",
+        "nickname": "แชมป์",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1008.jpg",
+        "lineToken": "line_token_C004-1008"
+      }
+    },
+    {
+      "id": "20e89423-8fe7-4981-a6e8-48e0b37f875d",
+      "email": "c004-1009@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1009",
+        "firstName": "พิมพ์ใจ",
+        "lastName": "อรุณมณี",
+        "nickname": "กุ้ง",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1009.jpg",
+        "lineToken": "line_token_C004-1009"
+      }
+    },
+    {
+      "id": "bbad881e-6ce8-4820-ae47-04b8c906c09f",
+      "email": "c004-1010@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1010",
+        "firstName": "วิไล",
+        "lastName": "สวัสดิ์",
+        "nickname": "ตูน",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1010.jpg",
+        "lineToken": "line_token_C004-1010"
+      }
+    },
+    {
+      "id": "b74df338-8b3f-4e8a-a1d2-072ba999a309",
+      "email": "c004-1011@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1011",
+        "firstName": "อลิษา",
+        "lastName": "สวัสดิ์",
+        "nickname": "ปุ้ม",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1011.jpg",
+        "lineToken": "line_token_C004-1011"
+      }
+    },
+    {
+      "id": "dbad0de5-19b5-4c54-96dd-2c2a5e1510ee",
+      "email": "c004-1012@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1012",
+        "firstName": "สมชาย",
+        "lastName": "เกียรติวงศ์",
+        "nickname": "คิม",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1012.jpg",
+        "lineToken": "line_token_C004-1012"
+      }
+    },
+    {
+      "id": "b0012c1b-3631-4152-b8fa-abf81094206a",
+      "email": "c004-1013@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1013",
+        "firstName": "วิสูตร",
+        "lastName": "วิริยะ",
+        "nickname": "เจมส์",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1013.jpg",
+        "lineToken": "line_token_C004-1013"
+      }
+    },
+    {
+      "id": "a4ac3d12-2992-4012-b19e-47e4bb32894f",
+      "email": "c004-1014@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1014",
+        "firstName": "กิตติ",
+        "lastName": "จิระเดช",
+        "nickname": "กุ้ง",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1014.jpg",
+        "lineToken": "line_token_C004-1014"
+      }
+    },
+    {
+      "id": "75fe9aea-2e38-49a5-84dc-0648be0d4b56",
+      "email": "c004-1015@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1015",
+        "firstName": "วิทวัส",
+        "lastName": "ชัยชนะ",
+        "nickname": "เอ็ม",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1015.jpg",
+        "lineToken": "line_token_C004-1015"
+      }
+    },
+    {
+      "id": "834b886a-5a9b-432e-9ae8-b68c593f5074",
+      "email": "c004-1016@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1016",
+        "firstName": "วิทวัส",
+        "lastName": "สุนทร",
+        "nickname": "ปุ้ม",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1016.jpg",
+        "lineToken": "line_token_C004-1016"
+      }
+    },
+    {
+      "id": "068d6417-6f0a-492a-9646-5e97d822545c",
+      "email": "c004-1017@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1017",
+        "firstName": "วิทวัส",
+        "lastName": "อรุณมณี",
+        "nickname": "บูม",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1017.jpg",
+        "lineToken": "line_token_C004-1017"
+      }
+    },
+    {
+      "id": "1c19ec7a-3db7-4bcc-8ce9-653f74433f2c",
+      "email": "c004-1018@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1018",
+        "firstName": "สุทธิพงษ์",
+        "lastName": "ศรีสุข",
+        "nickname": "ตาล",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1018.jpg",
+        "lineToken": "line_token_C004-1018"
+      }
+    },
+    {
+      "id": "80b0230a-fe8d-4abe-8bda-9fcac8b825e1",
+      "email": "c004-1019@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C004",
+        "employeeCode": "C004-1019",
+        "firstName": "จิราภรณ์",
+        "lastName": "สำโรง",
+        "nickname": "บูม",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C004-1019.jpg",
+        "lineToken": "line_token_C004-1019"
+      }
+    },
+    {
+      "id": "d440b3f4-1440-4f24-946c-db96c99dcfa0",
+      "email": "c005-1002@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1002",
+        "firstName": "วัฒนา",
+        "lastName": "จิระเดช",
+        "nickname": "เจมส์",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1002.jpg",
+        "lineToken": "line_token_C005-1002"
+      }
+    },
+    {
+      "id": "9f0ab751-3549-4ece-8f8b-a229bc25a1f7",
+      "email": "c005-1003@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1003",
+        "firstName": "สุภาวดี",
+        "lastName": "ปรารถนา",
+        "nickname": "ปุ้ย",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1003.jpg",
+        "lineToken": "line_token_C005-1003"
+      }
+    },
+    {
+      "id": "4cfba455-5476-4d44-8a40-32ae18cd921a",
+      "email": "c005-1004@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1004",
+        "firstName": "สุนีย์",
+        "lastName": "เกียรติวงศ์",
+        "nickname": "เบน",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1004.jpg",
+        "lineToken": "line_token_C005-1004"
+      }
+    },
+    {
+      "id": "d001893f-8684-4021-99ae-9b92820644c4",
+      "email": "c005-1005@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1005",
+        "firstName": "วิสูตร",
+        "lastName": "จิระเดช",
+        "nickname": "เต้",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1005.jpg",
+        "lineToken": "line_token_C005-1005"
+      }
+    },
+    {
+      "id": "27d29d85-524b-4c85-a255-3ff83f65a5a8",
+      "email": "c005-1006@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1006",
+        "firstName": "สุนีย์",
+        "lastName": "อรุณมณี",
+        "nickname": "ฟ้า",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1006.jpg",
+        "lineToken": "line_token_C005-1006"
+      }
+    },
+    {
+      "id": "3c127468-8fda-4ee3-aa2d-c10f68c56d92",
+      "email": "c005-1007@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1007",
+        "firstName": "วัฒนา",
+        "lastName": "บุญส่ง",
+        "nickname": "แจ็ค",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1007.jpg",
+        "lineToken": "line_token_C005-1007"
+      }
+    },
+    {
+      "id": "7de1a53f-afb1-4e91-9f1c-af0e99ee8a19",
+      "email": "c005-1008@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1008",
+        "firstName": "วิทวัส",
+        "lastName": "เกียรติวงศ์",
+        "nickname": "เฟิร์ส",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1008.jpg",
+        "lineToken": "line_token_C005-1008"
+      }
+    },
+    {
+      "id": "7af4c541-23dd-4247-8d76-650f913d10d7",
+      "email": "c005-1009@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1009",
+        "firstName": "พิมพ์ใจ",
+        "lastName": "ปรารถนา",
+        "nickname": "แบงค์",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1009.jpg",
+        "lineToken": "line_token_C005-1009"
+      }
+    },
+    {
+      "id": "a6bc4ca8-d92c-4da8-981b-5f81bf5e71e6",
+      "email": "c005-1010@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1010",
+        "firstName": "วิไล",
+        "lastName": "วิริยะ",
+        "nickname": "แบงค์",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1010.jpg",
+        "lineToken": "line_token_C005-1010"
+      }
+    },
+    {
+      "id": "4e4343d4-8404-4851-a787-54076acbba7a",
+      "email": "c005-1011@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1011",
+        "firstName": "ปาริฉัตร",
+        "lastName": "สุนทร",
+        "nickname": "โฟล์ค",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1011.jpg",
+        "lineToken": "line_token_C005-1011"
+      }
+    },
+    {
+      "id": "18eefaf8-a98c-49ff-8b40-171e0398f4d0",
+      "email": "c005-1012@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1012",
+        "firstName": "ณรงค์",
+        "lastName": "ฉิมพาลี",
+        "nickname": "แชมป์",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1012.jpg",
+        "lineToken": "line_token_C005-1012"
+      }
+    },
+    {
+      "id": "72adcf8d-78b1-4343-8d03-4dd0322e60c8",
+      "email": "c005-1013@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1013",
+        "firstName": "ปฐมพงศ์",
+        "lastName": "สวัสดิ์",
+        "nickname": "อาร์ต",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1013.jpg",
+        "lineToken": "line_token_C005-1013"
+      }
+    },
+    {
+      "id": "e622e203-b8ab-49d1-8471-f6f393169ff9",
+      "email": "c005-1014@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1014",
+        "firstName": "วิทวัส",
+        "lastName": "สำโรง",
+        "nickname": "เบน",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1014.jpg",
+        "lineToken": "line_token_C005-1014"
+      }
+    },
+    {
+      "id": "ecb7cab6-caa4-4419-9d5b-ad260b77557f",
+      "email": "c005-1015@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1015",
+        "firstName": "อัมพร",
+        "lastName": "จันทรา",
+        "nickname": "ตูน",
+        "position": "นักวิเคราะห์",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1015.jpg",
+        "lineToken": "line_token_C005-1015"
+      }
+    },
+    {
+      "id": "6ca4d92e-d224-4074-a8f8-6e0beb7c31fd",
+      "email": "c005-1016@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1016",
+        "firstName": "อนุชา",
+        "lastName": "ทองคำ",
+        "nickname": "เฟิร์ส",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1016.jpg",
+        "lineToken": "line_token_C005-1016"
+      }
+    },
+    {
+      "id": "43ffccbc-c40c-458d-a9a2-1edbeeccebf1",
+      "email": "c005-1017@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1017",
+        "firstName": "สมชาย",
+        "lastName": "ศรีสุข",
+        "nickname": "เจมส์",
+        "position": "พนักงานขาย",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1017.jpg",
+        "lineToken": "line_token_C005-1017"
+      }
+    },
+    {
+      "id": "bf1bced9-87ea-4a84-9049-fab7fc061d10",
+      "email": "c005-1018@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1018",
+        "firstName": "ปฐมพงศ์",
+        "lastName": "เกียรติวงศ์",
+        "nickname": "เจมส์",
+        "position": "พนักงานผลิต",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1018.jpg",
+        "lineToken": "line_token_C005-1018"
+      }
+    },
+    {
+      "id": "5fc2acba-3a8c-48c1-9143-e5faa85aa70e",
+      "email": "c005-1019@example.com",
+      "password": "123456",
+      "role": "EMPLOYEE",
+      "status": "ACTIVE",
+      "employeeProfile": {
+        "companyCode": "C005",
+        "employeeCode": "C005-1019",
+        "firstName": "สุนีย์",
+        "lastName": "พิชญ์มล",
+        "nickname": "เฟิร์ส",
+        "position": "นักพัฒนา",
+        "profileImageUrl": "https://cdn.example.com/profiles/C005-1019.jpg",
+        "lineToken": "line_token_C005-1019"
+      }
+    }
+  ]
+}
