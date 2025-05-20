@@ -17,6 +17,9 @@ interface MonthCalendarProps {
   resetForm: () => void
   currentMonth: number
   currentYear: number
+  onToggleTaskDone?: (id: string) => void
+  onRescheduleTask?: (task: Task) => void
+  onViewTaskDetail?: (task: Task) => void
 }
 
 export function MonthCalendar({
@@ -27,6 +30,9 @@ export function MonthCalendar({
   resetForm,
   currentMonth,
   currentYear,
+  onToggleTaskDone,
+  onRescheduleTask,
+  onViewTaskDetail,
 }: MonthCalendarProps) {
   const [isMobileView, setIsMobileView] = useState(false)
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
@@ -266,9 +272,14 @@ export function MonthCalendar({
                           onDragStart={(e) => handleDragStart(e, task)}
                           onClick={(e) => {
                             e.stopPropagation()
-                            resetForm()
-                            setEditTask(task)
-                            setIsAddDialogOpen(true)
+                            // เปิดหน้าต่างรายละเอียดงานแทนการแก้ไข
+                            if (onViewTaskDetail) {
+                              onViewTaskDetail(task)
+                            } else {
+                              resetForm()
+                              setEditTask(task)
+                              setIsAddDialogOpen(true)
+                            }
                           }}
                         >
                           {task.title}
@@ -306,9 +317,14 @@ export function MonthCalendar({
                     className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
                     onClick={() => {
                       setDayTasksDialogOpen(false)
-                      resetForm()
-                      setEditTask(task)
-                      setIsAddDialogOpen(true)
+                      // เปิดหน้าต่างรายละเอียดงานแทนการแก้ไข
+                      if (onViewTaskDetail) {
+                        onViewTaskDetail(task)
+                      } else {
+                        resetForm()
+                        setEditTask(task)
+                        setIsAddDialogOpen(true)
+                      }
                     }}
                   >
                     <div className="flex items-center gap-2">
@@ -317,7 +333,10 @@ export function MonthCalendar({
                         checked={task.done}
                         onChange={(e) => {
                           e.stopPropagation()
-                          // This would typically call the handleToggleTaskDone function
+                          // เปลี่ยนจากคอมเมนต์เป็นการเรียกใช้ฟังก์ชันจริง
+                          if (onToggleTaskDone) {
+                            onToggleTaskDone(task.id)
+                          }
                         }}
                         className="h-4 w-4"
                       />

@@ -16,7 +16,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
   )
 
   const [teamOpen, setTeamOpen] = useState(
-    ["/team-overview", "/teammember", "/add-notification"].some((path) => location.pathname.startsWith(path)),
+    ["/team-overview", "/teammember", "/team-notification"].some((path) => location.pathname.startsWith(path)),
   )
 
   const [adminOpen, setAdminOpen] = useState(
@@ -24,7 +24,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
   )
 
   const [superAdminOpen, setSuperAdminOpen] = useState(
-    ["/all-history", "/add-admin"].some((path) => location.pathname.startsWith(path)),
+    ["/superadmin", "/addadmin"].some((path) => location.pathname.startsWith(path)),
   )
 
   // Get user data from useAuth hook
@@ -174,7 +174,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
             <button
               onClick={() => setTeamOpen(!teamOpen)}
               className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
-                isGroupActive(["/team-overview", "/teammember", "/add-notification"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
+                isGroupActive(["/team-overview", "/teammember", "/team-notification"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
               }`}
             >
               <div className="flex items-center">
@@ -197,7 +197,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
                   }`}
                 >
                   <div className="flex items-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/60 mr-2.5"></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mr-2.5"></div>
                     ภาพรวม
                   </div>
                 </Link>
@@ -213,13 +213,13 @@ export default function Sidebar({ onLogout }: SidebarProps) {
                   </div>
                 </Link>
                 <Link
-                  to="/add-notification"
+                  to="/team-notification"
                   className={`block rounded-md px-4 py-2 text-white transition-colors ${
-                    isActive("/add-notification") ? "bg-white/15 font-medium" : "hover:bg-white/10"
+                    isActive("/team-notification") ? "bg-white/15 font-medium" : "hover:bg-white/10"
                   }`}
                 >
                   <div className="flex items-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/60 mr-2.5"></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mr-2.5"></div>
                     เพิ่มการแจ้งเตือน
                   </div>
                 </Link>
@@ -278,7 +278,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
               <button
                 onClick={() => setSuperAdminOpen(!superAdminOpen)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
-                  isGroupActive(["/all-history", "/add-admin"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
+                  isGroupActive(["/superadmin", "/addadmin"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
                 }`}
               >
                 <div className="flex items-center">
@@ -296,9 +296,9 @@ export default function Sidebar({ onLogout }: SidebarProps) {
               {superAdminOpen && (
                 <div className="ml-4 mt-1 space-y-1">
                   <Link
-                    to="/all-history"
+                    to="/superadmin"
                     className={`block rounded-md px-4 py-2 text-white transition-colors ${
-                      isActive("/all-history") ? "bg-white/15 font-medium" : "hover:bg-white/10"
+                      isActive("/superadmin") ? "bg-white/15 font-medium" : "hover:bg-white/10"
                     }`}
                   >
                     <div className="flex items-center">
@@ -307,9 +307,9 @@ export default function Sidebar({ onLogout }: SidebarProps) {
                     </div>
                   </Link>
                   <Link
-                    to="/add-admin"
+                    to="/addadmin"
                     className={`block rounded-md px-4 py-2 text-white transition-colors ${
-                      isActive("/add-admin") ? "bg-white/15 font-medium" : "hover:bg-white/10"
+                      isActive("/addadmin") ? "bg-white/15 font-medium" : "hover:bg-white/10"
                     }`}
                   >
                     <div className="flex items-center">

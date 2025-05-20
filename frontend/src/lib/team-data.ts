@@ -18,7 +18,7 @@ export interface Team {
   name: string
 }
 
-export const teams: Team[] = [
+export let teams: Team[] = [
   {
     id: "team-1",
     name: "ทีมพัฒนาระบบ",
@@ -32,6 +32,13 @@ export const teams: Team[] = [
     name: "ทีมทดสอบระบบ",
   },
 ]
+
+export function renameTeam(teamId: string, newName: string) {
+  const team = teams.find((t) => t.id === teamId)
+  if (team) {
+    team.name = newName
+  }
+}
 
 export const teamMembers: Member[] = [
   {

@@ -11,6 +11,7 @@ type TaskCalendarProps = {
   onMonthChange: (month: number, year: number) => void
   onToggleTaskDone?: (id: string) => void
   onRescheduleTask?: (task: Task) => void
+  onViewTaskDetail?: (task: Task) => void
 }
 
 export default function TaskCalendar({
@@ -23,6 +24,7 @@ export default function TaskCalendar({
   onMonthChange,
   onToggleTaskDone,
   onRescheduleTask,
+  onViewTaskDetail,
 }: TaskCalendarProps) {
   return (
     <section className="mt-6">
@@ -37,6 +39,7 @@ export default function TaskCalendar({
           resetForm={resetForm}
           onToggleTaskDone={onToggleTaskDone}
           onRescheduleTask={onRescheduleTask}
+          onViewTaskDetail={onViewTaskDetail}
         />
       </div>
     </section>

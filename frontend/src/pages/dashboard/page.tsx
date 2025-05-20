@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Calendar } from "lucide-react"
+import { CheckCircle2 } from "lucide-react"
 
 // Import our separated components
 import AppLayout from "@/components/layout/app-layout"
@@ -70,6 +72,11 @@ export default function AdminNotificationPage() {
   const [reopenReason, setReopenReason] = useState("")
   const [rescheduleReason, setRescheduleReason] = useState("")
   const [newDueDate, setNewDueDate] = useState("")
+
+  // เพิ่มสถานะสำหรับหน้าต่างรายละเอียดงาน
+  const [isTaskDetailDialogOpen, setIsTaskDetailDialogOpen] = useState(false)
+  const [taskDetail, setTaskDetail] = useState<Task | null>(null)
+
   // แยกฟังก์ชันโหลดข้อมูลเป็นส่วนๆ
   const loadCurrentMonthData = useCallback(async () => {
     try {
@@ -226,6 +233,12 @@ export default function AdminNotificationPage() {
     setIsReopenDialogOpen(true)
   }
 
+  // เพิ่มฟังก์ชันสำหรับเปิดหน้าต่างรายละเอียดงาน
+  const openTaskDetailDialog = (task: Task) => {
+    setTaskDetail(task)
+    setIsTaskDetailDialogOpen(true)
+  }
+
   // Function to change month/year
   const changeMonth = (month: number, year: number) => {
     console.log("Changing month/year to:", { month, year })
@@ -253,7 +266,14 @@ export default function AdminNotificationPage() {
     try {
       const updatedTask = await notificationsApi.reopen(taskToReopen.id, reopenReason)
 
+      // อัปเดตทั้ง tasks และ allTasks
       setTasks((prev) =>
+        prev.map((t) =>
+          t.id === updatedTask.id ? { ...t, done: false, reopenHistory: updatedTask.reopenHistory } : t,
+        ),
+      )
+
+      setAllTasks((prev) =>
         prev.map((t) =>
           t.id === updatedTask.id ? { ...t, done: false, reopenHistory: updatedTask.reopenHistory } : t,
         ),
@@ -274,7 +294,20 @@ export default function AdminNotificationPage() {
     try {
       const updatedTask = await notificationsApi.reschedule(taskToReschedule.id, newDueDate, rescheduleReason)
 
+      // อัปเดตทั้ง tasks และ allTasks เพื่อให้แน่ใจว่าข้อมูลตรงกัน
       setTasks((prev) =>
+        prev.map((t) =>
+          t.id === updatedTask.id
+            ? {
+                ...t,
+                dueDate: updatedTask.scheduledAt?.split("T")[0],
+                rescheduleHistory: updatedTask.rescheduleHistory,
+              }
+            : t,
+        ),
+      )
+
+      setAllTasks((prev) =>
         prev.map((t) =>
           t.id === updatedTask.id
             ? {
@@ -308,7 +341,9 @@ export default function AdminNotificationPage() {
     try {
       await notificationsApi.updateStatus(id, "DONE")
 
-      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: true, priority: "pending" } : t)))
+      // อัปเดตทั้ง tasks และ allTasks
+      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: true } : t)))
+      setAllTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: true } : t)))
     } catch (error) {
       console.error("Failed to update task status:", error)
     }
@@ -489,6 +524,7 @@ export default function AdminNotificationPage() {
               setEditTask(task)
               setIsAddDialogOpen(true)
             }}
+            onViewTaskDetail={openTaskDetailDialog}
             onRescheduleTask={openRescheduleDialog}
             onAddTask={() => {
               resetForm()
@@ -511,6 +547,7 @@ export default function AdminNotificationPage() {
         setModalActiveFilter={setModalActiveFilter}
         handleToggleTaskDone={handleToggleTaskDone}
         setEditTask={setEditTask}
+        onViewTaskDetail={openTaskDetailDialog}
         openRescheduleDialog={openRescheduleDialog}
         resetForm={resetForm}
         setIsAddDialogOpen={setIsAddDialogOpen}
@@ -755,6 +792,145 @@ export default function AdminNotificationPage() {
               disabled={!formData.title.trim() || !formData.date || !formData.details.trim() || !formData.impact.trim()}
             >
               {editTask ? "บันทึกการเปลี่ยนแปลง" : "สร้างการแจ้งเตือน"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* ===== TASK DETAIL DIALOG ===== */}
+      <Dialog open={isTaskDetailDialogOpen} onOpenChange={setIsTaskDetailDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] rounded-[20px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl">รายละเอียดงาน</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {taskDetail && (
+              <>
+                <div className="flex justify-between items-start">
+                  <h3 className="text-lg font-semibold">{taskDetail.title}</h3>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                      taskDetail.done
+                        ? "bg-green-100 text-green-700"
+                        : taskDetail.priority === "overdue"
+                          ? "bg-red-100 text-red-700"
+                          : taskDetail.priority === "urgent"
+                            ? "bg-orange-100 text-orange-700"
+                            : taskDetail.priority === "today"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {taskDetail.done
+                      ? "เสร็จแล้ว"
+                      : taskDetail.priority === "overdue"
+                        ? "เลยกำหนด"
+                        : taskDetail.priority === "urgent"
+                          ? "ด่วน"
+                          : taskDetail.priority === "today"
+                            ? "วันนี้"
+                            : "ปกติ"}
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <Calendar className="h-4 w-4" />
+                    <span>กำหนดส่ง: {taskDetail.dueDate}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-medium text-gray-700">รายละเอียด</h4>
+                  <div className="p-3 bg-gray-50 rounded-lg whitespace-pre-wrap text-gray-700">
+                    {taskDetail.details}
+                  </div>
+                </div>
+
+                {taskDetail.hasLogin && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-gray-700">ข้อมูลการเข้าสู่ระบบ</h4>
+                    <div className="p-3 bg-gray-50 rounded-lg space-y-2">
+                      <div className="flex gap-2">
+                        <span className="font-medium text-gray-600">Username:</span>
+                        <span>{taskDetail.username}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="font-medium text-gray-600">Password:</span>
+                        <span>{taskDetail.password}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {taskDetail.link && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-gray-700">ลิงก์</h4>
+                    <a
+                      href={taskDetail.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      {taskDetail.link}
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                        />
+                      </svg>
+                    </a>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <DialogFooter className="mt-6 space-x-2">
+            {taskDetail && !taskDetail.done && (
+              <Button
+                onClick={() => {
+                  if (taskDetail) {
+                    handleToggleTaskDone(taskDetail.id)
+                    setIsTaskDetailDialogOpen(false)
+                  }
+                }}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" /> ทำเสร็จแล้ว
+              </Button>
+            )}
+            {taskDetail && !taskDetail.done && (
+              <Button
+                onClick={() => {
+                  if (taskDetail) {
+                    openRescheduleDialog(taskDetail)
+                    setIsTaskDetailDialogOpen(false)
+                  }
+                }}
+                variant="outline"
+              >
+                เลื่อนกำหนด
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                if (taskDetail) {
+                  resetForm()
+                  setEditTask(taskDetail)
+                  setIsAddDialogOpen(true)
+                  setIsTaskDetailDialogOpen(false)
+                }
+              }}
+              variant="outline"
+            >
+              แก้ไข
             </Button>
           </DialogFooter>
         </DialogContent>

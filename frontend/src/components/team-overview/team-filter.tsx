@@ -18,7 +18,7 @@ export function TeamFilter({ statuses, selectedStatus, onSelectStatus }: TeamFil
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2">
-            <span>{selectedStatus || "อาการ"}</span>
+            <span>{selectedStatus || "สถานะ"}</span>
             <ChevronDown className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>

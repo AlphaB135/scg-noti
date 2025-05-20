@@ -1,8 +1,6 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useCallback } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import EmployeeTable from "./employee-table"
 import type { Employee } from "@/lib/api/employees"
 
@@ -15,7 +13,7 @@ interface EmployeeListProps {
   handleEmployeeSelection: (id: string) => void
   currentPage: number
   totalPages: number
-  onLoadMore: () => void
+  setCurrentPage: (page: number) => void
   isLoading: boolean
 }
 
@@ -26,31 +24,11 @@ export default function EmployeeList({
   setActiveTab,
   handleSelectAll,
   handleEmployeeSelection,
+  currentPage,
+  totalPages,
+  setCurrentPage,
   isLoading,
-  onLoadMore,
-}: EmployeeListProps) {  const scrollRef = useRef<HTMLDivElement>(null)
-
-  // Handle scroll for infinite loading
-  const handleScroll = useCallback(() => {
-    if (!scrollRef.current) return
-
-    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current
-    const threshold = 100 // ระยะห่างจากด้านล่างที่จะโหลดข้อมูลเพิ่ม
-
-    // เมื่อ scroll ใกล้ถึงด้านล่าง
-    if (scrollHeight - scrollTop - clientHeight < threshold && !isLoading) {
-      onLoadMore()
-    }
-  }, [onLoadMore, isLoading])
-
-  useEffect(() => {
-    const scrollElement = scrollRef.current
-    if (scrollElement) {
-      scrollElement.addEventListener('scroll', handleScroll)
-      return () => scrollElement.removeEventListener('scroll', handleScroll)
-    }
-  }, [handleScroll])
-
+}: EmployeeListProps) {
   return (
     <div className="space-y-4 relative">
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
@@ -63,42 +41,64 @@ export default function EmployeeList({
           ))}
         </TabsList>
 
-        <div ref={scrollRef} style={{ maxHeight: "60vh", overflowY: "auto" }}>
-          <TabsContent value="all" className="m-0">
+        <TabsContent value="all" className="m-0">
+          <EmployeeTable
+            employees={filteredEmployees}
+            handleSelectAll={handleSelectAll}
+            handleEmployeeSelection={handleEmployeeSelection}
+            allSelected={
+              filteredEmployees.length > 0 &&
+              filteredEmployees.every((emp) => emp.selected)
+            }
+          />
+        </TabsContent>
+
+        {departments.map((dept) => (
+          <TabsContent key={dept} value={dept} className="m-0">
             <EmployeeTable
-              employees={filteredEmployees}
-              handleSelectAll={handleSelectAll}
+              employees={filteredEmployees.filter((emp) => emp.employeeProfile.position === dept)}
+              handleSelectAll={() => {
+                const deptEmployees = filteredEmployees.filter((emp) => emp.employeeProfile.position === dept)
+                const allSelected = deptEmployees.every((emp) => emp.selected)
+                deptEmployees.forEach((emp) => handleEmployeeSelection(emp.id))
+              }}
               handleEmployeeSelection={handleEmployeeSelection}
-              allSelected={filteredEmployees.length > 0 && filteredEmployees.every((emp) => emp.selected)}
+              allSelected={
+                filteredEmployees.filter((emp) => emp.employeeProfile.position === dept).length > 0 &&
+                filteredEmployees.filter((emp) => emp.employeeProfile.position === dept).every((emp) => emp.selected)
+              }
+              departmentName={dept}
             />
           </TabsContent>
+        ))}
 
-          {departments.map((dept) => (
-            <TabsContent key={dept} value={dept} className="m-0">
-              <EmployeeTable
-                employees={filteredEmployees.filter((emp) => emp.employeeProfile.position === dept)}
-                handleSelectAll={() => {
-                  const deptEmployees = filteredEmployees.filter((emp) => emp.employeeProfile.position === dept)
-                  const allSelected = deptEmployees.every((emp) => emp.selected)
-                  deptEmployees.forEach((emp) => handleEmployeeSelection(emp.id))
-                }}
-                handleEmployeeSelection={handleEmployeeSelection}
-                allSelected={
-                  filteredEmployees.filter((emp) => emp.employeeProfile.position === dept).length > 0 &&
-                  filteredEmployees.filter((emp) => emp.employeeProfile.position === dept).every((emp) => emp.selected)
-                }
-                departmentName={dept}
-              />
-            </TabsContent>
-          ))}
-
-          {/* Loading indicator */}
-          {isLoading && (
-            <div className="flex justify-center py-4">
-              <div className="animate-spin h-5 w-5 border-2 border-red-700 border-t-transparent rounded-full"></div>
-            </div>
-          )}
+        {/* Pagination */}
+        <div className="flex justify-center mt-4">
+          <div className="inline-flex border rounded overflow-hidden">
+            {[...Array(totalPages)].map((_, i) => {
+              const page = i + 1
+              return (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1 text-sm font-medium ${
+                    page === currentPage
+                      ? "bg-red-600 text-white"
+                      : "hover:bg-red-100 text-gray-700"
+                  }`}
+                >
+                  {page}
+                </button>
+              )
+            })}
+          </div>
         </div>
+
+        {isLoading && (
+          <div className="flex justify-center py-4">
+            <div className="animate-spin h-5 w-5 border-2 border-red-700 border-t-transparent rounded-full"></div>
+          </div>
+        )}
       </Tabs>
     </div>
   )

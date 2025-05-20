@@ -14,6 +14,7 @@ type TaskModalProps = {
   setModalActiveFilter: (value: string) => void
   handleToggleTaskDone: (id: string) => void
   setEditTask: (task: Task | null) => void
+  onViewTaskDetail: (task: Task) => void
   openRescheduleDialog: (task: Task) => void
   resetForm: () => void
   setIsAddDialogOpen: (value: boolean) => void
@@ -27,6 +28,7 @@ export default function TaskModal({
   setModalActiveFilter,
   handleToggleTaskDone,
   setEditTask,
+  onViewTaskDetail,
   openRescheduleDialog,
   resetForm,
   setIsAddDialogOpen,
@@ -157,13 +159,23 @@ export default function TaskModal({
                       tasks
                         .filter((t) => t.priority === "overdue" && !t.done)
                         .map((task, i) => (
-                          <div key={i} className="p-4 hover:bg-gray-50 transition-colors">
+                          <div
+                            key={i}
+                            className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                            onClick={() => {
+                              onViewTaskDetail(task)
+                              setExpandTodo(false) // ปิดโมดัลเมื่อเปิดรายละเอียดงาน
+                            }}
+                          >
                             <div className="flex items-start gap-3">
                               <div className="pt-0.5">
                                 <input
                                   type="checkbox"
                                   checked={task.done}
-                                  onChange={() => handleToggleTaskDone(task.id)}
+                                  onChange={(e) => {
+                                    e.stopPropagation()
+                                    handleToggleTaskDone(task.id)
+                                  }}
                                   className="h-4 w-4 text-red-600 rounded border-gray-300 focus:ring-red-600"
                                 />
                               </div>
@@ -181,7 +193,8 @@ export default function TaskModal({
                                   </p>
                                   <div className="flex gap-2">
                                     <button
-                                      onClick={() => {
+                                      onClick={(e) => {
+                                        e.stopPropagation()
                                         resetForm()
                                         setEditTask(task)
                                         setIsAddDialogOpen(true)
@@ -235,13 +248,23 @@ export default function TaskModal({
                       tasks
                         .filter((t) => ["today", "urgent"].includes(t.priority) && !t.done)
                         .map((task, i) => (
-                          <div key={i} className="p-4 hover:bg-gray-50 transition-colors">
+                          <div
+                            key={i}
+                            className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                            onClick={() => {
+                              onViewTaskDetail(task)
+                              setExpandTodo(false) // ปิดโมดัลเมื่อเปิดรายละเอียดงาน
+                            }}
+                          >
                             <div className="flex items-start gap-3">
                               <div className="pt-0.5">
                                 <input
                                   type="checkbox"
                                   checked={task.done}
-                                  onChange={() => handleToggleTaskDone(task.id)}
+                                  onChange={(e) => {
+                                    e.stopPropagation()
+                                    handleToggleTaskDone(task.id)
+                                  }}
                                   className="h-4 w-4 text-orange-600 rounded border-gray-300 focus:ring-orange-600"
                                 />
                               </div>
@@ -259,7 +282,8 @@ export default function TaskModal({
                                   </p>
                                   <div className="flex gap-2">
                                     <button
-                                      onClick={() => {
+                                      onClick={(e) => {
+                                        e.stopPropagation()
                                         resetForm()
                                         setEditTask(task)
                                         setIsAddDialogOpen(true)
@@ -313,13 +337,23 @@ export default function TaskModal({
                       tasks
                         .filter((t) => !["today", "urgent", "overdue"].includes(t.priority) && !t.done)
                         .map((task, i) => (
-                          <div key={i} className="p-4 hover:bg-gray-50 transition-colors">
+                          <div
+                            key={i}
+                            className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                            onClick={() => {
+                              onViewTaskDetail(task)
+                              setExpandTodo(false) // ปิดโมดัลเมื่อเปิดรายละเอียดงาน
+                            }}
+                          >
                             <div className="flex items-start gap-3">
                               <div className="pt-0.5">
                                 <input
                                   type="checkbox"
                                   checked={task.done}
-                                  onChange={() => handleToggleTaskDone(task.id)}
+                                  onChange={(e) => {
+                                    e.stopPropagation()
+                                    handleToggleTaskDone(task.id)
+                                  }}
                                   className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-600"
                                 />
                               </div>
@@ -337,7 +371,8 @@ export default function TaskModal({
                                   </p>
                                   <div className="flex gap-2">
                                     <button
-                                      onClick={() => {
+                                      onClick={(e) => {
+                                        e.stopPropagation()
                                         resetForm()
                                         setEditTask(task)
                                         setIsAddDialogOpen(true)
@@ -391,13 +426,23 @@ export default function TaskModal({
                       tasks
                         .filter((t) => t.done)
                         .map((task, i) => (
-                          <div key={i} className="p-4 hover:bg-gray-50 transition-colors">
+                          <div
+                            key={i}
+                            className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                            onClick={() => {
+                              onViewTaskDetail(task)
+                              setExpandTodo(false) // ปิดโมดัลเมื่อเปิดรายละเอียดงาน
+                            }}
+                          >
                             <div className="flex items-start gap-3">
                               <div className="pt-0.5">
                                 <input
                                   type="checkbox"
                                   checked={task.done}
-                                  onChange={() => handleToggleTaskDone(task.id)}
+                                  onChange={(e) => {
+                                    e.stopPropagation()
+                                    handleToggleTaskDone(task.id)
+                                  }}
                                   className="h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-600"
                                 />
                               </div>
@@ -414,7 +459,8 @@ export default function TaskModal({
                                     <Calendar className="h-3.5 w-3.5" /> กำหนด: {task.dueDate}
                                   </p>
                                   <button
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                      e.stopPropagation()
                                       resetForm()
                                       setEditTask(task)
                                       setIsAddDialogOpen(true)

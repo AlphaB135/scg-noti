@@ -17,12 +17,12 @@ export function TeamSelector({ teams, selectedTeamId, onSelectTeam }: TeamSelect
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2 bg-/80 border-red-800/20">
+        <Button variant="outline" className="flex items-center gap-2 border-red-800/20">
           <span className="font-medium">{selectedTeam?.name || "เลือกทีม"}</span>
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent align="end">
         {teams.map((team) => (
           <DropdownMenuItem key={team.id} onClick={() => onSelectTeam(team.id)}>
             <span className="flex items-center">

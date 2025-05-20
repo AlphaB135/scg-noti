@@ -2,7 +2,6 @@ import { AlertTriangle, CheckCircle, Clock } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface Member {
   id: string
@@ -16,6 +15,7 @@ interface Member {
   lateTasks: number
   status: "normal" | "warning" | "critical"
   lastActive: string
+  teamId: string
 }
 
 interface MemberCardProps {
@@ -65,11 +65,11 @@ export function MemberCard({ member }: MemberCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="p-6">
-        <div className="flex flex-col md:flex-row md:items-center">
-          <div className="flex items-center mb-4 md:mb-0">
-            <Avatar className="h-14 w-14 border-2 border-red-800/20">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+      <div className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Avatar className="h-12 w-12 border-2 border-red-800/10">
               <AvatarImage src={member.avatar || "/placeholder.svg"} alt={member.name} />
               <AvatarFallback className="bg-red-800/10 text-red-800">
                 {member.name
@@ -78,76 +78,47 @@ export function MemberCard({ member }: MemberCardProps) {
                   .join("")}
               </AvatarFallback>
             </Avatar>
-            <div className="ml-4">
-              <h3 className="font-medium text-lg">{member.name}</h3>
+            <div className="ml-3">
+              <h3 className="font-medium">{member.name}</h3>
               <p className="text-gray-500 text-sm">{member.position}</p>
             </div>
           </div>
 
-          <div className="md:ml-auto flex flex-wrap gap-2">
-            <Badge className={getStatusColor(member.status)} variant="secondary">
-              <span className="flex items-center">
-                {getStatusIcon(member.status)}
-                {getStatusText(member.status)}
-              </span>
-            </Badge>
+          <Badge className={getStatusColor(member.status)} variant="secondary">
+            <span className="flex items-center text-xs">
+              {getStatusIcon(member.status)}
+              {getStatusText(member.status)}
+            </span>
+          </Badge>
+        </div>
+
+        <div className="mt-4">
+          <div className="flex justify-between mb-1">
+            <span className="text-xs text-gray-500">ความคืบหน้า</span>
+            <span className="text-xs font-medium">{completionRate}%</span>
+          </div>
+          <Progress value={completionRate} className="h-1.5" />
+
+          <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="bg-green-50 p-2 rounded-md">
+              <span className="block font-medium text-green-700">{member.completedTasks}</span>
+              <span className="text-green-600">เสร็จสิ้น</span>
+            </div>
+
+            <div className="bg-blue-50 p-2 rounded-md">
+              <span className="block font-medium text-blue-700">{member.pendingTasks}</span>
+              <span className="text-blue-600">รอดำเนินการ</span>
+            </div>
+
+            <div className="bg-red-50 p-2 rounded-md">
+              <span className="block font-medium text-red-700">{member.lateTasks}</span>
+              <span className="text-red-600">ล่าช้า</span>
+            </div>
           </div>
         </div>
 
-        <div className="mt-6">
-          <div className="flex justify-between mb-2">
-            <span className="text-sm font-medium">ความคืบหน้างาน</span>
-            <span className="text-sm font-medium">{completionRate}%</span>
-          </div>
-          <Progress value={completionRate} className="h-2" />
-
-          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="bg-green-50 p-2 rounded-md">
-                    <span className="block font-medium text-green-700">{member.completedTasks}</span>
-                    <span className="text-green-600">เสร็จสิ้น</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>งานที่เสร็จสิ้นแล้ว</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="bg-blue-50 p-2 rounded-md">
-                    <span className="block font-medium text-blue-700">{member.pendingTasks}</span>
-                    <span className="text-blue-600">รอดำเนินการ</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>งานที่อยู่ระหว่างดำเนินการ</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="bg-red-50 p-2 rounded-md">
-                    <span className="block font-medium text-red-700">{member.lateTasks}</span>
-                    <span className="text-red-600">ล่าช้า</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>งานที่เลยกำหนดส่ง</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
-
-        <div className="mt-4 text-right">
-          <span className="text-xs text-gray-500">อัพเดทล่าสุด: {member.lastActive}</span>
+        <div className="mt-3 text-right">
+          <span className="text-xs text-gray-400">อัพเดทล่าสุด: {member.lastActive}</span>
         </div>
       </div>
     </div>
