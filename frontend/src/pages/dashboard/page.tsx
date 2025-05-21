@@ -2,14 +2,15 @@
 
 import type React from "react"
 import { useEffect, useState, useCallback } from "react"
-import axios from 'axios'
-import { notificationsApi } from '@/lib/real-api'
+import { notificationsApi } from "@/lib/real-api"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Calendar } from "lucide-react"
+import { CheckCircle2 } from "lucide-react"
 
 // Import our separated components
 import AppLayout from "@/components/layout/app-layout"
@@ -28,8 +29,8 @@ type APINotification = {
   dueDate?: string
   scheduledAt?: string
   status: string
-  rescheduleHistory?: Array<{date: string, reason: string}>
-  reopenHistory?: Array<{date: string, reason: string}>
+  rescheduleHistory?: Array<{ date: string; reason: string }>
+  reopenHistory?: Array<{ date: string; reason: string }>
 }
 
 // ===== STATE MANAGEMENT =====
@@ -65,62 +66,73 @@ export default function AdminNotificationPage() {
     password: "",
     link: "",
   })
-  
+
   const [taskToReschedule, setTaskToReschedule] = useState<Task | null>(null)
   const [taskToReopen, setTaskToReopen] = useState<Task | null>(null)
   const [reopenReason, setReopenReason] = useState("")
   const [rescheduleReason, setRescheduleReason] = useState("")
   const [newDueDate, setNewDueDate] = useState("")
+
+  // เพิ่มสถานะสำหรับหน้าต่างรายละเอียดงาน
+  const [isTaskDetailDialogOpen, setIsTaskDetailDialogOpen] = useState(false)
+  const [taskDetail, setTaskDetail] = useState<Task | null>(null)
+
   // แยกฟังก์ชันโหลดข้อมูลเป็นส่วนๆ
   const loadCurrentMonthData = useCallback(async () => {
     try {
       // โหลดข้อมูลพร้อมกันทั้ง calendar และ task list
       const [monthResponse, allResponse] = await Promise.all([
         notificationsApi.getCurrentMonthNotifications(selectedMonth, selectedYear),
-        notificationsApi.getAll(1, 100)
+        notificationsApi.getAll(1, 100),
       ])
-      
+
       if (!monthResponse?.data) {
         throw new Error("Invalid response format")
       }
-      
-      const mappedTasks = monthResponse.data.map(notification => ({
-        id: notification.id,
-        title: notification.title,
-        details: notification.message || "",
-        dueDate: notification.scheduledAt?.split("T")[0] || "",
-        done: notification.status === "DONE",
-        priority: "pending" as const,
-        frequency: "no-repeat" as const,
-        impact: "",
-        link: "",
-        hasLogin: false,
-        username: "",
-        password: ""
-      } satisfies Task))
+
+      const mappedTasks = monthResponse.data.map(
+        (notification) =>
+          ({
+            id: notification.id,
+            title: notification.title,
+            details: notification.message || "",
+            dueDate: notification.scheduledAt?.split("T")[0] || "",
+            done: notification.status === "DONE",
+            priority: "pending" as const,
+            frequency: "no-repeat" as const,
+            impact: "",
+            link: "",
+            hasLogin: false,
+            username: "",
+            password: "",
+          }) satisfies Task,
+      )
 
       // อัพเดทสถานะงานก่อนเซ็ตค่า
-      const updatedTasks = mappedTasks.map(task => updateTaskPriority(task))
+      const updatedTasks = mappedTasks.map((task) => updateTaskPriority(task))
       setTasks(updatedTasks)
-      
+
       if (allResponse?.data) {
-        const allMappedTasks = allResponse.data.map(notification => ({
-          id: notification.id,
-          title: notification.title,
-          details: notification.message || "",
-          dueDate: notification.scheduledAt?.split("T")[0] || "",
-          done: notification.status === "DONE",
-          priority: "pending" as const,
-          frequency: "no-repeat" as const,
-          impact: "",
-          link: "",
-          hasLogin: false,
-          username: "",
-          password: ""
-        } satisfies Task))
+        const allMappedTasks = allResponse.data.map(
+          (notification) =>
+            ({
+              id: notification.id,
+              title: notification.title,
+              details: notification.message || "",
+              dueDate: notification.scheduledAt?.split("T")[0] || "",
+              done: notification.status === "DONE",
+              priority: "pending" as const,
+              frequency: "no-repeat" as const,
+              impact: "",
+              link: "",
+              hasLogin: false,
+              username: "",
+              password: "",
+            }) satisfies Task,
+        )
 
         // อัพเดทสถานะงานก่อนเซ็ตค่า
-        const updatedAllTasks = allMappedTasks.map(task => updateTaskPriority(task))
+        const updatedAllTasks = allMappedTasks.map((task) => updateTaskPriority(task))
         setAllTasks(updatedAllTasks)
       }
     } catch (err) {
@@ -146,9 +158,9 @@ export default function AdminNotificationPage() {
         username: editTask.username || "",
         password: editTask.password || "",
         link: editTask.link || "",
-      });
+      })
     }
-  }, [editTask]);
+  }, [editTask])
 
   // ===== TASK MANAGEMENT FUNCTIONS =====
   // Set task priority based on due date
@@ -164,8 +176,8 @@ export default function AdminNotificationPage() {
     const diffInDays = Math.floor((due.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24))
 
     if (diffInDays < 0) return { ...task, priority: "overdue" } // งานที่เลยกำหนด
-    if (diffInDays === 0) return { ...task, priority: "today" }  // งานที่ต้องทำวันนี้
-    if (diffInDays <= 3) return { ...task, priority: "urgent" }  // งานด่วนที่ต้องทำภายใน 3 วัน
+    if (diffInDays === 0) return { ...task, priority: "today" } // งานที่ต้องทำวันนี้
+    if (diffInDays <= 3) return { ...task, priority: "urgent" } // งานด่วนที่ต้องทำภายใน 3 วัน
     return { ...task, priority: "pending" } // งานปกติที่ยังไม่ถึงกำหนด
   }
 
@@ -189,23 +201,23 @@ export default function AdminNotificationPage() {
   // Form change handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target
-    if (type === 'checkbox') {
-      setFormData(prev => ({
+    if (type === "checkbox") {
+      setFormData((prev) => ({
         ...prev,
-        [name]: (e.target as HTMLInputElement).checked
+        [name]: (e.target as HTMLInputElement).checked,
       }))
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }))
     }
   }
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }))
   }
 
@@ -221,12 +233,18 @@ export default function AdminNotificationPage() {
     setIsReopenDialogOpen(true)
   }
 
+  // เพิ่มฟังก์ชันสำหรับเปิดหน้าต่างรายละเอียดงาน
+  const openTaskDetailDialog = (task: Task) => {
+    setTaskDetail(task)
+    setIsTaskDetailDialogOpen(true)
+  }
+
   // Function to change month/year
   const changeMonth = (month: number, year: number) => {
     console.log("Changing month/year to:", { month, year })
     setSelectedMonth(month)
     setSelectedYear(year)
-    
+
     // กรองข้อมูลใหม่จาก allTasks
     const filteredTasks = allTasks.filter((task: Task) => {
       if (!task.dueDate) return false
@@ -235,9 +253,9 @@ export default function AdminNotificationPage() {
       const taskYear = taskDate.getFullYear()
       return taskYear === year && taskMonth === month
     })
-    
+
     // อัพเดทสถานะงานก่อนเซ็ตค่า
-    const updatedTasks = filteredTasks.map(task => updateTaskPriority(task))
+    const updatedTasks = filteredTasks.map((task) => updateTaskPriority(task))
     setTasks(updatedTasks)
   }
 
@@ -246,22 +264,26 @@ export default function AdminNotificationPage() {
     if (!taskToReopen || !reopenReason.trim()) return
 
     try {
-      const updatedTask = await notificationsApi.reopen(
-        taskToReopen.id,
-        reopenReason
+      const updatedTask = await notificationsApi.reopen(taskToReopen.id, reopenReason)
+
+      // อัปเดตทั้ง tasks และ allTasks
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === updatedTask.id ? { ...t, done: false, reopenHistory: updatedTask.reopenHistory } : t,
+        ),
       )
 
-      setTasks(prev => prev.map(t => 
-        t.id === updatedTask.id 
-          ? { ...t, done: false, reopenHistory: updatedTask.reopenHistory }
-          : t
-      ))
+      setAllTasks((prev) =>
+        prev.map((t) =>
+          t.id === updatedTask.id ? { ...t, done: false, reopenHistory: updatedTask.reopenHistory } : t,
+        ),
+      )
 
       setTaskToReopen(null)
       setReopenReason("")
       setIsReopenDialogOpen(false)
     } catch (error) {
-      console.error('Failed to reopen task:', error)
+      console.error("Failed to reopen task:", error)
     }
   }
 
@@ -270,28 +292,39 @@ export default function AdminNotificationPage() {
     if (!taskToReschedule || !rescheduleReason.trim() || !newDueDate) return
 
     try {
-      const updatedTask = await notificationsApi.reschedule(
-        taskToReschedule.id,
-        newDueDate,
-        rescheduleReason
+      const updatedTask = await notificationsApi.reschedule(taskToReschedule.id, newDueDate, rescheduleReason)
+
+      // อัปเดตทั้ง tasks และ allTasks เพื่อให้แน่ใจว่าข้อมูลตรงกัน
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === updatedTask.id
+            ? {
+                ...t,
+                dueDate: updatedTask.scheduledAt?.split("T")[0],
+                rescheduleHistory: updatedTask.rescheduleHistory,
+              }
+            : t,
+        ),
       )
 
-      setTasks(prev => prev.map(t => 
-        t.id === updatedTask.id 
-          ? {
-              ...t,
-              dueDate: updatedTask.scheduledAt?.split('T')[0],
-              rescheduleHistory: updatedTask.rescheduleHistory
-            }
-          : t
-      ))
+      setAllTasks((prev) =>
+        prev.map((t) =>
+          t.id === updatedTask.id
+            ? {
+                ...t,
+                dueDate: updatedTask.scheduledAt?.split("T")[0],
+                rescheduleHistory: updatedTask.rescheduleHistory,
+              }
+            : t,
+        ),
+      )
 
       setTaskToReschedule(null)
       setRescheduleReason("")
       setNewDueDate("")
       setIsRescheduleDialogOpen(false)
     } catch (error) {
-      console.error('Failed to reschedule task:', error)
+      console.error("Failed to reschedule task:", error)
     }
   }
 
@@ -306,13 +339,11 @@ export default function AdminNotificationPage() {
     }
 
     try {
-      await notificationsApi.updateStatus(id, 'DONE')
-      
-      setTasks(prev => prev.map(t => 
-        t.id === id 
-          ? { ...t, done: true, priority: "pending" }
-          : t
-      ))
+      await notificationsApi.updateStatus(id, "DONE")
+
+      // อัปเดตทั้ง tasks และ allTasks
+      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: true } : t)))
+      setAllTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: true } : t)))
     } catch (error) {
       console.error("Failed to update task status:", error)
     }
@@ -330,9 +361,9 @@ export default function AdminNotificationPage() {
         username: editTask.username || "",
         password: editTask.password || "",
         link: editTask.link || "",
-      });
+      })
     }
-  }, [editTask]);
+  }, [editTask])
   // Add or edit task
   const handleAddTask = async () => {
     if (!formData.title.trim() || !formData.date || !formData.details.trim() || !formData.impact.trim()) {
@@ -342,59 +373,61 @@ export default function AdminNotificationPage() {
     try {
       // Create message with all details
       const message = `${formData.details}\n\nผลกระทบ: ${formData.impact}${
-        formData.hasLogin 
-          ? `\n\nข้อมูลการเข้าสู่ระบบ:\nUsername: ${formData.username}\nPassword: ${formData.password}` 
-          : ''
+        formData.hasLogin ? `\n\nข้อมูลการเข้าสู่ระบบ:\nUsername: ${formData.username}\nPassword: ${formData.password}` : ""
       }`
 
       const repeatIntervalMap = {
-        'no-repeat': 0,
-        'daily': 1,
-        'weekly': 7,
-        'monthly': 30,
-        'quarterly': 90,
-        'yearly': 365
+        "no-repeat": 0,
+        daily: 1,
+        weekly: 7,
+        monthly: 30,
+        quarterly: 90,
+        yearly: 365,
       }
 
       if (editTask) {
         // Update existing task
-        try {          await notificationsApi.update(editTask.id, {
+        try {
+          await notificationsApi.update(editTask.id, {
             title: formData.title,
             message: message,
-            scheduledAt: new Date(formData.date).toISOString()
-          } as any); // TODO: Fix types
-          
+            scheduledAt: new Date(formData.date).toISOString(),
+          } as any) // TODO: Fix types
+
           // Update local state
-          setTasks(prev => prev.map(t => 
-            t.id === editTask.id 
-            ? {
-                ...t,
-                title: formData.title,
-                details: message,
-                dueDate: formData.date,
-                frequency: formData.frequency as Task['frequency'],
-                impact: formData.impact,
-                link: formData.link,
-                hasLogin: formData.hasLogin,
-                username: formData.username,
-                password: formData.password
-              }
-            : t
-          ))
+          setTasks((prev) =>
+            prev.map((t) =>
+              t.id === editTask.id
+                ? {
+                    ...t,
+                    title: formData.title,
+                    details: message,
+                    dueDate: formData.date,
+                    frequency: formData.frequency as Task["frequency"],
+                    impact: formData.impact,
+                    link: formData.link,
+                    hasLogin: formData.hasLogin,
+                    username: formData.username,
+                    password: formData.password,
+                  }
+                : t,
+            ),
+          )
         } catch (error) {
-          console.error('Error updating notification:', error);
+          console.error("Error updating notification:", error)
         }
-      } else {        // Create new task
+      } else {
+        // Create new task
         const notification = await notificationsApi.create({
           title: formData.title,
           message,
-          type: 'TODO',
+          type: "TODO",
           scheduledAt: new Date(formData.date).toISOString(),
-          category: 'TASK',
+          category: "TASK",
           link: formData.link || undefined,
           urgencyDays: 3,
           repeatIntervalDays: repeatIntervalMap[formData.frequency as keyof typeof repeatIntervalMap],
-          recipients: [{ type: 'ALL' }]
+          recipients: [{ type: "ALL" }],
         } as any) // TODO: Fix types
 
         // Convert API response to Task format
@@ -402,24 +435,24 @@ export default function AdminNotificationPage() {
           id: notification.id,
           title: notification.title,
           details: notification.message,
-          dueDate: notification.scheduledAt?.split('T')[0],
+          dueDate: notification.scheduledAt?.split("T")[0],
           done: false,
-          priority: 'pending',
-          frequency: formData.frequency as Task['frequency'],
+          priority: "pending",
+          frequency: formData.frequency as Task["frequency"],
           impact: formData.impact,
           link: formData.link,
           hasLogin: formData.hasLogin,
           username: formData.username,
-          password: formData.password
+          password: formData.password,
         }
 
-        setTasks(prev => [...prev, updateTaskPriority(newTask)])
+        setTasks((prev) => [...prev, updateTaskPriority(newTask)])
       }
-      
+
       setIsAddDialogOpen(false)
       resetForm()
     } catch (error) {
-      console.error('Failed to create or update notification:', error)
+      console.error("Failed to create or update notification:", error)
     }
   }
 
@@ -446,7 +479,7 @@ export default function AdminNotificationPage() {
     const timer = setInterval(() => {
       setCurrentTime(new Date())
       // อัพเดทสถานะงานทุกครั้งที่เวลาเปลี่ยน
-      setTasks(prev => prev.map(task => updateTaskPriority(task)))
+      setTasks((prev) => prev.map((task) => updateTaskPriority(task)))
     }, 1000)
 
     return () => clearInterval(timer)
@@ -463,45 +496,48 @@ export default function AdminNotificationPage() {
   }
 
   return (
-    <AppLayout title="ระบบเตือนความจำ" description="จัดการงานและการแจ้งเตือนของคุณ">      {/* ===== NOTIFICATION CARDS ===== */}
+    <AppLayout title="ระบบเตือนความจำ" description="จัดการงานและการแจ้งเตือนของคุณ">
+      {" "}
+      {/* ===== NOTIFICATION CARDS ===== */}
       <TaskStatusCards notifications={notifications} onCardClick={handleCardClick} />
-
       {/* ===== DASHBOARD MAIN CONTENT ===== */}
-      <div className="flex flex-col md:flex-row gap-6 items-stretch mt-6">
-        {/* ===== DONUT CHART ===== */}
-        <MonthlyProgress
-          doneCount={doneCount}
-          incompleteCnt={incompleteCnt}
-          totalTasks={totalTasks}
-          progressPercent={progressPercent}
-          currentMonth={currentTime}
-        />
-
-        {/* ===== TO-DO LIST ===== */}        <div className="w-full">
-          <>
-            <TaskList
-              tasks={tasks}
-              activeFilter={activeFilter}
-              onToggleTaskDone={handleToggleTaskDone}
-              onEditTask={(task) => {
-                resetForm()
-                setEditTask(task)
-                setIsAddDialogOpen(true)
-              }}
-              onRescheduleTask={openRescheduleDialog}
-              onAddTask={() => {
-                resetForm()
-                setIsAddDialogOpen(true)
-              }}                onExpandTodo={() => {
-                setExpandTodo(true)
-                setModalActiveFilter("all")
-              }}
-              onFilterChange={setActiveFilter}
-            />
-          </>
+      <div className="grid grid-cols-1 md:grid-cols-10 gap-6 mt-6 w-full">
+        {/* ===== DONUT CHART (30% width) ===== */}
+        <div className="md:col-span-3 flex">
+          <MonthlyProgress
+            doneCount={doneCount}
+            incompleteCnt={incompleteCnt}
+            totalTasks={totalTasks}
+            progressPercent={progressPercent}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+          />
+        </div>
+        {/* ===== TO-DO LIST (70% width) ===== */}
+        <div className="md:col-span-7 flex">
+          <TaskList
+            tasks={tasks}
+            activeFilter={activeFilter}
+            onToggleTaskDone={handleToggleTaskDone}
+            onEditTask={(task) => {
+              resetForm()
+              setEditTask(task)
+              setIsAddDialogOpen(true)
+            }}
+            onViewTaskDetail={openTaskDetailDialog}
+            onRescheduleTask={openRescheduleDialog}
+            onAddTask={() => {
+              resetForm()
+              setIsAddDialogOpen(true)
+            }}
+            onExpandTodo={() => {
+              setExpandTodo(true)
+              setModalActiveFilter("all")
+            }}
+            onFilterChange={setActiveFilter}
+          />
         </div>
       </div>
-
       {/* ===== FULLSCREEN MODAL ===== */}
       <TaskModal
         tasks={tasks}
@@ -511,15 +547,16 @@ export default function AdminNotificationPage() {
         setModalActiveFilter={setModalActiveFilter}
         handleToggleTaskDone={handleToggleTaskDone}
         setEditTask={setEditTask}
+        onViewTaskDetail={openTaskDetailDialog}
         openRescheduleDialog={openRescheduleDialog}
         resetForm={resetForm}
         setIsAddDialogOpen={setIsAddDialogOpen}
       />
-
       {/* ===== EDIT TASK DIALOG ===== */}
       <Dialog open={false} onOpenChange={() => {}}>
         {/* This dialog is no longer needed as we're using the Add Task Dialog for editing */}
-      </Dialog>      {/* ===== CALENDAR SECTION ===== */}
+      </Dialog>{" "}
+      {/* ===== CALENDAR SECTION ===== */}
       <TaskCalendar
         tasks={tasks}
         setIsAddDialogOpen={setIsAddDialogOpen}
@@ -528,8 +565,9 @@ export default function AdminNotificationPage() {
         selectedMonth={selectedMonth}
         selectedYear={selectedYear}
         onMonthChange={changeMonth}
+        onToggleTaskDone={handleToggleTaskDone}
+        onRescheduleTask={openRescheduleDialog}
       />
-
       {/* ===== RESCHEDULE TASK DIALOG ===== */}
       <Dialog open={isRescheduleDialogOpen} onOpenChange={setIsRescheduleDialogOpen}>
         <DialogContent className="sm:max-w-[500px] rounded-[20px]">
@@ -577,7 +615,6 @@ export default function AdminNotificationPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       {/* ===== REOPEN TASK DIALOG ===== */}
       <Dialog open={isReopenDialogOpen} onOpenChange={setIsReopenDialogOpen}>
         <DialogContent className="sm:max-w-[500px] rounded-[20px]">
@@ -613,7 +650,6 @@ export default function AdminNotificationPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       {/* ===== ADD TASK DIALOG ===== */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="w-full max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[60vw] h-[90vh] overflow-y-auto">
@@ -756,6 +792,145 @@ export default function AdminNotificationPage() {
               disabled={!formData.title.trim() || !formData.date || !formData.details.trim() || !formData.impact.trim()}
             >
               {editTask ? "บันทึกการเปลี่ยนแปลง" : "สร้างการแจ้งเตือน"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* ===== TASK DETAIL DIALOG ===== */}
+      <Dialog open={isTaskDetailDialogOpen} onOpenChange={setIsTaskDetailDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] rounded-[20px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl">รายละเอียดงาน</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {taskDetail && (
+              <>
+                <div className="flex justify-between items-start">
+                  <h3 className="text-lg font-semibold">{taskDetail.title}</h3>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                      taskDetail.done
+                        ? "bg-green-100 text-green-700"
+                        : taskDetail.priority === "overdue"
+                          ? "bg-red-100 text-red-700"
+                          : taskDetail.priority === "urgent"
+                            ? "bg-orange-100 text-orange-700"
+                            : taskDetail.priority === "today"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {taskDetail.done
+                      ? "เสร็จแล้ว"
+                      : taskDetail.priority === "overdue"
+                        ? "เลยกำหนด"
+                        : taskDetail.priority === "urgent"
+                          ? "ด่วน"
+                          : taskDetail.priority === "today"
+                            ? "วันนี้"
+                            : "ปกติ"}
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <Calendar className="h-4 w-4" />
+                    <span>กำหนดส่ง: {taskDetail.dueDate}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-medium text-gray-700">รายละเอียด</h4>
+                  <div className="p-3 bg-gray-50 rounded-lg whitespace-pre-wrap text-gray-700">
+                    {taskDetail.details}
+                  </div>
+                </div>
+
+                {taskDetail.hasLogin && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-gray-700">ข้อมูลการเข้าสู่ระบบ</h4>
+                    <div className="p-3 bg-gray-50 rounded-lg space-y-2">
+                      <div className="flex gap-2">
+                        <span className="font-medium text-gray-600">Username:</span>
+                        <span>{taskDetail.username}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="font-medium text-gray-600">Password:</span>
+                        <span>{taskDetail.password}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {taskDetail.link && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-gray-700">ลิงก์</h4>
+                    <a
+                      href={taskDetail.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      {taskDetail.link}
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                        />
+                      </svg>
+                    </a>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <DialogFooter className="mt-6 space-x-2">
+            {taskDetail && !taskDetail.done && (
+              <Button
+                onClick={() => {
+                  if (taskDetail) {
+                    handleToggleTaskDone(taskDetail.id)
+                    setIsTaskDetailDialogOpen(false)
+                  }
+                }}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" /> ทำเสร็จแล้ว
+              </Button>
+            )}
+            {taskDetail && !taskDetail.done && (
+              <Button
+                onClick={() => {
+                  if (taskDetail) {
+                    openRescheduleDialog(taskDetail)
+                    setIsTaskDetailDialogOpen(false)
+                  }
+                }}
+                variant="outline"
+              >
+                เลื่อนกำหนด
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                if (taskDetail) {
+                  resetForm()
+                  setEditTask(taskDetail)
+                  setIsAddDialogOpen(true)
+                  setIsTaskDetailDialogOpen(false)
+                }
+              }}
+              variant="outline"
+            >
+              แก้ไข
             </Button>
           </DialogFooter>
         </DialogContent>

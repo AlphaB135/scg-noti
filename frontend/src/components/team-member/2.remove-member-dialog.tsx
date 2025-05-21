@@ -18,7 +18,7 @@ export default function RemoveMemberDialog({ isOpen, setIsOpen, memberName, onCo
         <DialogHeader>
           <DialogTitle>ยืนยันการนำสมาชิกออกจากทีม</DialogTitle>
         </DialogHeader>
-        <div className="py-4">
+        <div className="pt-6 pb-4">
           <p className="mb-4">
             คุณต้องการนำ <span className="font-semibold">{memberName}</span> ออกจากทีมใช่หรือไม่?
           </p>

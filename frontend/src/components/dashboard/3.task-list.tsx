@@ -8,6 +8,7 @@ type TaskListProps = {
   activeFilter: string
   onToggleTaskDone: (id: string) => void
   onEditTask: (task: Task) => void
+  onViewTaskDetail: (task: Task) => void
   onRescheduleTask: (task: Task) => void
   onAddTask: () => void
   onExpandTodo: () => void
@@ -19,13 +20,14 @@ export default function TaskList({
   activeFilter,
   onToggleTaskDone,
   onEditTask,
+  onViewTaskDetail,
   onRescheduleTask,
   onAddTask,
   onExpandTodo,
   onFilterChange,
 }: TaskListProps) {
   return (
-    <section className="w-full md:w-2/3 rounded-[20px] border border-gray-100 bg-white shadow-sm backdrop-blur-sm shadow-xl ring-1 ring-black/5 transition hover:scale-[1.02] transition duration-300 shadow-md">
+    <section className="w-full h-full rounded-[20px] border border-gray-100 bg-white shadow-sm backdrop-blur-sm shadow-xl ring-1 ring-black/5 transition hover:scale-[1.02] duration-300 shadow-md flex flex-col">
       <div className="p-6 ">
         <div className="flex justify-between items-center mb-4 ">
           <h2 className="text-lg font-bold text-gray-800">สิ่งที่ต้องทำ</h2>
@@ -110,12 +112,16 @@ export default function TaskList({
                     .map((task, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2 p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50"
+                        className="flex items-center gap-2 p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50 cursor-pointer"
+                        onClick={() => onViewTaskDetail(task)}
                       >
                         <input
                           type="checkbox"
                           checked={task.done}
-                          onChange={() => onToggleTaskDone(task.id)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            onToggleTaskDone(task.id)
+                          }}
                           className="h-5 w-5 text-red-700 rounded-md"
                         />
                         <div className="flex-1">
@@ -138,7 +144,8 @@ export default function TaskList({
                             </span>
                             <div className="flex gap-1">
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation()
                                   onEditTask(task)
                                 }}
                                 className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-100 rounded border border-gray-200"
@@ -188,12 +195,16 @@ export default function TaskList({
                     .map((task, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2 p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50"
+                        className="flex items-center gap-2 p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50 cursor-pointer"
+                        onClick={() => onViewTaskDetail(task)}
                       >
                         <input
                           type="checkbox"
                           checked={task.done}
-                          onChange={() => onToggleTaskDone(task.id)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            onToggleTaskDone(task.id)
+                          }}
                           className="h-5 w-5 text-orange-600 rounded-md"
                         />
                         <div className="flex-1">
@@ -216,7 +227,8 @@ export default function TaskList({
                             </span>
                             <div className="flex gap-1">
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation()
                                   onEditTask(task)
                                 }}
                                 className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-100 rounded border border-gray-200"
@@ -266,12 +278,16 @@ export default function TaskList({
                     .map((task, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2 p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50"
+                        className="flex items-center gap-2 p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50 cursor-pointer"
+                        onClick={() => onViewTaskDetail(task)}
                       >
                         <input
                           type="checkbox"
                           checked={task.done}
-                          onChange={() => onToggleTaskDone(task.id)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            onToggleTaskDone(task.id)
+                          }}
                           className="h-5 w-5 text-gray-700 rounded-md"
                         />
                         <div className="flex-1">
@@ -294,7 +310,8 @@ export default function TaskList({
                             </span>
                             <div className="flex gap-1">
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation()
                                   onEditTask(task)
                                 }}
                                 className="text-xs px-2 py-1 text-gray-600 hover:bg-gray-100 rounded border border-gray-200"
@@ -344,12 +361,16 @@ export default function TaskList({
                     .map((task, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2 p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50"
+                        className="flex items-center gap-2 p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50 cursor-pointer"
+                        onClick={() => onViewTaskDetail(task)}
                       >
                         <input
                           type="checkbox"
                           checked={task.done}
-                          onChange={() => onToggleTaskDone(task.id)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            onToggleTaskDone(task.id)
+                          }}
                           className="h-5 w-5 text-green-700 rounded-md"
                         />
                         <div className="flex-1">

@@ -3,13 +3,18 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
+import { Plus, Search } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import AppLayout from "@/components/layout/app-layout"
-import ReminderFilter from "@/components/manage-reminder/1.reminder-filter"
-import ReminderTabs from "@/components/manage-reminder/2.reminder-tabs"
-import AddReminderDialog from "@/components/manage-reminder/3.add-reminder-dialog"
-import EditReminderDialog from "@/components/manage-reminder/4.edit-reminder-dialog"
-import DeleteReminderDialog from "@/components/manage-reminder/5.delete-reminder-dialog"
-import PasswordDialog from "@/components/manage-reminder/6.password-dialog"
+import { unifiedApi, type UnifiedTask } from "@/lib/api-integration"
+import ReminderTabs from "@/components/manage-reminder/reminder-tabs"
+import ReminderFilters from "@/components/manage-reminder/reminder-filters"
+import AddReminderDialog from "@/components/manage-reminder/add-reminder-dialog"
+import EditReminderDialog from "@/components/manage-reminder/edit-reminder-dialog"
+import DeleteReminderDialog from "@/components/manage-reminder/delete-reminder-dialog"
+import PasswordDialog from "@/components/manage-reminder/password-dialog"
+import ConfettiAnimation from "@/components/ui/confetti-animation"
 import {
   checkIsUrgent,
   formatThaiDate,
@@ -17,25 +22,54 @@ import {
   getFrequencyText,
   getStatusBadge,
   getTypeIcon,
-} from "@/components/manage-reminder/7.reminder-utils"
+} from "@/components/manage-reminder/reminder-utils"
+import { useToast } from "@/hooks/use-toast"
 
+// Convert UnifiedTask to Reminder type for the UI
 type Reminder = {
-  id: number
+  id: number | string
   title: string
   details: string
   date: string
   frequency: string
   link?: string
   password?: string
+  username?: string
   impact?: string
   status: "completed" | "incomplete" | "overdue"
   type?: string
   isUrgent?: boolean
+  hasLogin?: boolean
+}
+
+const convertTaskToReminder = (task: UnifiedTask): Reminder => {
+  // Create password string from username and password if they exist
+  let passwordData = ""
+  if (task.hasLogin && (task.username || task.password)) {
+    passwordData = `user: ${task.username || ""}\npassword: ${task.password || ""}`
+  }
+
+  return {
+    id: task.id,
+    title: task.title,
+    details: task.details,
+    date: task.dueDate,
+    frequency: task.frequency,
+    link: task.link,
+    password: passwordData,
+    username: task.username,
+    impact: task.impact,
+    status: task.status,
+    type: task.type,
+    isUrgent: task.isUrgent,
+    hasLogin: task.hasLogin,
+  }
 }
 
 export default function ManageReminderPage() {
+  const { toast } = useToast()
   const [reminders, setReminders] = useState<Reminder[]>([])
-  const [cycleReminders, setCycleReminders] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -49,11 +83,17 @@ export default function ManageReminderPage() {
   const [hasLogin, setHasLogin] = useState(false)
   const [isEditPasswordAuthenticated, setIsEditPasswordAuthenticated] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
+  const [isFiltersVisible, setIsFiltersVisible] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [showConfetti, setShowConfetti] = useState(false)
+  const [successTitle, setSuccessTitle] = useState("")
+  const [successDescription, setSuccessDescription] = useState("")
 
   // Form state for new/edit reminder
   const [formData, setFormData] = useState({
     title: "",
-    date: "",
+    date: new Date().toISOString().split("T")[0],
     frequency: "no-repeat",
     details: "",
     link: "",
@@ -63,207 +103,47 @@ export default function ManageReminderPage() {
     hasLogin: false,
   })
 
+  // Load reminders from API
+  const loadReminders = async () => {
+    setIsLoading(true)
+    try {
+      const tasks = await unifiedApi.getAll(currentPage, 20)
+      const convertedReminders = tasks.map(convertTaskToReminder)
+      setReminders(convertedReminders)
+
+      // In a real implementation, you would get the total pages from the API response
+      // For now, we'll just set it to 1 since we don't have that information
+      setTotalPages(1)
+    } catch (error) {
+      console.error("Failed to load reminders:", error)
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลการแจ้งเตือนได้",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
-    // 2.1) ดึงงาน manual
-    const fetchManualReminders = async () => {
-      try {
-        // คอมเม้น API ไว้ก่อน
-        // const { data } = await axios.get("/api/notifications", {
-        //   withCredentials: true,
-        //   params: { skip: 0, take: 100 },
-        // })
-
-        // Get today's date for urgent tasks
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-
-        // Calculate date for 3 days from now
-        const threeDaysFromNow = new Date(today)
-        threeDaysFromNow.setDate(today.getDate() + 3)
-
-        // Format dates for mock data
-        const todayStr = today.toISOString().split("T")[0]
-        const tomorrowStr = new Date(today.getTime() + 86400000).toISOString().split("T")[0]
-        const dayAfterTomorrowStr = new Date(today.getTime() + 2 * 86400000).toISOString().split("T")[0]
-
-        // Mock data สำหรับการแจ้งเตือนแบบ manual
-        const mockManualReminders = [
-          {
-            id: 1,
-            title: "ต่อสัญญาเช่าสำนักงาน",
-            date: "2025-06-15",
-            frequency: "no-repeat",
-            details: "ติดต่อตัวแทนอสังหาริมทรัพย์เพื่อต่อสัญญาเช่าสำนักงานสาขาบางนา",
-            link: "https://scg-property.com/contracts",
-            password: "user: property_admin\npassword: SCGprop2025!",
-            impact: "หากไม่ต่อสัญญาภายในกำหนด อาจต้องจ่ายค่าปรับ 15% หรือสูญเสียพื้นที่สำนักงาน",
-            status: "incomplete",
-            type: "document",
-          },
-          {
-            id: 2,
-            title: "ชำระภาษีประจำปี",
-            date: "2025-05-30",
-            frequency: "yearly",
-            details: "ชำระภาษีนิติบุคคลประจำปี 2025 ผ่านระบบกรมสรรพากร",
-            link: "https://www.rd.go.th/",
-            password: "user: scg_tax\npassword: Tax2025@SCG\nรหัส OTP จะส่งไปที่เบอร์ 08x-xxx-xxxx (คุณสมศักดิ์)",
-            impact: "หากชำระล่าช้าจะมีค่าปรับ 1.5% ต่อเดือน และอาจส่งผลต่อการตรวจสอบบัญชีประจำปี",
-            status: "incomplete",
-            type: "finance",
-          },
-          {
-            id: 3,
-            title: "ประชุมคณะกรรมการบริษัท",
-            date: "2025-05-20",
-            frequency: "no-repeat",
-            details: "ประชุมคณะกรรมการบริษัทประจำเดือนพฤษภาคม ห้องประชุมใหญ่ ชั้น 15",
-            link: "https://scg-meeting.zoom.us/j/123456789",
-            password: "Meeting ID: 123 456 789\nPasscode: SCG2025",
-            impact: "การไม่จัดประชุมตามกำหนดอาจส่งผลต่อการตัดสินใจเชิงกลยุทธ์และการดำเนินงานของบริษัท",
-            status: "incomplete",
-            type: "meeting",
-          },
-          {
-            id: 4,
-            title: "ตรวจสอบและบำรุงรักษาเครื���องจักร",
-            date: "2025-05-10",
-            frequency: "no-repeat",
-            details: "ตรวจสอบและบำรุงรักษาเครื่องจักรในสายการผลิต A ตามแผนการบำรุงรักษาเชิงป้องกัน",
-            link: "",
-            password: "",
-            impact: "หากไม่ดำเนินการตามแผน อาจทำให้เครื่องจักรเสียหายและกระทบต่อการผลิต ทำให้ส่งมอบสินค้าล่าช้า",
-            status: "completed",
-            type: "maintenance",
-          },
-          {
-            id: 5,
-            title: "ส่งรายงานความยั่งยืน",
-            date: "2025-07-15",
-            frequency: "monthly",
-            details: "จัดทำและส่งรายงานความยั่งยืนประจำไตรมาสที่ 2 ปี 2025 ให้กับตลาดหลักทรัพย์",
-            link: "https://scg-sustainability.com/reports",
-            password: "user: report_admin\npassword: Sus@SCG2025",
-            impact: "การไม่ส่งรายงานตามกำหนดอาจส่งผลต่อความน่าเชื่อถือและภาพลักษณ์ของบริษัทในด้านความยั่งยืน",
-            status: "incomplete",
-            type: "report",
-          },
-          {
-            id: 6,
-            title: "อบรมความปลอดภัยในการทำงาน",
-            date: "2025-06-05",
-            frequency: "yearly",
-            details: "จัดอบรมความปลอดภัยในการทำงานประจำปีให้กับพนักงานทุกคนตามข้อกำหนด ISO 45001",
-            link: "https://scg-training.com/safety2025",
-            password: "user: training_admin\npassword: Safety2025!",
-            impact: "การไม่จัดอบรมตามกำหนดอาจส่งผลต่อการรับรองมาตรฐาน ISO และความปลอดภัยของพนักงาน",
-            status: "incomplete",
-            type: "training",
-          },
-          {
-            id: 7,
-            title: "สั่งซื้อวัตถุดิบหลัก",
-            date: "2025-05-25",
-            frequency: "monthly",
-            details: "สั่งซื้อวัตถุดิบหลักสำหรับการผลิตเดือนมิถุนายน 2025 จากซัพพลายเออร์หลัก",
-            link: "https://scg-procurement.com",
-            password: "user: procurement_manager\npassword: Proc@SCG2025\nรหัสอนุมัติ: 7890-ABCD",
-            impact: "การสั่งซื้อล่าช้าอาจทำให้วัตถุดิบไม่เพียงพอต่อการผลิต ส่งผลให้ไม่สามารถส่งมอบสินค้าได้ตามกำหนด",
-            status: "incomplete",
-            type: "purchase",
-          },
-          // เพิ่มงานด่วน 2 งาน
-          {
-            id: 8,
-            title: "ส่งเอกสารประมูลโครงการใหม่",
-            date: todayStr, // วันนี้
-            frequency: "no-repeat",
-            details: "จัดเตรียมและส่งเอกสารประมูลโครงการก่อสร้างสาขาใหม่ภายในวันนี้",
-            link: "https://scg-bidding.com/projects",
-            password: "user: bid_manager\npassword: Bid2025!",
-            impact: "หากไม่ส่งเอกสารภายในวันนี้ บริษัทจะหมดสิทธิ์ในการเข้าร่วมประมูลโครงการมูลค่า 50 ล้านบาท",
-            status: "incomplete",
-            type: "document",
-            isUrgent: true,
-          },
-          {
-            id: 9,
-            title: "ตรวจสอบระบบความปลอดภัยหลังเหตุการณ์น้ำรั่ว",
-            date: tomorrowStr, // พรุ่งนี้
-            frequency: "no-repeat",
-            details: "ตรวจสอบระบบความปลอดภัยและความเสียหายหลังเหตุการณ์น้ำรั่วในโรงงานเมื่อวานนี้",
-            link: "",
-            password: "",
-            impact: "หากไม่ตรวจสอบและแก้ไขอย่างเร่งด่วน อาจเกิดความเสียหายต่อเครื่องจักรและระบบไฟฟ้าเพิ่มเติม",
-            status: "incomplete",
-            type: "maintenance",
-            isUrgent: true,
-          },
-        ]
-
-        setReminders(mockManualReminders)
-      } catch (e) {
-        console.error("Failed to load manual reminders", e)
-      }
-    }
-
-    // 2.2) ดึงงาน cycle
-    const fetchCycleReminders = async () => {
-      try {
-        // คอมเม้น API ไว้ก่อน
-        // const { data } = await axios.get("/api/notifications/cycles", {
-        //   withCredentials: true,
-        //   params: { skip: 0, take: 100 },
-        // })
-
-        // Mock data สำหรับการแจ้งเตือนแบบ cycle
-        const mockCycleReminders = [
-          {
-            id: 101,
-            title: "อัปเดตข้อมูลความปลอดภัยระบบ IT",
-            message: "ตรวจสอบและอัปเดตระบบความปลอดภัย IT ตามนโยบายความปลอดภัยข้อมูล",
-            scheduledAt: "2025-05-18T09:00:00",
-            frequency: "monthly",
-            status: "incomplete",
-            type: "data",
-          },
-          {
-            id: 102,
-            title: "ส่งรายงานยอดขายประจำวัน",
-            message: "รวบรวมและส่งรายงานยอดขายประจำวันให้ผู้บริหาร",
-            scheduledAt: "2025-05-15T17:00:00",
-            frequency: "daily",
-            status: "overdue",
-            type: "report",
-          },
-          {
-            id: 103,
-            title: "ประชุมทีมการตลาด",
-            message: "ประชุมทีมการตลาดเพื่อติดตามความคืบหน้าแคมเปญไตรมาส 2",
-            scheduledAt: "2025-05-22T13:00:00",
-            frequency: "weekly",
-            status: "incomplete",
-            type: "meeting",
-          },
-        ]
-
-        setCycleReminders(mockCycleReminders)
-      } catch (e) {
-        console.error("Failed to load cycle reminders", e)
-      }
-    }
-
-    fetchManualReminders()
-    fetchCycleReminders()
-  }, []) // รันแค่ครั้งเดียวตอน mount
+    loadReminders()
+  }, [currentPage])
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value,
-    })
+    const { name, value, type } = e.target
+    if (type === "checkbox") {
+      setFormData({
+        ...formData,
+        [name]: (e.target as HTMLInputElement).checked,
+      })
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      })
+    }
   }
 
   // Handle select changes
@@ -275,69 +155,135 @@ export default function ManageReminderPage() {
   }
 
   // Add new reminder
-  const handleAddReminder = () => {
-    // Validate required fields
-    if (!formData.title.trim() || !formData.date || !formData.details.trim() || !formData.impact.trim()) {
-      // Show error or return
-      return
-    }
+  const handleAddReminder = async () => {
+    try {
+      // ตรวจสอบว่ามีหัวข้องานอย่างน้อย
+      if (!formData.title.trim()) {
+        toast({
+          title: "กรุณาระบุข้อมูล",
+          description: "กรุณาระบุหัวข้องานอย่างน้อย",
+          variant: "destructive",
+        })
+        return
+      }
 
-    // สร้างข้อมูล password จาก username และ password ถ้ามีการติ๊กช่อง hasLogin
-    let passwordData = ""
-    if (formData.hasLogin && (formData.username || formData.password)) {
-      passwordData = `user: ${formData.username}\npassword: ${formData.password}`
-    }
+      // Create a new task from form data
+      const newTask: Omit<UnifiedTask, "id"> = {
+        title: formData.title,
+        details: formData.details || "ไม่มีรายละเอียด",
+        dueDate: formData.date || new Date().toISOString().split("T")[0],
+        status: "incomplete",
+        priority: "pending", // Will be calculated by API
+        done: false,
+        frequency: formData.frequency as UnifiedTask["frequency"],
+        impact: formData.impact || "ไม่ระบุ",
+        link: formData.link,
+        hasLogin: hasLogin,
+        username: hasLogin ? formData.username : undefined,
+        password: hasLogin ? formData.password : undefined,
+        isUrgent: formData.date ? checkIsUrgent(formData.date) : false,
+        type: typeFilter !== "all" ? typeFilter : undefined,
+      }
 
-    // Check if task is urgent (today or within next 3 days)
-    const isUrgent = checkIsUrgent(formData.date)
+      // Create the task via API
+      await unifiedApi.create(newTask)
 
-    const newReminder = {
-      id: reminders.length + 1,
-      ...formData,
-      password: passwordData,
-      status: "incomplete" as const,
-      isUrgent: isUrgent,
+      // Reload reminders to get the updated list
+      await loadReminders()
+
+      // Close dialog
+      setIsAddDialogOpen(false)
+
+      // Set success message and show confetti
+      setSuccessTitle("สร้างการแจ้งเตือนสำเร็จ!")
+      setSuccessDescription(`การแจ้งเตือน "${formData.title}" ถูกสร้างเรียบร้อยแล้ว`)
+      setShowConfetti(true)
+
+      // Reset form
+      resetForm()
+    } catch (error) {
+      console.error("Failed to create reminder:", error)
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถสร้างการแจ้งเตือนได้",
+        variant: "destructive",
+      })
+
+      // Close dialog in case of error
+      setIsAddDialogOpen(false)
     }
-    setReminders([...reminders, newReminder])
-    setIsAddDialogOpen(false)
-    resetForm()
   }
 
   // Edit reminder
-  const handleEditReminder = () => {
+  const handleEditReminder = async () => {
     if (!currentReminder) return
 
-    // สร้างข้อมูล password จาก username และ password ถ้ามีการติ๊กช่อง hasLogin
-    let passwordData = ""
-    if (formData.hasLogin && (formData.username || formData.password)) {
-      passwordData = `user: ${formData.username}\npassword: ${formData.password}`
+    try {
+      // Create updated task from form data
+      const updatedTask: Partial<UnifiedTask> = {
+        title: formData.title || currentReminder.title,
+        details: formData.details || "ไม่มีรายละเอียด",
+        dueDate: formData.date || currentReminder.date,
+        frequency: formData.frequency as UnifiedTask["frequency"],
+        impact: formData.impact || "ไม่ระบุ",
+        link: formData.link,
+        hasLogin: hasLogin,
+        username: hasLogin ? formData.username : undefined,
+        password: hasLogin ? formData.password : undefined,
+      }
+
+      // Update the task via API
+      await unifiedApi.update(String(currentReminder.id), updatedTask)
+
+      // Reload reminders to get the updated list
+      await loadReminders()
+
+      // Show success toast
+      toast({
+        title: "แก้ไขการแจ้งเตือนสำเร็จ",
+        description: `แก้ไขการแจ้งเตือน "${formData.title}" เรียบร้อยแล้ว`,
+      })
+
+      // Close dialog and reset form
+      setIsEditDialogOpen(false)
+      resetForm()
+    } catch (error) {
+      console.error("Failed to update reminder:", error)
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถแก้ไขการแจ้งเตือนได้",
+        variant: "destructive",
+      })
     }
-
-    // Check if task is urgent (today or within next 3 days)
-    const isUrgent = checkIsUrgent(formData.date)
-
-    const updatedReminders = reminders.map((reminder) =>
-      reminder.id === currentReminder.id
-        ? {
-            ...formData,
-            id: reminder.id,
-            password: passwordData,
-            status: reminder.status,
-            isUrgent: isUrgent,
-          }
-        : reminder,
-    )
-    setReminders(updatedReminders)
-    setIsEditDialogOpen(false)
-    resetForm()
   }
 
   // Delete reminder
-  const handleDeleteReminder = () => {
+  const handleDeleteReminder = async () => {
     if (!currentReminder) return
-    const updatedReminders = reminders.filter((reminder) => reminder.id !== currentReminder.id)
-    setReminders(updatedReminders)
-    setIsDeleteDialogOpen(false)
+
+    try {
+      // Delete the task via API
+      await unifiedApi.delete(String(currentReminder.id))
+
+      // Reload reminders to get the updated list
+      await loadReminders()
+
+      // Show success toast
+      toast({
+        title: "ลบการแจ้งเตือนสำเร็จ",
+        description: `ลบการแจ้งเตือน "${currentReminder.title}" เรียบร้อยแล้ว`,
+      })
+
+      // Close dialog
+      setIsDeleteDialogOpen(false)
+    } catch (error) {
+      console.error("Failed to delete reminder:", error)
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถลบการแจ้งเตือนได้",
+        variant: "destructive",
+      })
+    }
   }
 
   // Open edit dialog and set current reminder
@@ -345,18 +291,34 @@ export default function ManageReminderPage() {
     setCurrentReminder(reminder)
 
     // Set hasLogin flag based on whether password exists
-    const hasLoginValue = reminder.password ? true : false
+    const hasLoginValue = reminder.hasLogin || false
     setHasLogin(hasLoginValue)
 
-    // Initialize form data without username and password
+    // Extract username and password from the reminder's password field
+    let username = reminder.username || ""
+    let password = ""
+
+    if (reminder.password) {
+      const passwordLines = reminder.password.split("\n")
+
+      for (const line of passwordLines) {
+        if (line.toLowerCase().startsWith("user:")) {
+          username = line.substring(line.indexOf(":") + 1).trim()
+        } else if (line.toLowerCase().startsWith("password:")) {
+          password = line.substring(line.indexOf(":") + 1).trim()
+        }
+      }
+    }
+
+    // Initialize form data
     setFormData({
       title: reminder.title,
       date: reminder.date,
       frequency: reminder.frequency,
       details: reminder.details,
       link: reminder.link || "",
-      username: "",
-      password: "",
+      username: username,
+      password: password,
       impact: reminder.impact || "",
       hasLogin: hasLoginValue,
     })
@@ -377,28 +339,10 @@ export default function ManageReminderPage() {
   const handleEditAuthenticate = () => {
     // In a real system, verify the password against backend
     // For this example, we'll just accept any password
-
-    // Extract username and password from the reminder's password field
-    let username = ""
-    let password = ""
-
-    if (currentReminder?.password) {
-      const passwordLines = currentReminder.password.split("\n")
-
-      for (const line of passwordLines) {
-        if (line.toLowerCase().startsWith("user:")) {
-          username = line.substring(line.indexOf(":") + 1).trim()
-        } else if (line.toLowerCase().startsWith("password:")) {
-          password = line.substring(line.indexOf(":") + 1).trim()
-        }
-      }
-    }
-
     setIsEditPasswordAuthenticated(true)
-    setFormData({
-      ...formData,
-      username: username,
-      password: password,
+    toast({
+      title: "ยืนยันตัวตนสำเร็จ",
+      description: "คุณสามารถแก้ไขข้อมูลล็อกอินได้แล้ว",
     })
   }
 
@@ -412,7 +356,7 @@ export default function ManageReminderPage() {
   const resetForm = () => {
     setFormData({
       title: "",
-      date: "",
+      date: new Date().toISOString().split("T")[0],
       frequency: "no-repeat",
       details: "",
       link: "",
@@ -431,41 +375,38 @@ export default function ManageReminderPage() {
     // ในระบบจริงควรมีการตรวจสอบรหัสผ่านกับ backend
     // สำหรับตัวอย่างนี้จะแสดงรหัสผ่านเมื่อกดปุ่มยืนยัน
     setIsPasswordVisible(true)
+    toast({
+      title: "ยืนยันตัวตนสำเร็จ",
+      description: "คุณสามารถดูข้อมูลล็อกอินได้แล้ว",
+    })
   }
 
   // Toggle reminder status
-  const toggleReminderStatus = (reminder: Reminder) => {
-    const updatedReminders = reminders.map((r) =>
-      r.id === reminder.id ? { ...r, status: r.status === "completed" ? "incomplete" : "completed" } : r,
-    )
-    setReminders(updatedReminders)
+  const toggleReminderStatus = async (reminder: Reminder) => {
+    try {
+      const newStatus = reminder.status === "completed" ? "PENDING" : "DONE"
+      await unifiedApi.updateStatus(String(reminder.id), newStatus)
+
+      // Show success toast
+      toast({
+        title: reminder.status === "completed" ? "ยกเลิกการเสร็จสิ้น" : "ทำเครื่องหมายว่าเสร็จสิ้น",
+        description: `${reminder.status === "completed" ? "ยกเลิกการเสร็จสิ้น" : "ทำเครื่องหมายว่าเสร็จสิ้น"} "${reminder.title}" เรียบร้อยแล้ว`,
+      })
+
+      // Reload reminders to get the updated list
+      await loadReminders()
+    } catch (error) {
+      console.error("Failed to toggle reminder status:", error)
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถเปลี่ยนสถานะการแจ้งเตือนได้",
+        variant: "destructive",
+      })
+    }
   }
 
-  const mappedCycle = cycleReminders.map((c) => ({
-    id: c.id,
-    title: c.title,
-    details: c.message,
-    date: c.scheduledAt?.split("T")[0],
-    frequency: c.frequency,
-    status: c.status,
-    type: c.type,
-    isUrgent: false, // Default for cycle reminders
-  }))
-
-  // รวม manual + cycle
-  const allReminders = [...reminders, ...mappedCycle]
-
-  // Mark urgent tasks
-  const remindersWithUrgentFlag = allReminders.map((reminder) => {
-    if (reminder.isUrgent !== undefined) return reminder
-    return {
-      ...reminder,
-      isUrgent: checkIsUrgent(reminder.date),
-    }
-  })
-
-  // กรอง search / filter บน allReminders
-  const filteredReminders = remindersWithUrgentFlag
+  // Filter reminders
+  const filteredReminders = reminders
     .filter((reminder) => {
       const matchesSearch =
         reminder.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -479,7 +420,30 @@ export default function ManageReminderPage() {
         (activeTab === "incomplete" && reminder.status === "incomplete") ||
         (activeTab === "completed" && reminder.status === "completed")
 
-      return matchesSearch && matchesStatus && matchesType && matchesTab
+      // Filter by date if needed
+      let matchesDate = true
+      if (filterDate !== "all") {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        const reminderDate = new Date(reminder.date)
+        reminderDate.setHours(0, 0, 0, 0)
+
+        if (filterDate === "today") {
+          matchesDate = reminderDate.getTime() === today.getTime()
+        } else if (filterDate === "thisWeek") {
+          const weekStart = new Date(today)
+          weekStart.setDate(today.getDate() - today.getDay())
+          const weekEnd = new Date(weekStart)
+          weekEnd.setDate(weekStart.getDate() + 6)
+          matchesDate = reminderDate >= weekStart && reminderDate <= weekEnd
+        } else if (filterDate === "thisMonth") {
+          matchesDate =
+            reminderDate.getMonth() === today.getMonth() && reminderDate.getFullYear() === today.getFullYear()
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesType && matchesTab && matchesDate
     })
     .sort((a, b) => {
       // Sort by priority: overdue > urgent > incomplete > completed
@@ -496,53 +460,123 @@ export default function ManageReminderPage() {
 
   // Count reminders by status
   const reminderCounts = {
-    all: remindersWithUrgentFlag.length,
-    overdue: remindersWithUrgentFlag.filter((r) => r.status === "overdue").length,
-    urgent: remindersWithUrgentFlag.filter((r) => r.isUrgent).length,
-    incomplete: remindersWithUrgentFlag.filter((r) => r.status === "incomplete").length,
-    completed: remindersWithUrgentFlag.filter((r) => r.status === "completed").length,
+    all: reminders.length,
+    overdue: reminders.filter((r) => r.status === "overdue").length,
+    urgent: reminders.filter((r) => r.isUrgent).length,
+    incomplete: reminders.filter((r) => r.status === "incomplete").length,
+    completed: reminders.filter((r) => r.status === "completed").length,
   }
 
   return (
     <AppLayout title="ตั้งค่าการแจ้งเตือน" description="สร้าง แก้ไข และลบการแจ้งเตือนต่างๆ">
-      <div className="mt-4">
-        {/* Main Content */}
-        <div className="flex flex-col gap-6">
-          {/* Search and Add Button */}
-          <ReminderFilter
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            typeFilter={typeFilter}
-            setTypeFilter={setTypeFilter}
-            filterDate={filterDate}
-            setFilterDate={setFilterDate}
-            onAddClick={() => {
-              resetForm()
-              setIsAddDialogOpen(true)
-            }}
-          />
+      <div className="bg-[#f8f9fc] min-h-screen">
+        <div className="container mx-auto px-4 py-6">
+          {/* Header with search and add button */}
+          <div className="flex flex-col sm:flex-row gap-3 items-center mb-6 bg-white p-4 rounded-xl shadow-sm">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Input
+                placeholder="ค้นหาการแจ้งเตือน..."
+                className="pl-10 w-full border-gray-300 focus:border-[#2c3e50] focus:ring-[#2c3e50]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                onClick={() => setIsFiltersVisible(!isFiltersVisible)}
+                className="flex-1 sm:flex-none border-[#2c3e50] text-[#2c3e50] hover:bg-[#2c3e50] hover:text-white transition-colors"
+              >
+                ตัวกรอง {isFiltersVisible ? "▲" : "▼"}
+              </Button>
+              <Button
+                onClick={() => {
+                  resetForm()
+                  setIsAddDialogOpen(true)
+                }}
+                className="flex-1 sm:flex-none bg-[#2c3e50] hover:bg-[#1a2530] text-white transition-colors"
+              >
+                <Plus className="mr-2 h-4 w-4" /> สร้างการแจ้งเตือน
+              </Button>
+            </div>
+          </div>
 
-          {/* Tabs */}
-          <ReminderTabs
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            reminderCounts={reminderCounts}
-            filteredReminders={filteredReminders}
-            onEdit={openEditDialog}
-            onDelete={openDeleteDialog}
-            onToggleStatus={toggleReminderStatus}
-            onViewPassword={(reminder) => {
-              setCurrentReminder(reminder)
-              setIsPasswordVisible(false)
-              setIsForgotPasswordDialogOpen(true)
-            }}
-            getStatusBadge={getStatusBadge}
-            getFrequencyText={getFrequencyText}
-            getTypeIcon={getTypeIcon}
-            getDueDateStatus={getDueDateStatus}
-            formatThaiDate={formatThaiDate}
+          {/* Filters section */}
+          {isFiltersVisible && (
+            <ReminderFilters
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              typeFilter={typeFilter}
+              setTypeFilter={setTypeFilter}
+              filterDate={filterDate}
+              setFilterDate={setFilterDate}
+            />
+          )}
+
+          {/* Loading state */}
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12 bg-white rounded-xl shadow-sm">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2c3e50]"></div>
+            </div>
+          ) : (
+            /* Tabs and reminder list */
+            <ReminderTabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              reminderCounts={reminderCounts}
+              filteredReminders={filteredReminders}
+              onEdit={openEditDialog}
+              onDelete={openDeleteDialog}
+              onToggleStatus={toggleReminderStatus}
+              onViewPassword={(reminder) => {
+                setCurrentReminder(reminder)
+                setIsPasswordVisible(false)
+                setIsForgotPasswordDialogOpen(true)
+              }}
+              getStatusBadge={getStatusBadge}
+              getFrequencyText={getFrequencyText}
+              getTypeIcon={getTypeIcon}
+              getDueDateStatus={getDueDateStatus}
+              formatThaiDate={formatThaiDate}
+            />
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-6">
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="border-[#2c3e50] text-[#2c3e50]"
+                >
+                  ก่อนหน้า
+                </Button>
+                <div className="flex items-center px-4 bg-white rounded-md border border-[#e2e8f0]">
+                  <span className="text-sm text-[#4a5568]">
+                    หน้า {currentPage} จาก {totalPages}
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="border-[#2c3e50] text-[#2c3e50]"
+                >
+                  ถัดไป
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Success Animation */}
+          <ConfettiAnimation
+            isVisible={showConfetti}
+            onComplete={() => setShowConfetti(false)}
+            title={successTitle}
+            description={successDescription}
           />
         </div>
       </div>

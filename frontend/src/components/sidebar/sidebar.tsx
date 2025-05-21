@@ -1,6 +1,6 @@
 "use client"
 import { Link, useLocation } from "react-router-dom"
-import { Bell, LogOut, Settings, CheckCircle, ChevronDown, Users, Database } from "lucide-react"
+import { Bell, LogOut, Settings, CheckCircle, ChevronDown, Users, Database } from 'lucide-react'
 import { useState } from "react"
 import { useAuth } from "@/hooks/use-auth"
 
@@ -15,16 +15,16 @@ export default function Sidebar({ onLogout }: SidebarProps) {
     ["/dashboard", "/manage", "/userlogs"].some((path) => location.pathname.startsWith(path)),
   )
 
-  const [adminOpen, setAdminOpen] = useState(
-    ["/addemployee", "/add-team", "/import-employees"].some((path) => location.pathname.startsWith(path)),
+  const [teamOpen, setTeamOpen] = useState(
+    ["/team-overview", "/teammember", "/team-notification"].some((path) => location.pathname.startsWith(path)),
   )
 
-  const [teamOpen, setTeamOpen] = useState(
-    ["/audit-logs", "/teammember"].some((path) => location.pathname.startsWith(path)),
+  const [adminOpen, setAdminOpen] = useState(
+    ["/add-team", "/import-employees"].some((path) => location.pathname.startsWith(path)),
   )
 
   const [superAdminOpen, setSuperAdminOpen] = useState(
-    ["/superadmin"].some((path) => location.pathname.startsWith(path)),
+    ["/superadmin", "/addadmin"].some((path) => location.pathname.startsWith(path)),
   )
 
   // Get user data from useAuth hook
@@ -111,7 +111,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto p-3">
         <nav className="space-y-1">
-          {/* Notification System */}
+          {/* ระบบการแจ้งเตือน */}
           <div className="rounded-md overflow-hidden">
             <button
               onClick={() => setNotificationOpen(!notificationOpen)}
@@ -169,17 +169,19 @@ export default function Sidebar({ onLogout }: SidebarProps) {
             )}
           </div>
 
-          {/* Team Management */}
+          {/* จัดการทีม (หัวหน้างาน) */}
           <div className="rounded-md overflow-hidden">
             <button
               onClick={() => setTeamOpen(!teamOpen)}
               className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
-                isGroupActive(["/audit-logs", "/teammember"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
+                isGroupActive(["/team-overview", "/teammember", "/team-notification"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
               }`}
             >
               <div className="flex items-center">
                 <Users className="h-5 w-5 mr-3" />
-                <span>จัดการทีม</span>
+                <span>จัดการทีม
+                  <span className="ml-2 text-xs px-1.5 py-0.5 bg-yellow-500 text-black rounded-full">หัวหน้างาน</span>
+                </span>
               </div>
               <ChevronDown
                 className={`h-4 w-4 transition-transform duration-200 ${teamOpen ? "transform rotate-180" : ""}`}
@@ -189,14 +191,14 @@ export default function Sidebar({ onLogout }: SidebarProps) {
             {teamOpen && (
               <div className="ml-4 mt-1 space-y-1">
                 <Link
-                  to="/audit-logs"
+                  to="/team-overview"
                   className={`block rounded-md px-4 py-2 text-white transition-colors ${
-                    isActive("/audit-logs") ? "bg-white/15 font-medium" : "hover:bg-white/10"
+                    isActive("/team-overview") ? "bg-white/15 font-medium" : "hover:bg-white/10"
                   }`}
                 >
                   <div className="flex items-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/60 mr-2.5"></div>
-                    ประวัติการดำเนินการพนักงาน
+                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mr-2.5"></div>
+                    ภาพรวม
                   </div>
                 </Link>
                 <Link
@@ -207,19 +209,30 @@ export default function Sidebar({ onLogout }: SidebarProps) {
                 >
                   <div className="flex items-center">
                     <div className="w-1.5 h-1.5 rounded-full bg-white/60 mr-2.5"></div>
-                    สมาชิกในทีม
+                    สมาชิก
+                  </div>
+                </Link>
+                <Link
+                  to="/team-notification"
+                  className={`block rounded-md px-4 py-2 text-white transition-colors ${
+                    isActive("/team-notification") ? "bg-white/15 font-medium" : "hover:bg-white/10"
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mr-2.5"></div>
+                    เพิ่มการแจ้งเตือน
                   </div>
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Admin */}
+          {/* แอดมิน */}
           <div className="rounded-md overflow-hidden">
             <button
               onClick={() => setAdminOpen(!adminOpen)}
               className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
-                isGroupActive(["/addemployee", "/add-team", "/import-employees"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
+                isGroupActive(["/add-team", "/import-employees"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
               }`}
             >
               <div className="flex items-center">
@@ -259,13 +272,13 @@ export default function Sidebar({ onLogout }: SidebarProps) {
             )}
           </div>
 
-          {/* Super Admin (Hidden Menu) */}
+          {/* ซุปเปอร์แอดมิน - Only visible to superadmins */}
           {isSuperAdmin && (
             <div className="rounded-md overflow-hidden mt-4 border-t border-red-700/30 pt-4">
               <button
                 onClick={() => setSuperAdminOpen(!superAdminOpen)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 text-white ${
-                  isGroupActive(["/superadmin"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
+                  isGroupActive(["/superadmin", "/addadmin"]) ? "bg-white/10 font-medium" : "hover:bg-white/5"
                 }`}
               >
                 <div className="flex items-center">
@@ -293,12 +306,23 @@ export default function Sidebar({ onLogout }: SidebarProps) {
                       ประวัติการดำเนินการทั้งหมด
                     </div>
                   </Link>
+                  <Link
+                    to="/addadmin"
+                    className={`block rounded-md px-4 py-2 text-white transition-colors ${
+                      isActive("/addadmin") ? "bg-white/15 font-medium" : "hover:bg-white/10"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mr-2.5"></div>
+                      เพิ่มแอดมิน
+                    </div>
+                  </Link>
                 </div>
               )}
             </div>
           )}
 
-          {/* Settings */}
+          {/* การตั้งค่า */}
           <Link
             to="/settings"
             className={`flex items-center px-3 py-2.5 rounded-md text-white transition-colors ${

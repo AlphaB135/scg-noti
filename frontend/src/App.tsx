@@ -21,6 +21,9 @@ import AddTeam from "./pages/add-team/page";
 import ImportEmployees from "./pages/add-team/import-excel";
 import TeamMember from "./pages/team-member/page";
 import SuperAdmin from "./pages/super-admin-logs/page";
+import TeamOverview from "./pages/team-overview/page";
+import TeamNoti from "./pages/team-notification/page";
+import AddAdmin from "./pages/add-admin-dialog/page";
 
 // HOC ตรวจสอบสิทธิ์
 import { RequireAuth } from "./components/RequireAuth";
@@ -105,6 +108,30 @@ function App() {
           element={
             <RequireAuth>
               <SuperAdmin />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/team-overview"
+          element={
+            <RequireAuth>
+              <TeamOverview />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/team-notification"
+          element={
+            <RequireAuth>
+              <TeamNoti />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/addadmin"
+          element={
+            <RequireAuth>
+              <AddAdmin />
             </RequireAuth>
           }
         />
