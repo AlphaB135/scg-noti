@@ -1,4 +1,7 @@
+"use client"
+
 import { PieChart, Pie, Tooltip } from "recharts"
+import { useEffect, useState } from "react"
 
 type MonthlyProgressProps = {
   doneCount: number
@@ -17,7 +20,17 @@ export default function MonthlyProgress({
   selectedMonth,
   selectedYear,
 }: MonthlyProgressProps) {
-  // แปลงเดือนเป็นภาษาไทย
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Screen size detection
+  useEffect(() => {
+    const checkIsMobile = () => setIsMobile(window.innerWidth < 768)
+    checkIsMobile()
+    window.addEventListener("resize", checkIsMobile)
+    return () => window.removeEventListener("resize", checkIsMobile)
+  }, [])
+
+  // Convert month to Thai language
   const getThaiMonthName = (month: number) => {
     const monthNames = [
       "มกราคม",
@@ -33,11 +46,11 @@ export default function MonthlyProgress({
       "พฤศจิกายน",
       "ธันวาคม",
     ]
-    // เนื่องจาก selectedMonth เริ่มจาก 1 (มกราคม = 1) แต่ array เริ่มจาก 0
+    // Month is 1-based (January = 1) but array is 0-based
     return monthNames[month - 1]
   }
 
-  // คอมโพเนนต์สำหรับแสดง tooltip ในกราฟ
+  // Custom tooltip component for the chart
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const { name, value } = payload[0]
@@ -55,27 +68,27 @@ export default function MonthlyProgress({
 
   return (
     <section className="relative isolate w-full flex-1 overflow-hidden rounded-3xl border border-gray-100/70 bg-white/70 backdrop-blur-sm shadow-xl ring-1 ring-black/5 transition hover:scale-[1.02] duration-300 flex flex-col">
-      {/* light gradient tint */}
+      {/* Light gradient tint */}
       <div className="absolute inset-0 pointer-events-none" />
-      <div className="relative z-10 p-6 flex-1 flex flex-col">
+      <div className="relative z-10 p-4 md:p-6 flex-1 flex flex-col">
         {/* Heading */}
-        <div className="mb-4 text-center">
-          <h2 className="text-xl font-bold tracking-tight text-gray-800">สรุปความคืบหน้างานเดือน :</h2>
-          <h3 className="text-xl font-bold tracking-tight text-gray-800 mt-1">
+        <div className="mb-2 md:mb-4 text-center">
+          <h2 className="text-base md:text-xl font-bold tracking-tight text-gray-800">สรุปความคืบหน้างานเดือน :</h2>
+          <h3 className="text-base md:text-xl font-bold tracking-tight text-gray-800 mt-1">
             {getThaiMonthName(selectedMonth)} {selectedYear}
           </h3>
         </div>
 
-        {/* Donut chart - ปรับให้ขยายตามพื้นที่ */}
+        {/* Donut chart - responsive sizing */}
         <div className="relative mx-auto flex flex-1 items-center justify-center w-full">
-          <PieChart width={200} height={200} className="mx-auto">
-            {/* ✅ วาดสีเทาก่อน (พื้นหลัง) */}
+          <PieChart width={isMobile ? 150 : 200} height={isMobile ? 150 : 200} className="mx-auto">
+            {/* Draw gray background first */}
             <Pie
               data={[{ name: "ยังไม่เสร็จ", value: incompleteCnt }]}
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={80}
+              innerRadius={isMobile ? 45 : 60}
+              outerRadius={isMobile ? 60 : 80}
               startAngle={90}
               endAngle={-270}
               cornerRadius={50}
@@ -84,13 +97,13 @@ export default function MonthlyProgress({
               fill="#e5e7eb"
             />
 
-            {/* ✅ วาดวงเขียวซ้อนทับหลังสุด (ความคืบหน้า) */}
+            {/* Draw red progress on top */}
             <Pie
               data={[{ name: "เสร็จแล้ว", value: doneCount }]}
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={80}
+              innerRadius={isMobile ? 45 : 60}
+              outerRadius={isMobile ? 60 : 80}
               startAngle={90}
               endAngle={90 - (360 * doneCount) / (totalTasks || 1)}
               cornerRadius={50}
@@ -105,21 +118,21 @@ export default function MonthlyProgress({
 
           {/* Center label */}
           <div className="absolute flex flex-col items-center justify-center">
-            <span className="text-3xl font-bold">{progressPercent}%</span>
-            <span className="mt-1 text-xs">
+            <span className="text-xl md:text-3xl font-bold">{progressPercent}%</span>
+            <span className="mt-1 text-[10px] md:text-xs">
               {doneCount} จาก {totalTasks} งาน
             </span>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="mt-4 flex justify-center gap-8 text-sm font-medium text-gray-700">
-          <div className="flex items-center gap-2">
-            <span className="block h-3 w-3 rounded-full bg-gradient-to-b from-red-800 to-red-900" />
+        <div className="mt-2 md:mt-4 flex justify-center gap-4 md:gap-8 text-xs md:text-sm font-medium text-gray-700">
+          <div className="flex items-center gap-1 md:gap-2">
+            <span className="block h-2 w-2 md:h-3 md:w-3 rounded-full bg-gradient-to-b from-red-800 to-red-900" />
             เสร็จแล้ว
           </div>
-          <div className="flex items-center gap-2">
-            <span className="block h-3 w-3 rounded-full bg-gray-300" />
+          <div className="flex items-center gap-1 md:gap-2">
+            <span className="block h-2 w-2 md:h-3 md:w-3 rounded-full bg-gray-300" />
             ยังไม่เสร็จ
           </div>
         </div>

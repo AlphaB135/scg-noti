@@ -501,8 +501,8 @@ export default function AdminNotificationPage() {
       {/* ===== NOTIFICATION CARDS ===== */}
       <TaskStatusCards notifications={notifications} onCardClick={handleCardClick} />
       {/* ===== DASHBOARD MAIN CONTENT ===== */}
-      <div className="grid grid-cols-1 md:grid-cols-10 gap-6 mt-6 w-full">
-        {/* ===== DONUT CHART (30% width) ===== */}
+      <div className="grid grid-cols-1 md:grid-cols-10 gap-4 md:gap-6 mt-4 md:mt-6 w-full">
+        {/* ===== DONUT CHART (30% width on desktop, full width on mobile) ===== */}
         <div className="md:col-span-3 flex">
           <MonthlyProgress
             doneCount={doneCount}
@@ -513,7 +513,7 @@ export default function AdminNotificationPage() {
             selectedYear={selectedYear}
           />
         </div>
-        {/* ===== TO-DO LIST (70% width) ===== */}
+        {/* ===== TO-DO LIST (70% width on desktop, full width on mobile) ===== */}
         <div className="md:col-span-7 flex">
           <TaskList
             tasks={tasks}
@@ -652,13 +652,13 @@ export default function AdminNotificationPage() {
       </Dialog>
       {/* ===== ADD TASK DIALOG ===== */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="w-full max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[60vw] h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[60vw] h-[90vh] overflow-y-auto rounded-lg">
           <DialogHeader>
-            <DialogTitle>{editTask ? "แก้ไขงาน" : "สร้างการแจ้งเตือนใหม่"}</DialogTitle>
+            <DialogTitle className="text-base md:text-xl">{editTask ? "แก้ไขงาน" : "สร้างการแจ้งเตือนใหม่"}</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="title">
+          <div className="grid gap-3 md:gap-4 py-2 md:py-4">
+            <div className="grid gap-1 md:gap-2">
+              <Label htmlFor="title" className="text-xs md:text-sm">
                 หัวข้องาน <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -668,22 +668,31 @@ export default function AdminNotificationPage() {
                 onChange={handleInputChange}
                 placeholder="กรอกหัวข้องาน"
                 required
+                className="text-sm"
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="date">
+            <div className="grid gap-1 md:gap-2">
+              <Label htmlFor="date" className="text-xs md:text-sm">
                 วันที่แจ้งเตือน <span className="text-red-500">*</span>
               </Label>
-              <Input id="date" name="date" type="date" value={formData.date} onChange={handleInputChange} required />
+              <Input
+                id="date"
+                name="date"
+                type="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                required
+                className="text-sm"
+              />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="frequency">
+            <div className="grid gap-1 md:gap-2">
+              <Label htmlFor="frequency" className="text-xs md:text-sm">
                 ความถี่ <span className="text-red-500">*</span>
               </Label>
               <Select value={formData.frequency} onValueChange={(value) => handleSelectChange("frequency", value)}>
-                <SelectTrigger>
+                <SelectTrigger className="text-sm">
                   <SelectValue placeholder="เลือกความถี่" />
                 </SelectTrigger>
                 <SelectContent>
@@ -697,8 +706,8 @@ export default function AdminNotificationPage() {
               </Select>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="details">
+            <div className="grid gap-1 md:gap-2">
+              <Label htmlFor="details" className="text-xs md:text-sm">
                 รายละเอียด <span className="text-red-500">*</span>
               </Label>
               <Textarea
@@ -708,11 +717,12 @@ export default function AdminNotificationPage() {
                 onChange={handleInputChange}
                 placeholder="กรอกรายละเอียดเพิ่มเติม"
                 required
+                className="min-h-[80px] md:min-h-[100px] text-sm"
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="impact">
+            <div className="grid gap-1 md:gap-2">
+              <Label htmlFor="impact" className="text-xs md:text-sm">
                 ผลกระทบหากงานไม่เสร็จ <span className="text-red-500">*</span>
               </Label>
               <Textarea
@@ -722,11 +732,14 @@ export default function AdminNotificationPage() {
                 onChange={handleInputChange}
                 placeholder="ระบุความเสียหายหากงานไม่เสร็จ"
                 required
+                className="min-h-[80px] md:min-h-[100px] text-sm"
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="link">ลิงก์ (ถ้ามี)</Label>
+            <div className="grid gap-1 md:gap-2">
+              <Label htmlFor="link" className="text-xs md:text-sm">
+                ลิงก์ (ถ้ามี)
+              </Label>
               <Input
                 id="link"
                 name="link"
@@ -734,10 +747,11 @@ export default function AdminNotificationPage() {
                 onChange={handleInputChange}
                 placeholder="https://example.com"
                 type="url"
+                className="text-sm"
               />
             </div>
 
-            <div className="grid gap-2">
+            <div className="grid gap-1 md:gap-2">
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -751,24 +765,31 @@ export default function AdminNotificationPage() {
                   }}
                   className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
                 />
-                <Label htmlFor="hasLogin">งานที่ต้องมีการล็อคอิน</Label>
+                <Label htmlFor="hasLogin" className="text-xs md:text-sm">
+                  งานที่ต้องมีการล็อคอิน
+                </Label>
               </div>
 
               {formData.hasLogin && (
-                <div className="grid gap-4 mt-2 p-3 bg-gray-50 rounded-md">
-                  <div className="grid gap-2">
-                    <Label htmlFor="username">Username</Label>
+                <div className="grid gap-3 md:gap-4 mt-2 p-2 md:p-3 bg-gray-50 rounded-md">
+                  <div className="grid gap-1 md:gap-2">
+                    <Label htmlFor="username" className="text-xs md:text-sm">
+                      Username
+                    </Label>
                     <Input
                       id="username"
                       name="username"
                       value={formData.username}
                       onChange={handleInputChange}
                       placeholder="ระบุ username ที่ใช้ในการล็อคอิน"
+                      className="text-sm"
                     />
                   </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="password">Password</Label>
+                  <div className="grid gap-1 md:gap-2">
+                    <Label htmlFor="password" className="text-xs md:text-sm">
+                      Password
+                    </Label>
                     <Input
                       id="password"
                       name="password"
@@ -776,19 +797,20 @@ export default function AdminNotificationPage() {
                       onChange={handleInputChange}
                       placeholder="ระบุ password ที่ใช้ในการล็อคอิน"
                       type="text"
+                      className="text-sm"
                     />
                   </div>
                 </div>
               )}
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+          <DialogFooter className="flex-col space-y-2 sm:space-y-0 sm:flex-row mt-4">
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="w-full sm:w-auto">
               ยกเลิก
             </Button>
             <Button
               onClick={handleAddTask}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
               disabled={!formData.title.trim() || !formData.date || !formData.details.trim() || !formData.impact.trim()}
             >
               {editTask ? "บันทึกการเปลี่ยนแปลง" : "สร้างการแจ้งเตือน"}
@@ -798,17 +820,17 @@ export default function AdminNotificationPage() {
       </Dialog>
       {/* ===== TASK DETAIL DIALOG ===== */}
       <Dialog open={isTaskDetailDialogOpen} onOpenChange={setIsTaskDetailDialogOpen}>
-        <DialogContent className="sm:max-w-[600px] rounded-[20px]">
+        <DialogContent className="w-[95vw] max-w-[600px] rounded-lg">
           <DialogHeader>
-            <DialogTitle className="text-xl">รายละเอียดงาน</DialogTitle>
+            <DialogTitle className="text-base md:text-xl">รายละเอียดงาน</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="space-y-3 md:space-y-4 py-2">
             {taskDetail && (
               <>
                 <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-semibold">{taskDetail.title}</h3>
+                  <h3 className="text-base md:text-lg font-semibold">{taskDetail.title}</h3>
                   <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                    className={`rounded-full px-2 py-1 text-xs font-medium ${
                       taskDetail.done
                         ? "bg-green-100 text-green-700"
                         : taskDetail.priority === "overdue"
@@ -832,48 +854,48 @@ export default function AdminNotificationPage() {
                   </span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1 md:space-y-2">
                   <div className="flex items-center gap-2 text-gray-500">
-                    <Calendar className="h-4 w-4" />
-                    <span>กำหนดส่ง: {taskDetail.dueDate}</span>
+                    <Calendar className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                    <span className="text-xs md:text-sm">กำหนดส่ง: {taskDetail.dueDate}</span>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <h4 className="font-medium text-gray-700">รายละเอียด</h4>
-                  <div className="p-3 bg-gray-50 rounded-lg whitespace-pre-wrap text-gray-700">
+                <div className="space-y-1 md:space-y-2">
+                  <h4 className="text-xs md:text-sm font-medium text-gray-700">รายละเอียด</h4>
+                  <div className="p-2 md:p-3 bg-gray-50 rounded-lg whitespace-pre-wrap text-xs md:text-sm text-gray-700">
                     {taskDetail.details}
                   </div>
                 </div>
 
                 {taskDetail.hasLogin && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-gray-700">ข้อมูลการเข้าสู่ระบบ</h4>
-                    <div className="p-3 bg-gray-50 rounded-lg space-y-2">
+                  <div className="space-y-1 md:space-y-2">
+                    <h4 className="text-xs md:text-sm font-medium text-gray-700">ข้อมูลการเข้าสู่ระบบ</h4>
+                    <div className="p-2 md:p-3 bg-gray-50 rounded-lg space-y-1 md:space-y-2">
                       <div className="flex gap-2">
-                        <span className="font-medium text-gray-600">Username:</span>
-                        <span>{taskDetail.username}</span>
+                        <span className="text-xs md:text-sm font-medium text-gray-600">Username:</span>
+                        <span className="text-xs md:text-sm">{taskDetail.username}</span>
                       </div>
                       <div className="flex gap-2">
-                        <span className="font-medium text-gray-600">Password:</span>
-                        <span>{taskDetail.password}</span>
+                        <span className="text-xs md:text-sm font-medium text-gray-600">Password:</span>
+                        <span className="text-xs md:text-sm">{taskDetail.password}</span>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {taskDetail.link && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-gray-700">ลิงก์</h4>
+                  <div className="space-y-1 md:space-y-2">
+                    <h4 className="text-xs md:text-sm font-medium text-gray-700">ลิงก์</h4>
                     <a
                       href={taskDetail.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline flex items-center gap-1"
+                      className="text-xs md:text-sm text-blue-600 hover:underline flex items-center gap-1"
                     >
                       {taskDetail.link}
                       <svg
-                        className="w-4 h-4"
+                        className="w-3 h-3 md:w-4 md:h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -892,7 +914,7 @@ export default function AdminNotificationPage() {
               </>
             )}
           </div>
-          <DialogFooter className="mt-6 space-x-2">
+          <DialogFooter className="mt-4 md:mt-6 space-x-0 space-y-2 md:space-y-0 md:space-x-2 flex-col md:flex-row">
             {taskDetail && !taskDetail.done && (
               <Button
                 onClick={() => {
@@ -901,9 +923,9 @@ export default function AdminNotificationPage() {
                     setIsTaskDetailDialogOpen(false)
                   }
                 }}
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white w-full md:w-auto"
               >
-                <CheckCircle2 className="mr-2 h-4 w-4" /> ทำเสร็จแล้ว
+                <CheckCircle2 className="mr-1 md:mr-2 h-3.5 w-3.5 md:h-4 md:w-4" /> ทำเสร็จแล้ว
               </Button>
             )}
             {taskDetail && !taskDetail.done && (
@@ -915,6 +937,7 @@ export default function AdminNotificationPage() {
                   }
                 }}
                 variant="outline"
+                className="w-full md:w-auto"
               >
                 เลื่อนกำหนด
               </Button>
@@ -929,6 +952,7 @@ export default function AdminNotificationPage() {
                 }
               }}
               variant="outline"
+              className="w-full md:w-auto"
             >
               แก้ไข
             </Button>
