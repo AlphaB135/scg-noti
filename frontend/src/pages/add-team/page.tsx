@@ -50,7 +50,6 @@ export default function AddEmployeePage() {
     useState(false);
   const [selectedLeaderToRemove, setSelectedLeaderToRemove] =
     useState<TeamMember | null>(null);
-  const [activeTab, setActiveTab] = useState("all");
   const [selectedPermission, setSelectedPermission] =
     useState<PermissionLevel>("member");
   const [isPermissionDialogOpen, setIsPermissionDialogOpen] = useState(false);
@@ -174,7 +173,7 @@ export default function AddEmployeePage() {
 
               return true;
             });
-            
+
             setTotalPages(Math.ceil(filtered.length / pageSize));
             return filtered;
           }
@@ -462,11 +461,6 @@ export default function AddEmployeePage() {
     setSelectedMemberForPermission(null);
   };
 
-  // Filter employees by department
-  const departments = [
-    ...new Set(employees.map((emp) => emp.department || "ไม่ระบุแผนก")),
-  ].sort();
-
   // Loading state UI
   if (isLoading) {
     return (
@@ -506,10 +500,15 @@ export default function AddEmployeePage() {
         <div className="lg:col-span-2">
           <Card className="h-full">
             <CardHeader className="pb-3">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg font-bold">
-                  รายชื่อพนักงาน
-                </CardTitle>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-lg font-bold">
+                    รายชื่อพนักงาน
+                  </CardTitle>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    โปรดเลือกทีม ติ๊กหน้าชื่อและเพิ่มพนักงาน
+                  </p>
+                </div>
                 {currentTeam && (
                   <div className="flex flex-col sm:flex-row gap-2">
                     <Select
@@ -570,9 +569,6 @@ export default function AddEmployeePage() {
               {" "}
               <EmployeeList
                 filteredEmployees={paginatedEmployees}
-                departments={departments}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
                 handleSelectAll={handleSelectAll}
                 handleEmployeeSelection={handleEmployeeSelection}
                 isLoading={isLoading}

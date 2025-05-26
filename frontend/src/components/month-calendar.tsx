@@ -48,7 +48,7 @@ export function MonthCalendar({
   onToggleTaskDone,
   onRescheduleTask,
   onViewTaskDetail,
-  onOpenRescheduleDialog,   // 🟢 เพิ่มบรรทัดนี้
+  onOpenRescheduleDialog, // 🟢 เพิ่มบรรทัดนี้
   onRescheduleStart,
 }: MonthCalendarProps) {
   const [isMobileView, setIsMobileView] = useState(false);
@@ -243,10 +243,11 @@ export function MonthCalendar({
     if (isMobile) {
       // จัดกลุ่มงานตาม priority
       const taskGroups = {
-        overdue: dayTasks.filter((t) => t.priority === "overdue"),
-        urgent: dayTasks.filter((t) => t.priority === "urgent"),
+        done: dayTasks.filter((t) => t.done), // ✅ ใหม่
+        overdue: dayTasks.filter((t) => !t.done && t.priority === "overdue"),
+        urgent: dayTasks.filter((t) => !t.done && t.priority === "urgent"),
         normal: dayTasks.filter(
-          (t) => !["overdue", "urgent"].includes(t.priority)
+          (t) => !t.done && !["overdue", "urgent"].includes(t.priority)
         ),
       };
 
@@ -256,21 +257,31 @@ export function MonthCalendar({
           onDragOver={handleDragOver}
           onDrop={(e) => handleDrop(e, formattedDate)}
         >
-          {/* จุดสีแดง - งานเลยกำหนด */}
+          {/* ✅ จุดสีเขียว – งานเสร็จแล้ว */}
+          {taskGroups.done.map((_, i) => (
+            <div
+              key={`done-${i}`}
+              className="w-1.5 h-1.5 rounded-full bg-green-500"
+            />
+          ))}
+
+          {/* จุดสีแดง – เลยกำหนด */}
           {taskGroups.overdue.map((_, i) => (
             <div
               key={`overdue-${i}`}
               className="w-1.5 h-1.5 rounded-full bg-red-500"
             />
           ))}
-          {/* จุดสีส้ม - งานด่วน */}
+
+          {/* จุดสีส้ม – งานด่วน */}
           {taskGroups.urgent.map((_, i) => (
             <div
               key={`urgent-${i}`}
               className="w-1.5 h-1.5 rounded-full bg-orange-500"
             />
           ))}
-          {/* จุดสีฟ้า - งานทั่วไป */}
+
+          {/* จุดสีฟ้า – งานปกติ */}
           {taskGroups.normal.map((_, i) => (
             <div
               key={`normal-${i}`}
@@ -469,11 +480,10 @@ export function MonthCalendar({
                   <input
                     type="checkbox"
                     checked={task.done}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      if (onToggleTaskDone) {
-                        onToggleTaskDone(task.id);
-                      }
+                    readOnly // ✅ ป้องกัน warning controlled-input
+                    onClick={(e) => {
+                      e.stopPropagation(); // ✅ กัน event ไม่ให้ลาม
+                      onToggleTaskDone?.(task.id); // เปิด Dialog แนบหลักฐาน
                     }}
                     className="h-4 w-4"
                   />
@@ -595,13 +605,12 @@ export function MonthCalendar({
                   <input
                     type="checkbox"
                     checked={task.done}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      if (onToggleTaskDone) {
-                        onToggleTaskDone(task.id);
-                      }
+                    readOnly // ป้องกัน React warning
+                    onClick={(e) => {
+                      e.stopPropagation(); // กัน event ไม่ให้ลามไป div ที่เปิดรายละเอียด
+                      onToggleTaskDone?.(task.id); // ⚡ จะเรียก handleToggleTaskDone → เปิด Dialog รี-โอเพ่น
                     }}
-                    className="mt-1 h-4 w-4"
+                    className="h-4 w-4"
                   />
                   <div className="flex-1">
                     <p className="font-medium text-sm">{task.title}</p>

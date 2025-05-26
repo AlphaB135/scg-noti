@@ -137,10 +137,11 @@ export default function TaskList({
                         <input
                           type="checkbox"
                           checked={task.done}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            onToggleTaskDone(task.id);
+                          onClick={(e) => {
+                            e.stopPropagation(); // กันไม่ให้ event ลามไป parent
+                            onToggleTaskDone(task.id); // ทำงานเสร็จ + เปิด dialog แนบไฟล์
                           }}
+                          readOnly // 💡 กัน React warning เพราะใช้ onClick แทน onChange
                           className="h-4 w-4 md:h-5 md:w-5 text-red-700 rounded-md"
                         />
                         <div className="flex-1 min-w-0">
@@ -229,11 +230,12 @@ export default function TaskList({
                         <input
                           type="checkbox"
                           checked={task.done}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            onToggleTaskDone(task.id);
+                          onClick={(e) => {
+                            e.stopPropagation(); // กันไม่ให้ event ลามไป parent
+                            onToggleTaskDone(task.id); // ทำงานเสร็จ + เปิด dialog แนบไฟล์
                           }}
-                          className="h-4 w-4 md:h-5 md:w-5 text-orange-600 rounded-md"
+                          readOnly // 💡 กัน React warning เพราะใช้ onClick แทน onChange
+                          className="h-4 w-4 md:h-5 md:w-5 text-red-700 rounded-md"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-start">
@@ -327,11 +329,12 @@ export default function TaskList({
                         <input
                           type="checkbox"
                           checked={task.done}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            onToggleTaskDone(task.id);
+                          onClick={(e) => {
+                            e.stopPropagation(); // กันไม่ให้ event ลามไป parent
+                            onToggleTaskDone(task.id); // ทำงานเสร็จ + เปิด dialog แนบไฟล์
                           }}
-                          className="h-4 w-4 md:h-5 md:w-5 text-gray-700 rounded-md"
+                          readOnly // 💡 กัน React warning เพราะใช้ onClick แทน onChange
+                          className="h-4 w-4 md:h-5 md:w-5 text-red-700 rounded-md"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-start">
@@ -415,11 +418,12 @@ export default function TaskList({
                         <input
                           type="checkbox"
                           checked={task.done}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            onToggleTaskDone(task.id);
+                          onClick={(e) => {
+                            e.stopPropagation(); // กันไม่ให้ event ลามไป parent
+                            onToggleTaskDone(task.id); // ทำงานเสร็จ + เปิด dialog แนบไฟล์
                           }}
-                          className="h-4 w-4 md:h-5 md:w-5 text-green-700 rounded-md"
+                          readOnly // 💡 กัน React warning เพราะใช้ onClick แทน onChange
+                          className="h-4 w-4 md:h-5 md:w-5 text-red-700 rounded-md"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-start">
