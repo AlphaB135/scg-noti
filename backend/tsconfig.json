@@ -1,0 +1,39 @@
+// backend/tsconfig.json
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "es2016",
+    "lib": ["es2021"],
+       "typeRoots": [
+           "./src/types",       // <-- ตรงนี้กระโดดไปที่โฟลเดอร์ types ที่เราสร้าง
+           "./node_modules/@types"
+         ],
+    /* Modules */
+    "module": "commonjs",
+
+    /* ให้ทั้ง src และ prisma ถูกมองเป็น source root */
+    "rootDir": ".",         
+    "outDir": "dist",
+
+    /* Absolute import setup (alias '@/…' → 'src/…') */
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"]
+    },
+
+    /* JSON, interop, strictness */
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*.ts",       // โค้ดหลัก
+    "prisma/**/*.ts"     // seed scripts ในโฟลเดอร์ prisma
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

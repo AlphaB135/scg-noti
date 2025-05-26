@@ -1,0 +1,220 @@
+"use client"
+
+import type React from "react"
+import { useEffect, useState, useCallback } from "react"
+import { notificationsApi } from '@/lib/real-api'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+// Import our separated components
+import AppLayout from "@/components/layout/app-layout"
+import TaskStatusCards from "@/components/dashboard/1.task-status-cards"
+import MonthlyProgress from "@/components/dashboard/2.monthly-progress"
+import TaskList from "@/components/dashboard/3.task-list"
+import TaskCalendar from "@/components/dashboard/5.task-calendar"
+import TaskModal from "@/components/dashboard/4.task-modal"
+import type { Task } from "@/lib/types/task"
+
+// ===== STATE MANAGEMENT =====
+export default function AdminNotificationPage() {
+  const [tasks, setTasks] = useState<Task[]>([]) 
+  const [allTasks, setAllTasks] = useState<Task[]>([])
+
+  // Initial state with current date
+  const now = new Date()
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1)
+  const [currentTime, setCurrentTime] = useState(now)
+
+  const [expandTodo, setExpandTodo] = useState(false)
+  const [editTask, setEditTask] = useState<Task | null>(null)
+
+  // Loading states
+  const [isLoadingCalendar, setIsLoadingCalendar] = useState(true)
+  const [isLoadingTasks, setIsLoadingTasks] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+
+  const loadCurrentMonthData = useCallback(async () => {
+    try {
+      setIsLoadingCalendar(true)
+      setIsLoadingTasks(true)
+
+      const response = await notificationsApi.getCurrentMonthNotifications(selectedMonth, selectedYear)
+      
+      if (!response?.data) {
+        throw new Error("Invalid response format")
+      }
+      
+      const mappedTasks = response.data.map(notification => ({
+        id: notification.id,
+        title: notification.title,
+        details: notification.message || "",
+        dueDate: notification.scheduledAt?.split("T")[0] || "",
+        done: notification.status === "DONE",
+        priority: "pending" as const,
+        frequency: "no-repeat" as const,
+        impact: "",
+        link: "",
+        hasLogin: false,
+        username: "",
+        password: ""
+      } satisfies Task))
+
+      setAllTasks(mappedTasks)
+      const filtered = mappedTasks.filter(task => {
+        if (!task.dueDate) return false
+        const taskDate = new Date(task.dueDate)
+        return taskDate.getMonth() + 1 === selectedMonth && taskDate.getFullYear() === selectedYear
+      }).map(updateTaskPriority)
+
+      setTasks(filtered)
+
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err)
+    } finally {
+      setIsLoadingCalendar(false)
+      setIsLoadingTasks(false)
+    }
+  }, [selectedMonth, selectedYear])
+
+  // Load data on mount and month change
+  useEffect(() => {
+    loadCurrentMonthData()
+  }, [loadCurrentMonthData])
+
+  // Update task priority based on due date
+  const updateTaskPriority = (task: Task): Task => {
+    if (!task.dueDate) return { ...task, priority: "pending" }
+
+    const todayDate = new Date()
+    todayDate.setHours(0, 0, 0, 0)
+
+    const due = new Date(task.dueDate)
+    due.setHours(0, 0, 0, 0)
+
+    const diffInDays = Math.floor((due.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24))
+
+    if (diffInDays < 0) return { ...task, priority: "overdue" } 
+    if (diffInDays === 0) return { ...task, priority: "today" }
+    if (diffInDays <= 3) return { ...task, priority: "urgent" }
+    return { ...task, priority: "pending" }
+  }
+
+  // Task stats
+  const totalTasks = tasks.length
+  const doneCount = tasks.filter((t) => t.done).length
+  const incompleteCnt = totalTasks - doneCount
+  const urgentTodayCount = tasks.filter((t) => ["today", "urgent"].includes(t.priority) && !t.done).length
+  const overdueCount = tasks.filter((t) => t.priority === "overdue" && !t.done).length
+  const otherPendingCount = tasks.filter((t) => !["today", "urgent", "overdue"].includes(t.priority) && !t.done).length
+  const progressPercent = totalTasks ? Math.round((doneCount / totalTasks) * 100) : 0
+
+  const notifications = {
+    urgentToday: urgentTodayCount,
+    overdue: overdueCount,
+    other: otherPendingCount,
+    done: doneCount,
+  }
+
+  return (
+    <AppLayout title="ระบบเตือนความจำ" description="จัดการงานและการแจ้งเตือนของคุณ">
+      {/* ===== CALENDAR SECTION ===== */}
+      <TaskCalendar
+        tasks={tasks}
+        setIsAddDialogOpen={setIsAddDialogOpen}
+        setEditTask={setEditTask}
+        resetForm={resetForm}
+        selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
+        onMonthChange={changeMonth}
+        isLoading={isLoadingCalendar}
+      />
+
+      {/* ===== NOTIFICATION CARDS ===== */}
+      <div className="mt-6">
+        <TaskStatusCards notifications={notifications} onCardClick={handleCardClick} />
+      </div>
+
+      {/* ===== DASHBOARD MAIN CONTENT ===== */}
+      <div className="flex flex-col md:flex-row gap-6 items-stretch mt-6">
+        {/* ===== DONUT CHART ===== */}
+        <MonthlyProgress
+          doneCount={doneCount}
+          incompleteCnt={incompleteCnt}
+          totalTasks={totalTasks}
+          progressPercent={progressPercent}
+          currentMonth={currentTime}
+        />
+
+        {/* ===== TO-DO LIST ===== */}
+        <div className="w-full">
+          {isLoadingTasks ? (
+            <div className="flex items-center justify-center p-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-700"></div>
+            </div>
+          ) : (
+            <>
+              <TaskList
+                tasks={tasks}
+                activeFilter={activeFilter}
+                onToggleTaskDone={handleToggleTaskDone}
+                onEditTask={(task) => {
+                  resetForm()
+                  setEditTask(task)
+                  setIsAddDialogOpen(true)
+                }}
+                onRescheduleTask={openRescheduleDialog}
+                onAddTask={() => {
+                  resetForm()
+                  setIsAddDialogOpen(true)
+                }}
+                onExpandTodo={() => {
+                  setExpandTodo(true)
+                  setModalActiveFilter("all")
+                }}
+                onFilterChange={setActiveFilter}
+              />
+              {hasMore && (
+                <div 
+                  id="load-more-trigger" 
+                  className="w-full p-4 flex justify-center"
+                >
+                  {loadingMore ? (
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-700"></div>
+                  ) : (
+                    <button 
+                      onClick={loadMore}
+                      className="text-red-700 hover:text-red-800"
+                    >
+                      โหลดเพิ่มเติม
+                    </button>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ===== TASK MODALS ===== */}
+      <TaskModal
+        tasks={tasks}
+        expandTodo={expandTodo}
+        setExpandTodo={setExpandTodo}
+        modalActiveFilter={modalActiveFilter}
+        setModalActiveFilter={setModalActiveFilter}
+        handleToggleTaskDone={handleToggleTaskDone}
+        setEditTask={setEditTask}
+        openRescheduleDialog={openRescheduleDialog}
+        resetForm={resetForm}
+        setIsAddDialogOpen={setIsAddDialogOpen}
+      />
+
+      {/* Other modals and dialogs... */}
+    </AppLayout>
+  )
+}
