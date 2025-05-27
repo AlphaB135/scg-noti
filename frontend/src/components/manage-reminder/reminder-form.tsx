@@ -180,9 +180,9 @@ export default function ReminderForm({
                 <div className="p-4 bg-[#fffaf0] border border-[#feebc8] rounded-md text-[#dd6b20] text-sm">
                   <div className="flex items-center gap-2 mb-2">
                     <ShieldCheck className="h-4 w-4" />
-                    <span className="font-medium">ยืนยันตัวตนเพื่อดูข้อมูล user-password</span>
+                    <span className="font-medium">ยืนยันตัวตนเพื่อดูข้อมูล User-Password</span>
                   </div>
-                  <p>กรุณาใส่รหัสผ่านของคุณเพื่อดูและแก้ไขข้อมูล user-password</p>
+                  <p>กรุณาใส่รหัสผ่านของคุณเพื่อดูและแก้ไขข้อมูล User-Password</p>
                 </div>
 
                 <div className="space-y-2">
@@ -228,10 +228,10 @@ export default function ReminderForm({
                   </Label>
                   <Input
                     id={`${prefix}username`}
-                    name="username"
+                    name="Username"
                     value={formData.username}
                     onChange={handleInputChange}
-                    placeholder="ระบุ username ที่ใช้ในการล็อคอิน"
+                    placeholder="ระบุ Username ที่ใช้ในการล็อคอิน"
                     className="border-[#cbd5e0] focus:border-[#2c3e50] focus:ring-[#2c3e50]"
                   />
                 </div>

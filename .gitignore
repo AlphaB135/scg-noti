@@ -1,8 +1,14 @@
 # Dependencies
 /node_modules
+**/node_modules
+**/node_modules/**
+node_modules/
 /.pnp
 .pnp.js
 .yarn/install-state.gz
+.pnpm-store/
+**/.pnpm/
+.yarn/
 
 # Testing
 /coverage
@@ -71,3 +77,21 @@ $RECYCLE.BIN/
 
 # Project specific
 public/uploads/
+**/uploads/*
+!**/uploads/.gitkeep
+tmp/
+logs/
+coverage/
+
+# Database related
+prisma/*.db
+*.sqlite
+*.sqlite3
+
+# Docker volumes
+sqlserver_data/
+redis_data/
+/volumes/
+docker-volumes/
+node_modules
+node_modules

@@ -45,7 +45,7 @@ export default function PasswordDialog({
       <DialogContent className="sm:max-w-[450px]">
         <DialogHeader className="border-b pb-4">
           <DialogTitle className="text-xl font-semibold text-[#2c3e50]">ยืนยันตัวตน</DialogTitle>
-          <DialogDescription>กรุณาใส่รหัสผ่านของคุณเพื่อดูข้อมูล user-password</DialogDescription>
+          <DialogDescription>กรุณาใส่รหัสผ่านของคุณเพื่อดูข้อมูล User-Password</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-6">
           {!isPasswordVisible && (
@@ -90,7 +90,7 @@ export default function PasswordDialog({
             <div className="p-6 bg-[#f7fafc] rounded-lg border border-[#e2e8f0] mt-4">
               <div className="flex items-center gap-2 mb-4">
                 <ShieldCheck className="h-5 w-5 text-[#3182ce]" />
-                <div className="text-sm font-medium text-[#2c3e50]">ข้อมูล user-password:</div>
+                <div className="text-sm font-medium text-[#2c3e50]">ข้อมูล User-Password:</div>
               </div>
               <div className="text-base bg-white p-4 rounded border border-[#e2e8f0] whitespace-pre-line shadow-sm">
                 {reminderPassword}
