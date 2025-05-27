@@ -7,7 +7,11 @@ import { Plus, Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import AppLayout from "@/components/layout/app-layout"
+<<<<<<< HEAD
 import { useToast } from "@/hooks/use-toast"
+=======
+import { notificationsApi } from "@/lib/api"
+>>>>>>> 9c9168b83a58a57f2055ca73d7fac4b3753d7707
 import NotificationFilters from "@/components/team-notification/notification-filters"
 import NotificationTabs from "@/components/team-notification/notification-tabs"
 import AddNotificationDialog from "@/components/team-notification/add-notification-dialog"

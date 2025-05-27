@@ -28,7 +28,7 @@ export async function sendLineNotification(
   maxRetries: number = 1
 ): Promise<any> {
   if (!process.env.ENABLE_LINE || process.env.ENABLE_LINE !== 'true') {
-    console.log('LINE notifications disabled. Skipping message:', message);
+    // LINE notifications disabled - return silently
     return;
   }
 

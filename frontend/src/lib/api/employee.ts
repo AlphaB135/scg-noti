@@ -1,5 +1,5 @@
 // employee.ts
-import api from '../real-api'
+import api from '../api'
 import type { Employee } from '@/components/types/team'
 
 // API Types

@@ -1,5 +1,5 @@
 // teams.ts
-import api from '../real-api'
+import api from '../api'
 import type { Team } from '@/components/types/team'
 // Using the shared API client from real-api.ts
 

@@ -14,7 +14,7 @@ importers:
         specifier: ^9.9.0
         version: 9.9.0
       '@prisma/client':
-        specifier: ^6.8.2
+        specifier: ^6.7.0
         version: 6.8.2(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3)
       '@types/ioredis':
         specifier: ^5.0.0
@@ -52,6 +52,9 @@ importers:
       nanoid:
         specifier: ^5.1.5
         version: 5.1.5
+      prisma:
+        specifier: ^6.7.0
+        version: 6.8.2(typescript@5.8.3)
       redis:
         specifier: 4.6.13
         version: 4.6.13
@@ -113,9 +116,6 @@ importers:
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.15.3)(ts-node@10.9.2(@types/node@22.15.3)(typescript@5.8.3))
-      prisma:
-        specifier: ^6.8.2
-        version: 6.8.2(typescript@5.8.3)
       sharp:
         specifier: ^0.34.1
         version: 0.34.2

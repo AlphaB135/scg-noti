@@ -9,6 +9,12 @@ import { TeamFilter } from "@/components/team-overview/team-filter";
 import { MemberDetailsModal } from "@/components/team-overview/member-details-modal";
 import AppLayout from "@/components/layout/app-layout";
 import { teamsApi } from "@/lib/api/teams";
+<<<<<<< HEAD
+=======
+import { notificationsApi } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+>>>>>>> 9c9168b83a58a57f2055ca73d7fac4b3753d7707
 import type { Team } from "@/components/types/team";
 
 // Task status interfaces for member stats

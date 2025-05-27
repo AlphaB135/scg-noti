@@ -1,307 +1,167 @@
-import axios from "axios"
-import {
-  mockNotifications,
-  mockNotificationStats,
-  mockApprovalLogs,
-  mockDashboardStats,
-  mockRPAResponse,
-  simulateApiDelay,
-} from "./mock-data"
+// frontend/src/lib/real-api.ts
+import axios from 'axios'
+import type {
+  Notification,
+  CreateNotificationInput,
+  UpdateNotificationInput,
+  DashboardStats,
+} from './types'
 
-// Base API configuration
+interface PaginatedResponse<T> {
+  data: T[]
+  meta: {
+    total: number
+    page: number
+    size: number
+    totalPages: number
+  }
+}
+
+export interface NotificationStatus {
+  DONE: 'DONE'
+  PENDING: 'PENDING'
+  CANCELLED: 'CANCELLED'
+}
+
+// Simple cache implementation
+const cache = new Map<string, {data: any, timestamp: number}>()
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
 const api = axios.create({
-  baseURL: "/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true, // For JWT HttpOnly cookie
+  baseURL: '/api',        // proxy ไป http://localhost:3001/api
+  withCredentials: true,  // ส่ง cookie httpOnly ไปด้วย
 })
 
-// Types
-export interface Notification {
-  id: string
-  title: string
-  message: string
-  status: "pending" | "approved" | "rejected" | "cancelled"
-  createdAt: string
-  updatedAt: string
-  createdBy: string
-  targetUsers: string[]
-}
+console.log('API client configured with baseURL:', api.defaults.baseURL)
+console.log('API client withCredentials:', api.defaults.withCredentials)
 
-export interface NotificationStats {
-  total: number
-  pending: number
-  approved: number
-  rejected: number
-  cancelled: number
-}
-
-export interface ApprovalLog {
-  id: string
-  notificationId: string
-  action: "approved" | "rejected" | "cancelled"
-  actionBy: string
-  actionAt: string
-  comments?: string
-}
-
-export interface DashboardStats {
-  notifications: {
-    total: number
-    pending: number
-    approved: number
+// Cache wrapper
+const withCache = async <T>(key: string, fn: () => Promise<T>): Promise<T> => {
+  const cached = cache.get(key)
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data
   }
-  approvals: {
-    total: number
-    pending: number
-    completed: number
+  const data = await fn()
+  cache.set(key, { data, timestamp: Date.now() })
+  return data
+}
+
+// Cache invalidation helper
+export const invalidateCache = (pattern?: string) => {
+  if (pattern) {
+    // Invalidate specific cache entries matching pattern
+    for (const key of cache.keys()) {
+      if (key.includes(pattern)) {
+        cache.delete(key)
+      }
+    }
+  } else {
+    // Clear all cache
+    cache.clear()
   }
-  users: {
-    total: number
-    active: number
-  }
-  recentActivity: {
-    id: string
-    type: string
-    description: string
-    timestamp: string
-  }[]
 }
 
-export interface RPAResponse {
-  success: boolean
-  message: string
-  jobId?: string
+export async function getDashboardStats(): Promise<DashboardStats> {
+  // Remove cache for dashboard stats to ensure immediate updates
+  const resp = await api.get<DashboardStats>('/dashboard/overview')
+  return resp.data
 }
 
-// Default dashboard stats for when API fails
-const defaultDashboardStats: DashboardStats = {
-  notifications: {
-    total: 0,
-    pending: 0,
-    approved: 0,
-  },
-  approvals: {
-    total: 0,
-    pending: 0,
-    completed: 0,
-  },
-  users: {
-    total: 0,
-    active: 0,
-  },
-  recentActivity: [],
-}
-
-// Helper to generate a random ID
-const generateId = () => Math.random().toString(36).substring(2, 15)
-
-// API functions with mock data
 export const notificationsApi = {
-  getAll: async () => {
-    try {
-      // Simulate API delay
-      await simulateApiDelay()
+  getAll: (page: number = 1, size: number = 20): Promise<PaginatedResponse<Notification>> =>
+    // Temporarily disable cache for debugging
+    api.get<PaginatedResponse<Notification>>('/notifications', {
+      params: { page, size }
+    }).then(r => {
+      console.log('Raw API response for notifications:', r.data)
+      return r.data
+    }),
 
-      // Use mock data instead of API call
-      return [...mockNotifications]
-    } catch (error) {
-      console.error("Error fetching notifications:", error)
-      return []
-    }
+  getCurrentMonthNotifications: (month: number, year: number): Promise<PaginatedResponse<Notification>> =>
+    withCache(`notifications-${year}-${month}`, () =>
+      api.get<PaginatedResponse<Notification>>('/notifications', {
+        params: { 
+          page: 1, 
+          size: 100,
+          month,
+          year
+        }
+      }).then(r => r.data)
+    ),
+
+  // Get user's own notifications only
+  getMine: (page: number = 1, size: number = 20): Promise<PaginatedResponse<Notification>> =>
+    api.get<PaginatedResponse<Notification>>('/notifications/mine', {
+      params: { page, size }
+    }).then(r => {
+      console.log('Raw API response for my notifications:', r.data)
+      return r.data
+    }),
+
+  getCurrentMonthMyNotifications: (month: number, year: number): Promise<PaginatedResponse<Notification>> =>
+    api.get<PaginatedResponse<Notification>>('/notifications/mine', {
+      params: { 
+        page: 1, 
+        size: 100,
+        month,
+        year
+      }
+    }).then(r => r.data),
+
+
+
+  get: (id: string): Promise<Notification> =>
+    api.get<Notification>(`/notifications/${id}`).then(r => r.data),
+
+  create: (data: CreateNotificationInput): Promise<Notification> =>
+    api.post<Notification>('/notifications', data).then(r => r.data),
+
+  update: (id: string, data: UpdateNotificationInput): Promise<Notification> =>
+    api.put<Notification>(`/notifications/${id}`, data).then(r => r.data),
+
+  updateStatus: async (id: string, status: keyof NotificationStatus): Promise<Notification> => {
+    const result = await api.patch<Notification>(`/notifications/${id}`, { status }).then(r => r.data)
+    // Invalidate all notification and dashboard caches after status update
+    invalidateCache('notifications')
+    return result
   },
 
-  getById: async (id: string) => {
-    await simulateApiDelay()
-    const notification = mockNotifications.find((n) => n.id === id)
+  reopen: (id: string, reason: string): Promise<Notification> =>
+    api.post<Notification>(`/notifications/${id}/reopen`, { reason }).then(r => r.data),
 
-    if (!notification) {
-      throw new Error(`Notification with ID ${id} not found`)
-    }
+  reschedule: (id: string, dueDate: string, reason: string): Promise<Notification> =>
+    api.post<Notification>(`/notifications/${id}/reschedule`, { dueDate, reason }).then(r => r.data),
 
-    return notification
-  },
-
-  create: async (notification: Omit<Notification, "id" | "createdAt" | "updatedAt" | "status">) => {
-    await simulateApiDelay()
-
-    const newNotification: Notification = {
-      id: generateId(),
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      ...notification,
-    }
-
-    // In a real app, we would add this to the database
-    // For mock purposes, we'll just return it
-    return newNotification
-  },
-
-  update: async (id: string, notification: Partial<Notification>) => {
-    await simulateApiDelay()
-
-    const existingIndex = mockNotifications.findIndex((n) => n.id === id)
-
-    if (existingIndex === -1) {
-      throw new Error(`Notification with ID ${id} not found`)
-    }
-
-    // In a real app, we would update the database
-    // For mock purposes, we'll just return the updated notification
-    const updatedNotification = {
-      ...mockNotifications[existingIndex],
-      ...notification,
-      updatedAt: new Date().toISOString(),
-    }
-
-    return updatedNotification
-  },
-
-  delete: async (id: string) => {
-    await simulateApiDelay()
-
-    const existingIndex = mockNotifications.findIndex((n) => n.id === id)
-
-    if (existingIndex === -1) {
-      throw new Error(`Notification with ID ${id} not found`)
-    }
-
-    // In a real app, we would delete from the database
-    // For mock purposes, we'll just return success
-    return { success: true }
-  },
-
-  approve: async (id: string, comments?: string) => {
-    await simulateApiDelay()
-
-    const existingIndex = mockNotifications.findIndex((n) => n.id === id)
-
-    if (existingIndex === -1) {
-      throw new Error(`Notification with ID ${id} not found`)
-    }
-
-    // In a real app, we would update the database
-    // For mock purposes, we'll just return the updated notification
-    const updatedNotification = {
-      ...mockNotifications[existingIndex],
-      status: "approved" as const,
-      updatedAt: new Date().toISOString(),
-    }
-
-    return updatedNotification
-  },
-
-  reject: async (id: string, comments?: string) => {
-    await simulateApiDelay()
-
-    const existingIndex = mockNotifications.findIndex((n) => n.id === id)
-
-    if (existingIndex === -1) {
-      throw new Error(`Notification with ID ${id} not found`)
-    }
-
-    // In a real app, we would update the database
-    // For mock purposes, we'll just return the updated notification
-    const updatedNotification = {
-      ...mockNotifications[existingIndex],
-      status: "rejected" as const,
-      updatedAt: new Date().toISOString(),
-    }
-
-    return updatedNotification
-  },
-
-  cancel: async (id: string, comments?: string) => {
-    await simulateApiDelay()
-
-    const existingIndex = mockNotifications.findIndex((n) => n.id === id)
-
-    if (existingIndex === -1) {
-      throw new Error(`Notification with ID ${id} not found`)
-    }
-
-    // In a real app, we would update the database
-    // For mock purposes, we'll just return the updated notification
-    const updatedNotification = {
-      ...mockNotifications[existingIndex],
-      status: "cancelled" as const,
-      updatedAt: new Date().toISOString(),
-    }
-
-    return updatedNotification
-  },
-
-  getApprovalLogs: async (id: string) => {
-    await simulateApiDelay()
-
-    // Return mock approval logs for the notification ID, or empty array if none exist
-    return mockApprovalLogs[id] || []
-  },
-
-  getStats: async () => {
-    await simulateApiDelay()
-    return mockNotificationStats
-  },
+  remove: (id: string): Promise<void> =>
+    api.delete<void>(`/notifications/${id}`).then(r => r.data),
 }
 
-export const approvalsApi = {
-  sendPopup: async (data: { notificationId: string; userIds: string[] }) => {
-    await simulateApiDelay()
+// Team API
+export const teamApi = {
+  getTeams: (): Promise<any[]> =>
+    api.get('/teams').then(r => r.data.data || r.data),
 
-    // Validate notification exists
-    const notification = mockNotifications.find((n) => n.id === data.notificationId)
+  getTeamById: (teamId: string): Promise<any> =>
+    api.get(`/teams/${teamId}`).then(r => r.data.data || r.data),
 
-    if (!notification) {
-      throw new Error(`Notification with ID ${data.notificationId} not found`)
-    }
+  getTeamMembers: (teamId: string): Promise<any[]> =>
+    api.get(`/teams/${teamId}/members`).then(r => r.data.data || r.data),
 
-    // In a real app, we would send popups to users
-    // For mock purposes, we'll just return success
-    return {
-      success: true,
-      message: `Popup sent to ${data.userIds.length} users`,
-    }
-  },
+  addTeamMember: (teamId: string, employeeId: string, role: string): Promise<any> =>
+    api.post(`/teams/${teamId}/members`, {
+      employeeId,
+      isLeader: role === 'หัวหน้างาน',
+      role
+    }).then(r => r.data.data || r.data),
 
-  sendResponse: async (data: { notificationId: string; response: "approve" | "reject"; comments?: string }) => {
-    await simulateApiDelay()
+  removeTeamMember: (teamId: string, memberId: string): Promise<void> =>
+    api.delete(`/teams/${teamId}/members/${memberId}`).then(r => r.data),
 
-    // Validate notification exists
-    const notification = mockNotifications.find((n) => n.id === data.notificationId)
+  leaveTeam: (teamId: string, userId: string): Promise<void> =>
+    api.delete(`/teams/${teamId}/members/${userId}`).then(r => r.data),
 
-    if (!notification) {
-      throw new Error(`Notification with ID ${data.notificationId} not found`)
-    }
-
-    // In a real app, we would record the response
-    // For mock purposes, we'll just return success
-    return {
-      success: true,
-      message: `Response "${data.response}" recorded for notification ${data.notificationId}`,
-    }
-  },
+  getAvailableEmployees: (teamId: string): Promise<any[]> =>
+    api.get(`/teams/${teamId}/available-employees`).then(r => r.data.data || r.data).catch(() => []),
 }
 
-export const dashboardApi = {
-  getStats: async () => {
-    try {
-      await simulateApiDelay()
-      return mockDashboardStats
-    } catch (error) {
-      console.error("Error fetching dashboard stats:", error)
-      return defaultDashboardStats
-    }
-  },
-}
-
-export const rpaApi = {
-  trigger: async (data: { action: string; parameters: Record<string, any> }) => {
-    await simulateApiDelay(1000) // Longer delay for RPA actions
-
-    // Randomly succeed or fail to demonstrate both scenarios
-    const success = Math.random() > 0.3
-    return mockRPAResponse(success)
-  },
-}
+export default api

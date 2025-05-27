@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,9 +16,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import type { Task } from "@/lib/types/task";
 
 // แก้ไข interface MonthCalendarProps
@@ -46,13 +44,11 @@ export function MonthCalendar({
   currentMonth,
   currentYear,
   onToggleTaskDone,
-  onRescheduleTask,
   onViewTaskDetail,
   onOpenRescheduleDialog, // 🟢 เพิ่มบรรทัดนี้
   onRescheduleStart,
 }: MonthCalendarProps) {
   const [isMobileView, setIsMobileView] = useState(false);
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({});
   const [dayTasksDialogOpen, setDayTasksDialogOpen] = useState(false);
   const [selectedDateTasks, setSelectedDateTasks] = useState<Task[]>([]);
@@ -60,6 +56,7 @@ export function MonthCalendar({
 
   // Drag and reschedule states
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+  const [forceUpdateKey, setForceUpdateKey] = useState(0); // เพิ่ม force update mechanism
 
   // Add this state at the top with other states
   const [taskActionDialogOpen, setTaskActionDialogOpen] = useState(false);
@@ -76,6 +73,17 @@ export function MonthCalendar({
   useEffect(() => {
     setMonthDate(new Date(currentYear, currentMonth - 1));
   }, [currentMonth, currentYear]);
+
+  // Debug: Log tasks changes (simplified)
+  useEffect(() => {
+    if (tasks.length > 0) {
+      console.log('📅 MonthCalendar: received', tasks.length, 'tasks');
+    } else {
+      console.log('⚠️ MonthCalendar: no tasks received');
+    }
+    // Force update เมื่อ tasks เปลี่ยน
+    setForceUpdateKey(prev => prev + 1);
+  }, [tasks]);
 
   // Screen size detection
   useEffect(() => {
@@ -106,16 +114,27 @@ export function MonthCalendar({
   const daysInMonth = getDaysInMonth(year, month);
   const firstDayOfMonth = getFirstDayOfMonth(year, month);
 
-  // Task grouping by date
-  const taskMap = tasks.reduce<{ [key: string]: Task[] }>((acc, task) => {
-    const date = task.dueDate;
-    if (!date) return acc;
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(task);
-    return acc;
-  }, {});
+  // Task grouping by date with memoization
+  const taskMap = useMemo(() => {
+    console.log('🔄 Rebuilding taskMap with', tasks.length, 'tasks');
+    return tasks.reduce<{ [key: string]: Task[] }>((acc, task) => {
+      const date = task.dueDate;
+      if (!date) return acc;
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(task);
+      return acc;
+    }, {});
+  }, [tasks]);
+
+  // Log summary of days with tasks (only once per render)
+  useEffect(() => {
+    const daysWithTasks = Object.entries(taskMap).filter(([_, t]) => t.length > 0);
+    console.log(`📊 Days with tasks this month: ${daysWithTasks.length}`);
+    // Optionally, log which days have tasks:
+    // console.log('📅 Days with tasks:', daysWithTasks.map(([date, t]) => ({ date, count: t.length })));
+  }, [taskMap]);
 
   // Date handling
   const formatDateStr = (year: number, month: number, day: number) =>
@@ -124,7 +143,14 @@ export function MonthCalendar({
       "0"
     )}`;
 
-  const getTasksForDate = (date: string) => taskMap[date] || [];
+  const getTasksForDate = useCallback((date: string) => {
+    const foundTasks = taskMap[date] || [];
+    // Remove per-day logging to avoid log spam
+    // if (foundTasks.length > 0) {
+    //   console.log(`🔍 ${date}: ${foundTasks.length} tasks`, foundTasks);
+    // }
+    return foundTasks;
+  }, [taskMap]);
 
   const handleDayClick = (day: number) => {
     const dateStr = formatDateStr(year, month, day);
@@ -143,12 +169,6 @@ export function MonthCalendar({
   };
 
   const [desktopDayDialogOpen, setDesktopDayDialogOpen] = useState(false);
-
-  const openAddTaskDialog = () => {
-    resetForm();
-    setEditTask(null);
-    setIsAddDialogOpen(true);
-  };
 
   const toggleExpandDay = (e: React.MouseEvent, dateStr: string) => {
     e.stopPropagation();
@@ -179,32 +199,12 @@ export function MonthCalendar({
       return;
     }
 
-    // แจ้ง parent component ว่ามีการลากวาง
+    // เปิด dialog ให้ใส่เหตุผลการย้าย
     if (onRescheduleStart) {
       onRescheduleStart(draggedTask, targetDate);
     }
 
     setDraggedTask(null);
-  };
-
-  const handleRescheduleConfirm = () => {
-    if (!draggedTask || !newTaskDate) return;
-
-    // Create updated task with new date and reason
-    const updatedTask = {
-      ...draggedTask,
-      dueDate: newTaskDate,
-      rescheduleReason: rescheduleReason,
-    };
-
-    // Call the reschedule handler from props
-    if (onRescheduleTask) {
-      onRescheduleTask(updatedTask);
-    }
-
-    setRescheduleDialogOpen(false);
-    setDraggedTask(null);
-    setRescheduleReason("");
   };
 
   // UI Constants
@@ -238,6 +238,8 @@ export function MonthCalendar({
     formattedDate: string,
     isMobile: boolean
   ) => {
+    // Remove per-day rendering log to avoid log spam
+    // console.log('🎨 Rendering day content for', formattedDate, 'with', dayTasks.length, 'tasks');
     if (!dayTasks.length) return null;
 
     if (isMobile) {
@@ -299,9 +301,9 @@ export function MonthCalendar({
         onDragOver={handleDragOver}
         onDrop={(e) => handleDrop(e, formattedDate)}
       >
-        {dayTasks.map((task, index) => (
+        {dayTasks.map((task) => (
           <div
-            key={index}
+            key={task.id}
             className={`px-1.5 py-0.5 text-[10px] font-medium truncate rounded cursor-move
               ${
                 task.done
@@ -392,7 +394,7 @@ export function MonthCalendar({
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-px bg-gray-100">
+        <div className="grid grid-cols-7 gap-px bg-gray-100" key={`calendar-grid-${year}-${month}-${forceUpdateKey}`}>
           {Array.from({ length: daysInMonth + firstDayOfMonth }).map((_, i) => {
             if (i < firstDayOfMonth) {
               return (
@@ -414,7 +416,7 @@ export function MonthCalendar({
 
             return (
               <div
-                key={`day-${day}`}
+                key={`day-${year}-${month}-${day}-${forceUpdateKey}`}
                 className={`min-h-[60px] md:min-h-[100px] p-1 bg-white relative cursor-pointer transition-all duration-200
                   ${isToday ? "bg-red-50" : ""}
                   ${draggedTask ? "hover:bg-blue-50" : "hover:bg-gray-50"}
@@ -469,9 +471,9 @@ export function MonthCalendar({
 
           {selectedDateTasks.length > 0 ? (
             <div className="space-y-2">
-              {selectedDateTasks.map((task, index) => (
+              {selectedDateTasks.map((task) => (
                 <div
-                  key={index}
+                  key={task.id}
                   className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
                   onClick={(event) => {
                     handleTaskClick(event as React.MouseEvent, task);
@@ -596,9 +598,9 @@ export function MonthCalendar({
 
           {selectedDateTasks.length > 0 ? (
             <div className="space-y-3">
-              {selectedDateTasks.map((task, index) => (
+              {selectedDateTasks.map((task) => (
                 <div
-                  key={index}
+                  key={task.id}
                   className="flex items-start gap-3 border rounded-lg p-3 hover:bg-gray-50 cursor-pointer"
                   onClick={(e) => handleTaskClick(e, task)}
                 >

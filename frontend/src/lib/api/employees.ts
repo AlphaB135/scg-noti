@@ -1,5 +1,5 @@
 // employees.ts
-import api from '../real-api'
+import api from '../api'
 
 export interface Employee {
   id: string

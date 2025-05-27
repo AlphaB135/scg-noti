@@ -382,6 +382,7 @@ export async function reschedule(
   }
 }
 
+<<<<<<< HEAD
 // PUT /api/notifications/:id
 export async function updateNotification(req: Request, res: Response, next: NextFunction) {
   try {
@@ -413,4 +414,214 @@ export async function completeNotification(req: Request, res: Response, next: Ne
     await CacheService.invalidateNotificationCaches()
     res.json(notification)
   } catch (err) { next(err) }
+=======
+/**
+ * Lists personal notifications (created by the authenticated user).
+ * 
+ * @param {Request} req - Express request object containing pagination params
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} Resolves when notifications are fetched
+ * 
+ * @endpoint GET /api/notifications/personal
+ * @auth Requires authenticated user
+ */
+export async function listPersonalNotifications(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const page = parseInt(req.query.page as string) || 1
+    const size = parseInt(req.query.size as string) || 20
+    const skip = (page - 1) * size
+
+    // Get month and year from query params for filtering
+    const month = req.query.month ? parseInt(req.query.month as string) : undefined
+    const year = req.query.year ? parseInt(req.query.year as string) : undefined
+
+    // Build date filter if month and year are provided
+    let dateFilter = {}
+    if (month && year) {
+      const startDate = new Date(year, month - 1, 1) // month is 0-indexed
+      const endDate = new Date(year, month, 0, 23, 59, 59, 999) // last day of month
+      dateFilter = {
+        scheduledAt: {
+          gte: startDate,
+          lte: endDate
+        }
+      }
+    }
+
+    console.log('Fetching personal notifications from database for user:', req.user!.id)
+
+    // Get notifications created by the authenticated user with pagination
+    const [notifications, total] = await Promise.all([
+      prisma.notification.findMany({
+        where: {
+          createdBy: req.user!.id,
+          ...dateFilter
+        },
+        include: {
+          recipients: true,
+          approvals: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  employeeProfile: {
+                    select: {
+                      firstName: true,
+                      lastName: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: size
+      }),
+      prisma.notification.count({
+        where: {
+          createdBy: req.user!.id,
+          ...dateFilter
+        }
+      })
+    ])
+
+    const response = {
+      data: notifications,
+      meta: {
+        total,
+        page,
+        size,
+        totalPages: Math.ceil(total / size)
+      }
+    }
+
+    console.log(`Personal notifications response for user ${req.user!.id}:`, {
+      count: notifications.length,
+      total,
+      page,
+      hasData: notifications.length > 0
+    })
+
+    res.json(response)
+  } catch (err) {
+    console.error('Error in listPersonalNotifications:', err)
+    next(err)
+  }
+}
+
+/**
+ * Lists current month personal notifications (created by the authenticated user).
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object  
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} Resolves when notifications are fetched
+ * 
+ * @endpoint GET /api/notifications/personal/current-month
+ * @auth Requires authenticated user
+ */
+export async function listCurrentMonthPersonalNotifications(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const now = new Date()
+    const currentMonth = now.getMonth() + 1 // Convert to 1-based month
+    const currentYear = now.getFullYear()
+
+    // Build date filter for current month
+    const startDate = new Date(currentYear, currentMonth - 1, 1) // month is 0-indexed
+    const endDate = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999) // last day of month
+
+    // Create cache key
+    const cacheKey = `personal_notifications_current_month:${req.user!.id}:${currentMonth}:${currentYear}`
+    
+    // Try cache first
+    const cached = await CacheService.get(cacheKey)
+    if (cached) {
+      console.log('Returning cached current month personal notifications for user:', req.user!.id)
+      res.json(cached)
+      return
+    }
+
+    console.log('Fetching current month personal notifications from database for user:', req.user!.id)
+
+    // Get notifications created by the authenticated user for current month
+    const [notifications, total] = await Promise.all([
+      prisma.notification.findMany({
+        where: {
+          createdBy: req.user!.id,
+          scheduledAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        },
+        include: {
+          recipients: true,
+          approvals: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  employeeProfile: {
+                    select: {
+                      firstName: true,
+                      lastName: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.notification.count({
+        where: {
+          createdBy: req.user!.id,
+          scheduledAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      })
+    ])
+
+    const response = {
+      data: notifications,
+      meta: {
+        total,
+        page: 1,
+        size: notifications.length,
+        totalPages: 1
+      }
+    }
+
+    // Cache the response
+    await CacheService.set(cacheKey, response, 300) // 5 minutes cache
+
+    console.log(`Current month personal notifications response for user ${req.user!.id}:`, {
+      count: notifications.length,
+      total,
+      month: currentMonth,
+      year: currentYear,
+      hasData: notifications.length > 0
+    })
+
+    res.json(response)
+  } catch (err) {
+    console.error('Error in listCurrentMonthPersonalNotifications:', err)
+    next(err)
+  }
+>>>>>>> 9c9168b83a58a57f2055ca73d7fac4b3753d7707
 }

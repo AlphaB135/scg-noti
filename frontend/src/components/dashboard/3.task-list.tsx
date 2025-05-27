@@ -9,15 +9,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface Task {
-  id: string;
-  title: string;
-  details: string;
-  dueDate: string;
-  priority: "today" | "urgent" | "overdue" | "pending";
-  done: boolean;
-}
+import type { Task } from "@/lib/types/task";
 
 type TaskListProps = {
   tasks: Task[];

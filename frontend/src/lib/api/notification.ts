@@ -1,5 +1,5 @@
 import axios from 'axios'
-import api from '../real-api'  // นำเข้า axios instance ที่มีการตั้งค่า baseURL
+import api from '../api'  // นำเข้า axios instance ที่มีการตั้งค่า baseURL
 
 // Helper function to implement delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
