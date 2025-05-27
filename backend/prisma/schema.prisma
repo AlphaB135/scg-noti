@@ -164,6 +164,8 @@ model Notification {
   message            String    @db.NVarChar(2000)
   scheduledAt        DateTime?
   status             String    @default("PENDING") @db.VarChar(20)
+  attachmentPath     String?   
+  completedAt        DateTime? 
   type               String    @db.VarChar(20) // SYSTEM / TODO / REMINDER / RECURRING
   category           String?   @db.NVarChar(80)
   link               String?   @db.NVarChar(255)

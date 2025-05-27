@@ -381,3 +381,36 @@ export async function reschedule(
     next(err)
   }
 }
+
+// PUT /api/notifications/:id
+export async function updateNotification(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params
+    const data   = req.body
+    const notification = await prisma.notification.update({
+      where: { id },
+      data,
+      include: { recipients: true },
+    })
+    await CacheService.invalidateNotificationCaches()
+    res.json(notification)
+  } catch (err) { next(err) }
+}
+
+// POST /api/notifications/:id/complete
+export async function completeNotification(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params
+    const file   = req.file
+    const notification = await prisma.notification.update({
+      where: { id },
+      data: {
+        status: 'DONE',
+        completedAt: new Date(),
+        attachmentPath: file ? `/uploads/${file.filename}` : undefined,
+      },
+    })
+    await CacheService.invalidateNotificationCaches()
+    res.json(notification)
+  } catch (err) { next(err) }
+}

@@ -396,10 +396,12 @@ export default function AdminNotificationPage() {
       setIsSubmitDialogOpen(true);
       return;
     }
-    
+
     openReopenDialog(target);
     try {
-      await notificationsApi.updateStatus(id, "DONE");
+      const form = new FormData();
+      form.append("attachment", submitEvidence!);
+      await notificationsApi.complete(submitTask.id, form);
 
       // อัปเดตทั้ง tasks และ allTasks
       setTasks((prev) =>
@@ -1128,7 +1130,9 @@ export default function AdminNotificationPage() {
       <Dialog open={isSubmitDialogOpen} onOpenChange={setIsSubmitDialogOpen}>
         <DialogContent className="sm:max-w-[500px] rounded-[20px]">
           <DialogHeader>
-            <DialogTitle className="text-xl">แนบหลักฐานการทำงาน (ถ้ามี) </DialogTitle>
+            <DialogTitle className="text-xl">
+              แนบหลักฐานการทำงาน (ถ้ามี){" "}
+            </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
