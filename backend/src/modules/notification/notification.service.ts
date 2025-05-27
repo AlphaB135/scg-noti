@@ -14,6 +14,9 @@ import type { CreateNotificationInput, ListQueryOpts } from './notification.dto'
 import { pushMessageWithRetry } from '../../integrations/line.service'
 import { NOTIFICATION_RETRY_COUNT } from '../../config/env'
 
+// Check if LINE notifications are enabled
+const ENABLE_LINE = process.env.ENABLE_LINE === 'true'
+
 /**
  * Format notification text for LINE message
  */
@@ -90,6 +93,12 @@ async function sendLineNotifications(
   recipientIds: string[],
   notificationText: string
 ): Promise<void> {
+  // Check if LINE notifications are enabled
+  if (!ENABLE_LINE) {
+    // LINE notifications disabled - return silently
+    return
+  }
+
   const employees = await prisma.employeeProfile.findMany({
     where: {
       userId: { in: recipientIds },

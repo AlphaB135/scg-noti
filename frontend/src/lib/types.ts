@@ -14,14 +14,19 @@ export interface Notification {
     title: string
     message: string
     scheduledAt?: string
+    dueDate?: string
     type?: 'SYSTEM' | 'TODO' | 'REMINDER'
+    category: string
     link?: string
     linkUsername?: string
     linkPassword?: string
+    urgencyDays?: number
+    repeatIntervalDays?: number
     recipients: Array<{
-      type: 'USER' | 'GROUP' | 'ALL'
+      type: 'USER' | 'GROUP' | 'ALL' | 'COMPANY'
       userId?: string
       groupId?: string
+      companyCode?: string
     }>
   }
   
@@ -29,6 +34,20 @@ export interface Notification {
     title?: string
     message?: string
     scheduledAt?: string
+    dueDate?: string
+    type?: 'SYSTEM' | 'TODO' | 'REMINDER'
+    category?: string
+    link?: string
+    linkUsername?: string
+    linkPassword?: string
+    urgencyDays?: number
+    repeatIntervalDays?: number
+    recipients?: Array<{
+      type: 'USER' | 'GROUP' | 'ALL' | 'COMPANY'
+      userId?: string
+      groupId?: string
+      companyCode?: string
+    }>
     status?: string
   }
   

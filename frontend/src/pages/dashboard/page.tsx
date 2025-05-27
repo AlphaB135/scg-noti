@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useEffect, useState, useCallback } from "react";
-import { notificationsApi } from "@/lib/real-api";
+import { notificationsApi, invalidateCache } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -55,6 +55,8 @@ export default function AdminNotificationPage() {
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [currentTime, setCurrentTime] = useState(now);
+  const [calendarKey, setCalendarKey] = useState(0); // สำหรับ force re-render calendar
+  const [globalRefreshKey, setGlobalRefreshKey] = useState(0); // สำหรับ force refresh ทั้งหมด
 
   const [expandTodo, setExpandTodo] = useState(false); // ควบคุมการแสดง modal รายการงานแบบเต็มจอ
   const [editTask, setEditTask] = useState<Task | null>(null); // เก็บข้อมูลงานที่กำลังแก้ไข
@@ -84,7 +86,6 @@ export default function AdminNotificationPage() {
   const [reopenReason, setReopenReason] = useState("");
   const [rescheduleReason, setRescheduleReason] = useState("");
   const [newDueDate, setNewDueDate] = useState("");
-  const [newTaskDate, setNewTaskDate] = useState("");
 
   // เพิ่มสถานะสำหรับหน้าต่างรายละเอียดงาน
   const [isTaskDetailDialogOpen, setIsTaskDetailDialogOpen] = useState(false);
@@ -93,20 +94,15 @@ export default function AdminNotificationPage() {
   // แยกฟังก์ชันโหลดข้อมูลเป็นส่วนๆ
   const loadCurrentMonthData = useCallback(async () => {
     try {
-      // โหลดข้อมูลพร้อมกันทั้ง calendar และ task list
-      const [monthResponse, allResponse] = await Promise.all([
-        notificationsApi.getCurrentMonthNotifications(
-          selectedMonth,
-          selectedYear
-        ),
-        notificationsApi.getAll(1, 100),
-      ]);
+      // โหลดข้อมูลการแจ้งเตือนทั้งหมด
+      const allResponse = await notificationsApi.getCurrentMonthNotifications(selectedMonth, selectedYear);
+      console.log('📥 Raw API response:', allResponse);
 
-      if (!monthResponse?.data) {
+      if (!allResponse?.data) {
         throw new Error("Invalid response format");
       }
 
-      const mappedTasks = monthResponse.data.map(
+      const allMappedTasks = allResponse.data.map(
         (notification) =>
           ({
             id: notification.id,
@@ -123,36 +119,34 @@ export default function AdminNotificationPage() {
             password: "",
           } satisfies Task)
       );
+      console.log('🔄 Mapped tasks:', allMappedTasks);
 
       // อัพเดทสถานะงานก่อนเซ็ตค่า
-      const updatedTasks = mappedTasks.map((task) => updateTaskPriority(task));
-      setTasks(updatedTasks);
+      const updatedAllTasks = allMappedTasks.map((task) => updateTaskPriority(task));
+      console.log('⭐ Tasks with priority:', updatedAllTasks);
+      
+      // กรองข้อมูลตามเดือนและปีที่เลือก
+      const filteredTasks = updatedAllTasks.filter((task) => {
+        if (!task.dueDate) {
+          console.log('⚠️ Task missing dueDate:', task);
+          return false;
+        }
+        
+        const [taskYear, taskMonth] = task.dueDate.split('-').map(Number);
+        const matches = taskMonth === selectedMonth && taskYear === selectedYear;
+        
+        if (matches) {
+          console.log('✅ Task matches current month/year:', task);
+        } else {
+          console.log('❌ Task does not match:', {task, taskMonth, taskYear, selectedMonth, selectedYear});
+        }
+        
+        return matches;
+      });
+      console.log('📅 Filtered tasks for', selectedMonth, '/', selectedYear, ':', filteredTasks);
 
-      if (allResponse?.data) {
-        const allMappedTasks = allResponse.data.map(
-          (notification) =>
-            ({
-              id: notification.id,
-              title: notification.title,
-              details: notification.message || "",
-              dueDate: notification.scheduledAt?.split("T")[0] || "",
-              done: notification.status === "DONE",
-              priority: "pending" as const,
-              frequency: "no-repeat" as const,
-              impact: "",
-              link: "",
-              hasLogin: false,
-              username: "",
-              password: "",
-            } satisfies Task)
-        );
-
-        // อัพเดทสถานะงานก่อนเซ็ตค่า
-        const updatedAllTasks = allMappedTasks.map((task) =>
-          updateTaskPriority(task)
-        );
-        setAllTasks(updatedAllTasks);
-      }
+      setTasks(filteredTasks);
+      setAllTasks(updatedAllTasks); // เก็บข้อมูลทั้งหมดไว้สำหรับใช้งานอื่น
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
     }
@@ -161,6 +155,20 @@ export default function AdminNotificationPage() {
   // โหลดข้อมูลตอนเริ่มต้นและเมื่อเปลี่ยนเดือน/ปี
   useEffect(() => {
     loadCurrentMonthData();
+  }, [loadCurrentMonthData]);
+
+  // เพิ่ม event listener สำหรับ window focus เพื่อ refresh ข้อมูลเมื่อกลับมาที่หน้า
+  useEffect(() => {
+    const handleFocus = () => {
+      // Invalidate cache และโหลดข้อมูลใหม่
+      invalidateCache('notifications');
+      loadCurrentMonthData();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [loadCurrentMonthData]);
 
   // Handle edit task
@@ -282,15 +290,23 @@ export default function AdminNotificationPage() {
 
     // กรองข้อมูลใหม่จาก allTasks
     const filteredTasks = allTasks.filter((task: Task) => {
-      if (!task.dueDate) return false;
-      const taskDate = new Date(task.dueDate);
-      const taskMonth = taskDate.getMonth() + 1; // JavaScript months are 0-based
-      const taskYear = taskDate.getFullYear();
-      return taskYear === year && taskMonth === month;
+      if (!task.dueDate) {
+        console.log('⚠️ Task has no dueDate:', task);
+        return false;
+      }
+      // แปลง date string เป็น UTC เพื่อให้แน่ใจว่าไม่มีปัญหาเรื่อง timezone
+      const [y, m, d] = task.dueDate.split('-').map(Number);
+      if (!y || !m || !d) {
+        console.log('⚠️ Invalid date format:', task.dueDate);
+        return false;
+      }
+      return y === year && m === month;
     });
+    console.log('🔍 Filtered tasks for', month, '/', year, ':', filteredTasks);
 
     // อัพเดทสถานะงานก่อนเซ็ตค่า
     const updatedTasks = filteredTasks.map((task) => updateTaskPriority(task));
+    console.log('✨ Final tasks with priority:', updatedTasks);
     setTasks(updatedTasks);
   };
 
@@ -329,31 +345,31 @@ export default function AdminNotificationPage() {
     )
       return;
 
+    setIsRescheduling(true);
     try {
-      const targetDate = rescheduleSource === "manual" ? newDueDate : taskToReschedule.dueDate!;
+      // ใช้ newDueDate สำหรับทั้ง manual และ drag
+      const targetDate = newDueDate;
       
+      // บันทึกข้อมูลใหม่ไปยัง server
       await notificationsApi.update(taskToReschedule.id, {
         scheduledAt: new Date(targetDate).toISOString(),
       } as any);
 
-      // อัปเดตทั้ง tasks และ allTasks
-      const updateTask = (t: Task) =>
-        t.id === taskToReschedule.id
-          ? { ...t, dueDate: targetDate }
-          : t;
-
-      setTasks((prev) => prev.map(updateTask));
-      setAllTasks((prev) => prev.map(updateTask));
-
-      // รีเฟรชข้อมูลสำหรับอัพเดท dashboard stats
-      await loadCurrentMonthData();
-
+      // ปิด dialog และ clear form
       setTaskToReschedule(null);
       setRescheduleReason("");
       setNewDueDate("");
       setIsRescheduleDialogOpen(false);
+      
+      // แสดงการแจ้งเตือนความสำเร็จ
+      console.log(`✅ Task "${taskToReschedule.title}" rescheduled to ${targetDate} successfully!`);
+      
+      // Refresh หน้าทั้งหมดเพื่อให้แน่ใจว่า UI อัพเดท
+      window.location.reload();
     } catch (error) {
       console.error("Failed to reschedule task:", error);
+    } finally {
+      setIsRescheduling(false);
     }
   };
 
@@ -537,6 +553,7 @@ export default function AdminNotificationPage() {
   const [rescheduleSource, setRescheduleSource] = useState<"manual" | "drag">(
     "drag"
   );
+  const [isRescheduling, setIsRescheduling] = useState(false);
 
   // Load notifications function
   const loadNotifications = async () => {
@@ -566,12 +583,24 @@ export default function AdminNotificationPage() {
         
         // กรองข้อมูลสำหรับเดือนปัจจุบัน
         const filteredTasks = updatedAllTasks.filter((task: Task) => {
-          if (!task.dueDate) return false;
-          const taskDate = new Date(task.dueDate);
-          const taskMonth = taskDate.getMonth() + 1;
-          const taskYear = taskDate.getFullYear();
-          return taskYear === selectedYear && taskMonth === selectedMonth;
+          if (!task.dueDate) {
+            console.log('⚠️ Task missing dueDate:', task);
+            return false;
+          }
+          
+          // แยกปีและเดือนจาก dueDate string โดยตรง ("YYYY-MM-DD")
+          const [taskYear, taskMonth] = task.dueDate.split('-').map(Number);
+          const matches = taskMonth === selectedMonth && taskYear === selectedYear;
+          
+          if (matches) {
+            console.log('✅ Task matches current month/year:', task);
+          } else {
+            console.log('❌ Task does not match:', {task, taskMonth, taskYear, selectedMonth, selectedYear});
+          }
+          
+          return matches;
         });
+        console.log('📅 Filtered tasks for', selectedMonth, '/', selectedYear, ':', filteredTasks);
         
         const updatedTasks = filteredTasks.map((task) => updateTaskPriority(task));
         setTasks(updatedTasks);
@@ -632,18 +661,22 @@ export default function AdminNotificationPage() {
       </div>
 
       {/* ===== CALENDAR SECTION (visible on all screens) ===== */}
-      <TaskCalendar
-        tasks={tasks}
-        setIsAddDialogOpen={setIsAddDialogOpen}
-        setEditTask={setEditTask}
-        resetForm={resetForm}
-        selectedMonth={selectedMonth}
-        selectedYear={selectedYear}
-        onMonthChange={changeMonth}
-        onToggleTaskDone={handleToggleTaskDone}
-        onRescheduleStart={handleRescheduleStart} // เพิ่ม prop นี้
-        onOpenRescheduleDialog={openRescheduleDialog}
-      />
+      <div key={globalRefreshKey}>
+        <TaskCalendar
+          tasks={tasks}
+          setIsAddDialogOpen={setIsAddDialogOpen}
+          setEditTask={setEditTask}
+          resetForm={resetForm}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          onMonthChange={changeMonth}
+          onToggleTaskDone={handleToggleTaskDone}
+          onRescheduleStart={handleRescheduleStart} // เพิ่ม prop นี้
+          onOpenRescheduleDialog={openRescheduleDialog}
+          isRescheduling={isRescheduling} // เพิ่ม loading state
+          key={calendarKey} // <-- เพิ่ม key นี้
+        />
+      </div>
 
       {/* ===== FULLSCREEN MODAL ===== */}
       <TaskModal
@@ -1106,6 +1139,7 @@ export default function AdminNotificationPage() {
               variant="outline"
               onClick={() => setIsRescheduleDialogOpen(false)}
               className="rounded-lg"
+              disabled={isRescheduling}
             >
               ยกเลิก
             </Button>
@@ -1113,11 +1147,12 @@ export default function AdminNotificationPage() {
               className="bg-red-700 hover:bg-red-800 text-white rounded-lg"
               onClick={handleRescheduleTask}
               disabled={
+                isRescheduling ||
                 !rescheduleReason.trim() ||
                 (rescheduleSource === "manual" && !newDueDate)
               }
             >
-              บันทึกการเลื่อน
+              {isRescheduling ? "กำลังบันทึก..." : "บันทึกการเลื่อน"}
             </Button>
           </DialogFooter>
         </DialogContent>

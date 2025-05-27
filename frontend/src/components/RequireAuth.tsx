@@ -2,7 +2,7 @@
 
 import React, { ReactElement, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '@/lib/real-api'  // ใช้ api instance ที่มีการกำหนดค่าไว้แล้ว
+import api from '@/lib/api'  // ใช้ api instance ที่มีการกำหนดค่าไว้แล้ว
 
 interface RequireAuthProps {
   children: ReactElement

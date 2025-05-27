@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Eye, EyeOff, ShieldCheck, Loader2 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "sonner"
-import { notificationsApi } from "@/lib/real-api"
+import { notificationsApi } from "@/lib/api"
 
 export type ReminderFormData = {
   title: string

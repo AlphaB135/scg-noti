@@ -11,7 +11,7 @@ import { TeamFilter } from "@/components/team-overview/team-filter";
 import { MemberDetailsModal } from "@/components/team-overview/member-details-modal";
 import AppLayout from "@/components/layout/app-layout";
 import { teamsApi } from "@/lib/api/teams";
-import { notificationsApi } from "@/lib/real-api";
+import { notificationsApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import type { Team } from "@/components/types/team";
