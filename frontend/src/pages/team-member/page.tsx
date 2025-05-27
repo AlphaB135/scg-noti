@@ -25,8 +25,12 @@ import {
 import LeaveTeamDialog from "@/components/team-member/1.leave-team-dialog";
 import RemoveMemberDialog from "@/components/team-member/2.remove-member-dialog";
 import AddMemberDialog from "@/components/team-member/3.add-member-dialog";
+import { teamsApi } from "@/lib/api/teams";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TeamMembersPage() {
+  const { toast } = useToast();
+  
   // State
   const [teams, setTeams] = useState<Team[]>([]);
   const [currentTeam, setCurrentTeam] = useState<Team | null>(null);
@@ -36,10 +40,7 @@ export default function TeamMembersPage() {
   const [isRemoveMemberDialogOpen, setIsRemoveMemberDialogOpen] =
     useState(false);
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
-  const [currentUserRole, setCurrentUserRole] = useState<
-    "admin" | "leader" | "member"
-  >("member");
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);  
 
   // Mock current user (in a real app, this would come from authentication)
   const currentUser = {
@@ -49,131 +50,28 @@ export default function TeamMembersPage() {
     position: "ผู้จัดการ",
     email: "employee1@selfsync.com",
   };
-
-  const roleColors: { [key: string]: string } = {
-    หัวหน้างาน: "bg-amber-100 text-amber-800",
-    พนักงาน: "bg-blue-100 text-blue-800",
+  // Load teams and members data
+  const loadTeams = async () => {
+    try {
+      const result = await teamsApi.list();
+      setTeams(result.data);
+      if (result.data.length > 0) {
+        setCurrentTeam(result.data[0]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch teams:", error);
+      toast({
+        title: "Error",
+        description: "ไม่สามารถดึงข้อมูลทีมได้",
+        variant: "destructive"
+      });
+    }
   };
 
-  // Fetch teams data (mock data for demo)
+  // Fetch teams data from API
   useEffect(() => {
-    // In a real application, you would fetch this data from an API
-    const mockTeams: Team[] = [
-      {
-        id: "team-1",
-        name: "ทีมพัฒนา",
-        members: [
-          {
-            id: "emp-1",
-            name: "พนักงาน 1",
-            department: "แผนก 1",
-            position: "ผู้จัดการ",
-            email: "employee1@selfsync.com",
-            isLeader: true,
-            permissionLevel: "leader",
-            role: "หัวหน้างาน",
-          },
-          {
-            id: "emp-2",
-            name: "พนักงาน 2",
-            department: "แผนก 1",
-            position: "พนักงาน",
-            email: "employee2@selfsync.com",
-            isLeader: false,
-            permissionLevel: "member",
-            role: "พนักงาน",
-          },
-          {
-            id: "emp-3",
-            name: "พนักงาน 3",
-            department: "แผนก 2",
-            position: "พนักงาน",
-            email: "employee3@selfsync.com",
-            isLeader: false,
-            permissionLevel: "member",
-            role: "พนักงาน",
-          },
-        ],
-      },
-      {
-        id: "team-2",
-        name: "ทีมการตลาด",
-        members: [
-          {
-            id: "emp-5",
-            name: "พนักงาน 5",
-            department: "แผนก 3",
-            position: "ผู้จัดการ",
-            email: "employee5@selfsync.com",
-            isLeader: true,
-            permissionLevel: "leader",
-            role: "หัวหน้างาน",
-          },
-          {
-            id: "emp-6",
-            name: "พนักงาน 6",
-            department: "แผนก 3",
-            position: "พนักงาน",
-            email: "employee6@selfsync.com",
-            isLeader: false,
-            permissionLevel: "member",
-            role: "พนักงาน",
-          },
-        ],
-      },
-      {
-        id: "team-3",
-        name: "ทีมบัญชี",
-        members: [
-          {
-            id: "emp-10",
-            name: "พนักงาน 10",
-            department: "แผนก 4",
-            position: "ผู้จัดการ",
-            email: "employee10@selfsync.com",
-            isLeader: true,
-            permissionLevel: "leader",
-            role: "หัวหน้างาน",
-          },
-          {
-            id: "emp-11",
-            name: "พนักงาน 11",
-            department: "แผนก 4",
-            position: "พนักงาน",
-            email: "employee11@selfsync.com",
-            isLeader: false,
-            permissionLevel: "member",
-            role: "พนักงาน",
-          },
-          {
-            id: "emp-12",
-            name: "พนักงาน 12",
-            department: "แผนก 4",
-            position: "พนักงาน",
-            email: "employee12@selfsync.com",
-            isLeader: false,
-            permissionLevel: "member",
-            role: "พนักงาน",
-          },
-          {
-            id: "emp-13",
-            name: "พนักงาน 13",
-            department: "แผนก 5",
-            position: "พนักงาน",
-            email: "employee13@selfsync.com",
-            isLeader: false,
-            permissionLevel: "member",
-            role: "พนักงาน",
-          },
-        ],
-      },
-    ];
-
-    setTeams(mockTeams);
-    if (mockTeams.length > 0) {
-      setCurrentTeam(mockTeams[0]);
-    }
-  }, []);
+    loadTeams();
+  }, [toast]);
 
   // Set filtered members when current team changes
   useEffect(() => {
@@ -185,12 +83,12 @@ export default function TeamMembersPage() {
         (member) => member.id === currentUser.id
       );
       if (userMember) {
-        setCurrentUserRole(userMember.permissionLevel);
+        // setCurrentUserRole(userMember.permissionLevel); // This line was using the removed state
       } else {
-        setCurrentUserRole("member");
+        // setCurrentUserRole("member"); // This line was using the removed state
       }
     }
-  }, [currentTeam]);
+  }, [currentTeam, currentUser.id]); // Added currentUser.id to dependency array if it influences role
 
   // Filter members based on search query
   useEffect(() => {
@@ -209,58 +107,6 @@ export default function TeamMembersPage() {
       setFilteredMembers(filtered);
     }
   }, [searchQuery, currentTeam]);
-
-  // Handle leave team
-  const handleLeaveTeam = () => {
-    if (!currentTeam) return;
-
-    // Remove current user from team
-    const updatedMembers = currentTeam.members.filter(
-      (member) => member.id !== currentUser.id
-    );
-    const updatedTeam = {
-      ...currentTeam,
-      members: updatedMembers,
-    };
-
-    // Update teams list
-    setTeams(
-      teams.map((team) => (team.id === currentTeam.id ? updatedTeam : team))
-    );
-
-    // If user was the only member, remove the team
-    if (updatedMembers.length === 0) {
-      const remainingTeams = teams.filter((team) => team.id !== currentTeam.id);
-      setTeams(remainingTeams);
-      setCurrentTeam(remainingTeams.length > 0 ? remainingTeams[0] : null);
-    } else {
-      setCurrentTeam(updatedTeam);
-    }
-
-    setIsLeaveTeamDialogOpen(false);
-  };
-
-  // Handle remove member
-  const handleRemoveMember = () => {
-    if (!currentTeam || !selectedMember) return;
-
-    // Remove selected member from team
-    const updatedMembers = currentTeam.members.filter(
-      (member) => member.id !== selectedMember.id
-    );
-    const updatedTeam = {
-      ...currentTeam,
-      members: updatedMembers,
-    };
-
-    // Update teams list
-    setTeams(
-      teams.map((team) => (team.id === currentTeam.id ? updatedTeam : team))
-    );
-    setCurrentTeam(updatedTeam);
-    setIsRemoveMemberDialogOpen(false);
-    setSelectedMember(null);
-  };
 
   // Handle add member (mock implementation)
   const handleAddMember = () => {
@@ -282,11 +128,10 @@ export default function TeamMembersPage() {
   const isUserInTeam =
     currentTeam?.members.some((member) => member.id === currentUser.id) ||
     false;
-
   // Check if current user is a leader
   const isUserLeader =
     currentTeam?.members.some(
-      (member) => member.id === currentUser.id && member.isLeader
+      (member) => member.id === currentUser.id && member.role === 'LEADER'
     ) || false;
 
   return (
@@ -322,10 +167,9 @@ export default function TeamMembersPage() {
                     {currentTeam.members.some(
                       (member) => member.id === currentUser.id
                     ) ? (
-                      <div className="flex flex-wrap gap-2">
-                        {currentTeam.members.find(
+                      <div className="flex flex-wrap gap-2">                        {currentTeam.members.find(
                           (member) => member.id === currentUser.id
-                        )?.isLeader ? (
+                        )?.role === 'LEADER' ? (
                           <Badge className="bg-amber-600 hover:bg-amber-700">
                             <UserCog className="h-3 w-3 mr-1" />
                             หัวหน้าทีม {currentTeam.name}
@@ -350,10 +194,9 @@ export default function TeamMembersPage() {
                     <p className="text-sm text-gray-600">
                       {currentTeam.members.some(
                         (member) => member.id === currentUser.id
-                      )
-                        ? currentTeam.members.find(
+                      )                        ? currentTeam.members.find(
                             (member) => member.id === currentUser.id
-                          )?.isLeader
+                          )?.role === 'LEADER'
                           ? "คุณมีสิทธิ์ในการจัดการสมาชิกและเพิ่มตำแหน่งในทีมนี้"
                           : "คุณสามารถดูข้อมูลและออกจากทีมได้"
                         : "คุณไม่มีสิทธิ์ในการจัดการทีมนี้"}
@@ -400,8 +243,7 @@ export default function TeamMembersPage() {
                         </p>
                         <p className="text-sm text-gray-500">
                           {team.members.length} สมาชิก
-                        </p>
-                      </div>
+                        </p>                      </div>
                     </button>
                   );
                 })
@@ -458,14 +300,13 @@ export default function TeamMembersPage() {
                 <TabsList className="mb-4">
                   <TabsTrigger value="all">
                     ทั้งหมด ({currentTeam.members.length})
-                  </TabsTrigger>
-                  <TabsTrigger value="leaders">
+                  </TabsTrigger>                  <TabsTrigger value="leaders">
                     หัวหน้าทีม (
-                    {currentTeam.members.filter((m) => m.isLeader).length})
+                    {currentTeam.members.filter((m) => m.role === 'LEADER').length})
                   </TabsTrigger>
                   <TabsTrigger value="members">
                     สมาชิก (
-                    {currentTeam.members.filter((m) => !m.isLeader).length})
+                    {currentTeam.members.filter((m) => m.role !== 'LEADER').length})
                   </TabsTrigger>
                 </TabsList>
 
@@ -481,11 +322,9 @@ export default function TeamMembersPage() {
                     getInitials={getInitials}
                     setIsLeaveTeamDialogOpen={setIsLeaveTeamDialogOpen}
                   />
-                </TabsContent>
-
-                <TabsContent value="leaders" className="m-0">
+                </TabsContent>                <TabsContent value="leaders" className="m-0">
                   <MembersList
-                    members={filteredMembers.filter((m) => m.isLeader)}
+                    members={filteredMembers.filter((m) => m.role === 'LEADER')}
                     currentUserId={currentUser.id}
                     isUserLeader={isUserLeader}
                     onRemoveMember={(member) => {
@@ -499,7 +338,7 @@ export default function TeamMembersPage() {
 
                 <TabsContent value="members" className="m-0">
                   <MembersList
-                    members={filteredMembers.filter((m) => !m.isLeader)}
+                    members={filteredMembers.filter((m) => m.role !== 'LEADER')}
                     currentUserId={currentUser.id}
                     isUserLeader={isUserLeader}
                     onRemoveMember={(member) => {
@@ -514,14 +353,18 @@ export default function TeamMembersPage() {
             </CardContent>
           </Card>
         )}
-      </div>
-
-      {/* Leave Team Dialog */}
+      </div>      {/* Leave Team Dialog */}
       <LeaveTeamDialog
         isOpen={isLeaveTeamDialogOpen}
         setIsOpen={setIsLeaveTeamDialogOpen}
         teamName={currentTeam?.name || ""}
-        onConfirm={handleLeaveTeam}
+        onConfirm={() => {
+          // Handle leave team logic here
+          console.log("User leaving team");
+          loadTeams();
+          setIsLeaveTeamDialogOpen(false);
+        }}
+        isLeader={isUserLeader}
       />
 
       {/* Remove Member Dialog */}
@@ -529,9 +372,13 @@ export default function TeamMembersPage() {
         isOpen={isRemoveMemberDialogOpen}
         setIsOpen={setIsRemoveMemberDialogOpen}
         memberName={selectedMember?.name || ""}
-        onConfirm={handleRemoveMember}
+        onConfirm={() => {
+          // Handle remove member logic here
+          console.log("Removing member:", selectedMember?.name);
+          loadTeams();
+          setIsRemoveMemberDialogOpen(false);
+        }}
       />
-
       {/* Add Member Dialog */}
       <AddMemberDialog
         isOpen={isAddMemberDialogOpen}
@@ -573,10 +420,9 @@ function MembersList({
     <ScrollArea className="h-[500px]">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {members.map((member) => (
-          <Card key={member.id} className="overflow-hidden">
-            <div
+          <Card key={member.id} className="overflow-hidden">            <div
               className={`h-2 ${
-                member.isLeader ? "bg-amber-500" : "bg-blue-500"
+                member.role === 'LEADER' ? "bg-amber-500" : "bg-blue-500"
               }`}
             />
             <CardContent className="p-4">
@@ -585,10 +431,9 @@ function MembersList({
                   <AvatarImage
                     src={`/placeholder.svg?height=64&width=64`}
                     alt={member.name}
-                  />
-                  <AvatarFallback
+                  />                  <AvatarFallback
                     className={`text-lg ${
-                      member.isLeader
+                      member.role === 'LEADER'
                         ? "bg-amber-100 text-amber-800"
                         : "bg-blue-100 text-blue-800"
                     }`}
@@ -597,31 +442,38 @@ function MembersList({
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <div>
+                  <div className="flex items-center justify-between">                    <div>
                       <h3 className="font-medium text-base">{member.name}</h3>
                       <p className="text-sm text-gray-500">{member.position}</p>
-                    </div>
-                    <div className="flex flex-col gap-1">
+                      {/* Show leader badge */}
+                      {member.role === 'LEADER' && (
+                        <Badge className="bg-amber-600 hover:bg-amber-700 text-white mt-1">
+                          <UserCog className="h-3 w-3 mr-1" />
+                          หัวหน้าทีม
+                        </Badge>
+                      )}
+                    </div>                    <div className="flex flex-col gap-1">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Badge
-                              className={`${
-                                permissionColors[member.permissionLevel]
-                              }`}
-                            >
-                              {member.isLeader ? (
-                                <UserCog className="h-3 w-3 mr-1" />
-                              ) : (
-                                <Users className="h-3 w-3 mr-1" />
-                              )}
-                              {member.permissionLevel === "admin"
-                                ? "แอดมินทีม"
-                                : member.permissionLevel === "leader"
-                                ? "หัวหน้าทีม"
-                                : "สมาชิก"}
-                            </Badge>
+                            <div>
+                              <Badge
+                                className={`${
+                                  permissionColors[member.permissionLevel]
+                                }`}
+                              >
+                                {member.role === 'LEADER' ? (
+                                  <UserCog className="h-3 w-3 mr-1" />
+                                ) : (
+                                  <Users className="h-3 w-3 mr-1" />
+                                )}
+                                {member.permissionLevel === "admin"
+                                  ? "แอดมินทีม"
+                                  : member.permissionLevel === "leader"
+                                  ? "หัวหน้าทีม"
+                                  : "สมาชิก"}
+                              </Badge>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             {member.permissionLevel === "admin" &&
@@ -632,15 +484,14 @@ function MembersList({
                               "สามารถแก้ไขข้อมูลทีมได้"}
                           </TooltipContent>
                         </Tooltip>
-                      </TooltipProvider>
-
-                      {/* Add role badge */}
-                      <TooltipProvider>
+                      </TooltipProvider>                      {/* Add role badge */}                      <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Badge className={`${roleColors[member.role]}`}>
-                              {member.role}
-                            </Badge>
+                            <div>
+                              <Badge className={`${roleColors[member.role as keyof typeof roleColors] || "bg-gray-100 text-gray-800"}`}>
+                                {member.role}
+                              </Badge>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             {member.role === "หัวหน้างาน"

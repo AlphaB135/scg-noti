@@ -14,7 +14,15 @@ export interface Notification {
     title: string
     message: string
     scheduledAt?: string
-    status?: string
+    type?: 'SYSTEM' | 'TODO' | 'REMINDER'
+    link?: string
+    linkUsername?: string
+    linkPassword?: string
+    recipients: Array<{
+      type: 'USER' | 'GROUP' | 'ALL'
+      userId?: string
+      groupId?: string
+    }>
   }
   
   export interface UpdateNotificationInput {

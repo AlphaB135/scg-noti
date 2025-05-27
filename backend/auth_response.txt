@@ -1,0 +1,31 @@
+Note: Unnecessary use of -X or --request, POST is already inferred.
+* Host localhost:3001 was resolved.
+* IPv6: ::1
+* IPv4: 127.0.0.1
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying [::1]:3001...
+* Connected to localhost (::1) port 3001
+> POST /api/auth/login HTTP/1.1
+> Host: localhost:3001
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 48
+> 
+} [48 bytes data]
+< HTTP/1.1 200 OK
+< X-Powered-By: Express
+< Set-Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI0NDRkNTI0MS0wMzJiLTQ5YTgtODdkOC1jZjBlZjU2ZDg5ZGQiLCJ1c2VySWQiOiJhNzc0MTI0Ny0zNzYxLTRiMjEtOTI4OC1hN2ZjNzU0NzZmZmEiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NDgyNTk0MDEsImV4cCI6MTc0ODI2MDMwMX0.7ZJU8z_KYY4QqMROkoEm68--VeH31EGg5-HIuzeir-U; Max-Age=900; Path=/; Expires=Mon, 26 May 2025 11:51:41 GMT; HttpOnly; SameSite=Strict
+< Set-Cookie: refreshToken=3ecae72233bd827687c66547fd463dd59048782ee6487fc2c2ef0be6cf2d56ec07145cd56b0980ecd37138d9fdc9405193ef7da958c329af248065eb5982f07b; Max-Age=604800; Path=/; Expires=Mon, 02 Jun 2025 11:36:41 GMT; HttpOnly; SameSite=Strict
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 26
+< ETag: W/"1a-GQGCNrfXKBGpxQhVARNg7nVomYo"
+< Date: Mon, 26 May 2025 11:36:41 GMT
+< Connection: keep-alive
+< Keep-Alive: timeout=5
+< 
+{ [26 bytes data]
+100    74  100    26  100    48    297    549 --:--:-- --:--:-- --:--:--   850
+* Connection #0 to host localhost left intact
+{"ok":true,"role":"ADMIN"}

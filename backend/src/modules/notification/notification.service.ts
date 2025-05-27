@@ -21,51 +21,66 @@ function formatNotificationText(notification: {
   type: string
   title: string
   message?: string | null
+  link?: string | null
+  linkUsername?: string | null
+  linkPassword?: string | null
 }): string {
-  return `[${notification.type}] ${notification.title}\n${notification.message || ''}`
+  let text = `[${notification.type}] ${notification.title}\n${notification.message || ''}`;
+  
+  if (notification.link) {
+    text += `\n🔗 ${notification.link}`;
+  }
+  if (notification.linkUsername) {
+    text += `\n👤 Username: ${notification.linkUsername}`;
+  }
+  if (notification.linkPassword) {
+    text += `\n🔑 Password: ${notification.linkPassword}`;
+  }
+  
+  return text;
 }
 
 /**
  * Get list of recipients from notification recipients config
  */
 async function getRecipientIds(recipients: CreateNotificationInput['recipients']): Promise<string[]> {
-  const recipientIds: string[] = []
-  
+  const recipientIds: string[] = [];
+
   for (const recipient of recipients) {
     switch (recipient.type) {
       case 'USER':
-        if (recipient.userId) recipientIds.push(recipient.userId)
-        break
+        if (recipient.userId) {
+          recipientIds.push(recipient.userId);
+        }
+        break;
       case 'GROUP':
         if (recipient.groupId) {
           const members = await prisma.teamMember.findMany({
             where: { teamId: recipient.groupId },
-            select: { 
-              employeeId: true
-            }
-          })
-          recipientIds.push(...members.map(m => m.employeeId))
+            select: { employeeId: true }
+          });
+          recipientIds.push(...members.map(m => m.employeeId));
         }
-        break
+        break;
       case 'COMPANY':
         if (recipient.companyCode) {
           const employees = await prisma.employeeProfile.findMany({
             where: { companyCode: recipient.companyCode },
             select: { userId: true }
-          })
-          recipientIds.push(...employees.map(e => e.userId))
+          });
+          recipientIds.push(...employees.map(e => e.userId));
         }
-        break
+        break;
       case 'ALL':
         const allEmployees = await prisma.employeeProfile.findMany({
           select: { userId: true }
-        })
-        recipientIds.push(...allEmployees.map(e => e.userId))
-        break
+        });
+        recipientIds.push(...allEmployees.map(e => e.userId));
+        break;
     }
   }
   
-  return [...new Set(recipientIds)] // Remove duplicates
+  return Array.from(new Set(recipientIds)); // Remove duplicates efficiently
 }
 
 /**
@@ -206,6 +221,8 @@ export async function create(data: CreateNotificationInput & { createdBy: string
       type: data.type,
       category: data.category,
       link: data.link,
+      linkUsername: data.linkUsername,
+      linkPassword: data.linkPassword,
       urgencyDays: data.urgencyDays,
       repeatIntervalDays: data.repeatIntervalDays,
       scheduledAt: data.scheduledAt,
@@ -252,6 +269,8 @@ export async function createMany(
           type: data.type,
           category: data.category,
           link: data.link,
+          linkUsername: data.linkUsername,
+          linkPassword: data.linkPassword,
           urgencyDays: data.urgencyDays,
           repeatIntervalDays: data.repeatIntervalDays,
           scheduledAt: data.scheduledAt,
@@ -296,7 +315,14 @@ export async function update(
     recipientIds = await getRecipientIds(data.recipients)
   }
 
-  const updateData: any = { ...data }
+  const updateData: any = { 
+    ...data,
+    // Handle nullable fields
+    link: data.link === undefined ? undefined : data.link,
+    linkUsername: data.linkUsername === undefined ? undefined : data.linkUsername,
+    linkPassword: data.linkPassword === undefined ? undefined : data.linkPassword,
+  };
+
   if (data.recipients) {
     updateData.recipients = {
       deleteMany: {},
@@ -309,13 +335,16 @@ export async function update(
 
   const notification = await prisma.notification.update({
     where: { id },
-    data: updateData
+    data: updateData,
+    include: {
+      recipients: true
+    }
   })
 
   // Re-send LINE notifications if content was updated for SYSTEM/TODO
   if (
     ['SYSTEM', 'TODO'].includes(notification.type) &&
-    (data.title || data.message || data.recipients)
+    (data.title || data.message || data.link || data.linkUsername || data.linkPassword || data.recipients)
   ) {
     const notificationText = formatNotificationText(notification)
     const recipients = recipientIds.length > 0 ? recipientIds : (

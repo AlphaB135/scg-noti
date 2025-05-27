@@ -299,27 +299,18 @@ export default function AdminNotificationPage() {
     if (!taskToReopen || !reopenReason.trim()) return;
 
     try {
-      const updatedTask = await notificationsApi.reopen(
-        taskToReopen.id,
-        reopenReason
-      );
+      // ใช้ updateStatus แทน reopen
+      await notificationsApi.updateStatus(taskToReopen.id, 'PENDING');
 
       // อัปเดตทั้ง tasks และ allTasks
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === updatedTask.id
-            ? { ...t, done: false, reopenHistory: updatedTask.reopenHistory }
-            : t
-        )
-      );
+      const updateTask = (t: Task) =>
+        t.id === taskToReopen.id ? { ...t, done: false } : t;
 
-      setAllTasks((prev) =>
-        prev.map((t) =>
-          t.id === updatedTask.id
-            ? { ...t, done: false, reopenHistory: updatedTask.reopenHistory }
-            : t
-        )
-      );
+      setTasks((prev) => prev.map(updateTask));
+      setAllTasks((prev) => prev.map(updateTask));
+
+      // รีเฟรชข้อมูลสำหรับอัพเดท dashboard stats
+      await loadCurrentMonthData();
 
       setTaskToReopen(null);
       setReopenReason("");
@@ -338,44 +329,24 @@ export default function AdminNotificationPage() {
     )
       return;
 
-    const newDate =
-      rescheduleSource === "manual" ? newDueDate : taskToReschedule.dueDate!;
-    await notificationsApi.reschedule(
-      taskToReschedule.id,
-      newDate,
-      rescheduleReason
-    );
     try {
-      const updatedTask = await notificationsApi.reschedule(
-        taskToReschedule.id,
-        rescheduleSource === "manual" ? newDueDate : taskToReschedule.dueDate!,
-        rescheduleReason
-      );
+      const targetDate = rescheduleSource === "manual" ? newDueDate : taskToReschedule.dueDate!;
+      
+      await notificationsApi.update(taskToReschedule.id, {
+        scheduledAt: new Date(targetDate).toISOString(),
+      } as any);
 
-      // อัปเดตทั้ง tasks และ allTasks เพื่อให้แน่ใจว่าข้อมูลตรงกัน
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === updatedTask.id
-            ? {
-                ...t,
-                dueDate: updatedTask.scheduledAt?.split("T")[0],
-                rescheduleHistory: updatedTask.rescheduleHistory,
-              }
-            : t
-        )
-      );
+      // อัปเดตทั้ง tasks และ allTasks
+      const updateTask = (t: Task) =>
+        t.id === taskToReschedule.id
+          ? { ...t, dueDate: targetDate }
+          : t;
 
-      setAllTasks((prev) =>
-        prev.map((t) =>
-          t.id === updatedTask.id
-            ? {
-                ...t,
-                dueDate: updatedTask.scheduledAt?.split("T")[0],
-                rescheduleHistory: updatedTask.rescheduleHistory,
-              }
-            : t
-        )
-      );
+      setTasks((prev) => prev.map(updateTask));
+      setAllTasks((prev) => prev.map(updateTask));
+
+      // รีเฟรชข้อมูลสำหรับอัพเดท dashboard stats
+      await loadCurrentMonthData();
 
       setTaskToReschedule(null);
       setRescheduleReason("");
@@ -392,25 +363,14 @@ export default function AdminNotificationPage() {
     if (!target) return;
 
     if (!target.done) {
+      // ถ้างานยังไม่เสร็จ ให้แสดง submit dialog
       setSubmitTask(target);
       setIsSubmitDialogOpen(true);
       return;
     }
     
+    // ถ้างานเสร็จแล้ว ให้เปิด reopen dialog
     openReopenDialog(target);
-    try {
-      await notificationsApi.updateStatus(id, "DONE");
-
-      // อัปเดตทั้ง tasks และ allTasks
-      setTasks((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, done: true } : t))
-      );
-      setAllTasks((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, done: true } : t))
-      );
-    } catch (error) {
-      console.error("Failed to update task status:", error);
-    }
   };
   // Load existing task data when editing
   useEffect(() => {
@@ -440,53 +400,39 @@ export default function AdminNotificationPage() {
     }
 
     try {
-      // Create message with all details
       const message = `${formData.details}\n\nผลกระทบ: ${formData.impact}${
         formData.hasLogin
           ? `\n\nข้อมูลการเข้าสู่ระบบ:\nUsername: ${formData.username}\nPassword: ${formData.password}`
           : ""
       }`;
 
-      const repeatIntervalMap = {
-        "no-repeat": 0,
-        daily: 1,
-        weekly: 7,
-        monthly: 30,
-        quarterly: 90,
-        yearly: 365,
-      };
-
       if (editTask) {
         // Update existing task
-        try {
-          await notificationsApi.update(editTask.id, {
-            title: formData.title,
-            message: message,
-            scheduledAt: new Date(formData.date).toISOString(),
-          } as any); // TODO: Fix types
+        await notificationsApi.update(editTask.id, {
+          title: formData.title,
+          message: message,
+          scheduledAt: new Date(formData.date).toISOString(),
+        } as any);
 
-          // Update local state
-          setTasks((prev) =>
-            prev.map((t) =>
-              t.id === editTask.id
-                ? {
-                    ...t,
-                    title: formData.title,
-                    details: message,
-                    dueDate: formData.date,
-                    frequency: formData.frequency as Task["frequency"],
-                    impact: formData.impact,
-                    link: formData.link,
-                    hasLogin: formData.hasLogin,
-                    username: formData.username,
-                    password: formData.password,
-                  }
-                : t
-            )
-          );
-        } catch (error) {
-          console.error("Error updating notification:", error);
-        }
+        // Update local state - ทั้ง tasks และ allTasks
+        const updateTask = (t: Task) =>
+          t.id === editTask.id
+            ? {
+                ...t,
+                title: formData.title,
+                details: message,
+                dueDate: formData.date,
+                frequency: formData.frequency as Task["frequency"],
+                impact: formData.impact,
+                link: formData.link,
+                hasLogin: formData.hasLogin,
+                username: formData.username,
+                password: formData.password,
+              }
+            : t;
+
+        setTasks((prev) => prev.map(updateTask));
+        setAllTasks((prev) => prev.map(updateTask));
       } else {
         // Create new task
         const notification = await notificationsApi.create({
@@ -497,14 +443,10 @@ export default function AdminNotificationPage() {
           category: "TASK",
           link: formData.link || undefined,
           urgencyDays: 3,
-          repeatIntervalDays:
-            repeatIntervalMap[
-              formData.frequency as keyof typeof repeatIntervalMap
-            ],
+          repeatIntervalDays: 0,
           recipients: [{ type: "ALL" }],
-        } as any); // TODO: Fix types
+        } as any);
 
-        // Convert API response to Task format
         const newTask: Task = {
           id: notification.id,
           title: notification.title,
@@ -520,7 +462,19 @@ export default function AdminNotificationPage() {
           password: formData.password,
         };
 
-        setTasks((prev) => [...prev, updateTaskPriority(newTask)]);
+        const updatedTask = updateTaskPriority(newTask);
+        
+        // เพิ่มใน allTasks
+        setAllTasks((prev) => [...prev, updatedTask]);
+        
+        // ถ้าอยู่ในเดือนปัจจุบัน ให้เพิ่มใน tasks ด้วย
+        const taskDate = new Date(formData.date);
+        const taskMonth = taskDate.getMonth() + 1;
+        const taskYear = taskDate.getFullYear();
+        
+        if (taskYear === selectedYear && taskMonth === selectedMonth) {
+          setTasks((prev) => [...prev, updatedTask]);
+        }
       }
 
       setIsAddDialogOpen(false);
@@ -583,6 +537,49 @@ export default function AdminNotificationPage() {
   const [rescheduleSource, setRescheduleSource] = useState<"manual" | "drag">(
     "drag"
   );
+
+  // Load notifications function
+  const loadNotifications = async () => {
+    try {
+      const res = await notificationsApi.getAll(1, 100);
+      if (res?.data) {
+        const mappedTasks = res.data.map(
+          (notification) =>
+            ({
+              id: notification.id,
+              title: notification.title,
+              details: notification.message || "",
+              dueDate: notification.scheduledAt?.split("T")[0] || "",
+              done: notification.status === "DONE",
+              priority: "pending" as const,
+              frequency: "no-repeat" as const,
+              impact: "",
+              link: "",
+              hasLogin: false,
+              username: "",
+              password: "",
+            } satisfies Task)
+        );
+        
+        const updatedAllTasks = mappedTasks.map((task) => updateTaskPriority(task));
+        setAllTasks(updatedAllTasks);
+        
+        // กรองข้อมูลสำหรับเดือนปัจจุบัน
+        const filteredTasks = updatedAllTasks.filter((task: Task) => {
+          if (!task.dueDate) return false;
+          const taskDate = new Date(task.dueDate);
+          const taskMonth = taskDate.getMonth() + 1;
+          const taskYear = taskDate.getFullYear();
+          return taskYear === selectedYear && taskMonth === selectedMonth;
+        });
+        
+        const updatedTasks = filteredTasks.map((task) => updateTaskPriority(task));
+        setTasks(updatedTasks);
+      }
+    } catch (error) {
+      console.error("Failed to load notifications:", error);
+    }
+  };
 
   return (
     <AppLayout
@@ -1002,7 +999,7 @@ export default function AdminNotificationPage() {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 002 2h10a2 2 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                         />
                       </svg>
                     </a>
@@ -1161,19 +1158,11 @@ export default function AdminNotificationPage() {
               onClick={async () => {
                 if (!submitTask) return;
 
-                const form = new FormData();
-                form.append("status", "DONE");
-                if (submitEvidence) {
-                  form.append("attachment", submitEvidence);
-                }
-
                 try {
-                  await fetch(`/api/notifications/${submitTask.id}/complete`, {
-                    method: "POST",
-                    body: form,
-                    credentials: "include",
-                  });
+                  // Use proper API call instead of direct fetch
+                  await notificationsApi.updateStatus(submitTask.id, 'DONE');
 
+                  // Update UI state
                   setTasks((prev) =>
                     prev.map((t) =>
                       t.id === submitTask.id ? { ...t, done: true } : t
@@ -1184,6 +1173,10 @@ export default function AdminNotificationPage() {
                       t.id === submitTask.id ? { ...t, done: true } : t
                     )
                   );
+
+                  // Refresh data for dashboard stats
+                  await loadCurrentMonthData();
+                  
                 } catch (e) {
                   console.error("ส่งงานล้มเหลว", e);
                 }

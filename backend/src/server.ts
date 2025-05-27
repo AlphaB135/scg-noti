@@ -1,4 +1,10 @@
 /**
+ * Load environment variables first to ensure they are available
+ */
+import dotenv from 'dotenv'
+dotenv.config()
+
+/**
  * @fileoverview Main server configuration and setup for the SCG Notification System.
  * Configures Express application with security middleware, rate limiting, API routes,
  * and OpenAPI documentation.

@@ -1,17 +1,18 @@
-"use client"
+//team-notification
 
-import type React from "react"
+"use client"
 
 import { useState, useEffect } from "react"
 import { Plus, Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { Input } from "@/components/ui/input" 
 import { Button } from "@/components/ui/button"
-import AppLayout from "@/components/layout/app-layout"
 import { useToast } from "@/hooks/use-toast"
+import AppLayout from "@/components/layout/app-layout"
+import { notificationsApi } from "@/lib/real-api"
 import NotificationFilters from "@/components/team-notification/notification-filters"
 import NotificationTabs from "@/components/team-notification/notification-tabs"
 import AddNotificationDialog from "@/components/team-notification/add-notification-dialog"
-import EditNotificationDialog from "@/components/team-notification/edit-notification-dialog"
+import EditNotificationDialog from "@/components/team-notification/edit-notification-dialog" 
 import DeleteNotificationDialog from "@/components/team-notification/delete-notification-dialog"
 import AssignmentStatusDialog from "@/components/team-notification/assignment-status-dialog"
 
@@ -45,7 +46,11 @@ type Notification = {
   assignments: NotificationAssignment[]
 }
 
-export default function TeamNotificationsPage() {
+type Props = {
+  teamId: string
+}
+
+export default function TeamNotificationsPage({ teamId }: Props) {
   const { toast } = useToast()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
@@ -70,7 +75,10 @@ export default function TeamNotificationsPage() {
     details: "",
     date: new Date().toISOString().split("T")[0],
     dueDate: new Date().toISOString().split("T")[0],
-    frequency: "no-repeat",
+    link: "",
+    username: "",
+    password: "",
+    frequency: "no-repeat", 
     type: "",
     priority: "medium",
     isTeamAssignment: false,
@@ -278,53 +286,41 @@ export default function TeamNotificationsPage() {
 
       if (!formData.isTeamAssignment && formData.selectedMembers.length === 0) {
         toast({
-          title: "กรุณาเลือกสมาชิก",
+          title: "กรุณาเลือกสมาชิก", 
           description: "กรุณาเลือกสมาชิกที่ต้องการมอบหมายงานอย่างน้อย 1 คน",
           variant: "destructive",
         })
         return
       }
 
-      // Create assignments
-      const assignments: NotificationAssignment[] = formData.selectedMembers.map((memberId) => {
-        const member = teamMembers.find((m) => m.id === memberId)
-        return {
-          memberId,
-          memberName: member?.name || "Unknown",
-          status: "pending",
-          assignedAt: new Date().toISOString().split("T")[0],
-        }
-      })
-
-      // Create new notification
-      const newNotification: Notification = {
-        id: Date.now().toString(), // Mock ID
+      // Build API payload
+      const payload = {
         title: formData.title,
-        details: formData.details,
-        date: formData.date,
-        dueDate: formData.dueDate,
-        frequency: formData.frequency,
-        type: formData.type || undefined,
-        priority: formData.priority as "low" | "medium" | "high" | "urgent",
-        status: "active",
-        isTeamAssignment: formData.isTeamAssignment,
-        assignments,
+        message: formData.details,
+        scheduledAt: new Date(formData.date).toISOString(),
+        link: formData.link || undefined,
+        linkUsername: formData.username || undefined,
+        linkPassword: formData.password || undefined,
+        recipients: formData.isTeamAssignment ? 
+          [{ type: 'GROUP' as const, groupId: teamId }] :
+          formData.selectedMembers.map(memberId => ({ type: 'USER' as const, userId: memberId }))
       }
 
-      // Add to list (in a real app, this would be an API call)
-      setNotifications([newNotification, ...notifications])
+      // Call API
+      await notificationsApi.create(payload)
 
       // Show success toast
       toast({
         title: "สร้างการแจ้งเตือนสำเร็จ",
-        description: `การแจ้งเตือน "${formData.title}" ถูกสร้างและมอบหมายให้ ${assignments.length} คนเรียบร้อยแล้ว`,
+        description: `การแจ้งเตือน "${formData.title}" ถูกสร้างเรียบร้อยแล้ว`,
       })
 
       // Close dialog and reset form
       setIsAddDialogOpen(false)
       resetForm()
+
     } catch (error) {
-      console.error("Failed to create notification:", error)
+      console.error("Failed to create notification:", error) 
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถสร้างการแจ้งเตือนได้",
@@ -333,60 +329,37 @@ export default function TeamNotificationsPage() {
     }
   }
 
-  // Edit notification
+  // Edit notification 
   const handleEditNotification = async () => {
     if (!currentNotification) return
 
     try {
-      // Create updated assignments
-      const currentAssignmentMap = new Map(currentNotification.assignments.map((a) => [a.memberId, a]))
-
-      const updatedAssignments: NotificationAssignment[] = formData.selectedMembers.map((memberId) => {
-        const member = teamMembers.find((m) => m.id === memberId)
-        const existingAssignment = currentAssignmentMap.get(memberId)
-
-        if (existingAssignment) {
-          return existingAssignment
-        }
-
-        return {
-          memberId,
-          memberName: member?.name || "Unknown",
-          status: "pending",
-          assignedAt: new Date().toISOString().split("T")[0],
-        }
-      })
-
-      // Create updated notification
-      const updatedNotification: Notification = {
-        ...currentNotification,
+      const payload = {
         title: formData.title,
-        details: formData.details,
-        date: formData.date,
-        dueDate: formData.dueDate,
-        frequency: formData.frequency,
-        type: formData.type || undefined,
-        priority: formData.priority as "low" | "medium" | "high" | "urgent",
-        isTeamAssignment: formData.isTeamAssignment,
-        assignments: updatedAssignments,
+        message: formData.details,
+        scheduledAt: new Date(formData.date).toISOString(),
+        link: formData.link || undefined,
+        linkUsername: formData.username || undefined,
+        linkPassword: formData.password || undefined,
+        recipients: formData.isTeamAssignment ?
+          [{ type: 'GROUP' as const, groupId: teamId }] :
+          formData.selectedMembers.map(memberId => ({ type: 'USER' as const, userId: memberId }))
       }
 
-      // Update in list (in a real app, this would be an API call)
-      setNotifications(notifications.map((n) => (n.id === currentNotification.id ? updatedNotification : n)))
+      await notificationsApi.update(currentNotification.id, payload)
 
-      // Show success toast
       toast({
         title: "แก้ไขการแจ้งเตือนสำเร็จ",
         description: `การแจ้งเตือน "${formData.title}" ถูกแก้ไขเรียบร้อยแล้ว`,
       })
 
-      // Close dialog and reset form
       setIsEditDialogOpen(false)
       resetForm()
+
     } catch (error) {
       console.error("Failed to update notification:", error)
       toast({
-        title: "เกิดข้อผิดพลาด",
+        title: "เกิดข้อผิดพลาด", 
         description: "ไม่สามารถแก้ไขการแจ้งเตือนได้",
         variant: "destructive",
       })
@@ -398,23 +371,21 @@ export default function TeamNotificationsPage() {
     if (!currentNotification) return
 
     try {
-      // Remove from list (in a real app, this would be an API call)
-      setNotifications(notifications.filter((n) => n.id !== currentNotification.id))
+      await notificationsApi.remove(currentNotification.id)
 
-      // Show success toast
       toast({
         title: "ลบการแจ้งเตือนสำเร็จ",
         description: `ลบการแจ้งเตือน "${currentNotification.title}" เรียบร้อยแล้ว`,
       })
 
-      // Close dialog
       setIsDeleteDialogOpen(false)
+
     } catch (error) {
       console.error("Failed to delete notification:", error)
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถลบการแจ้งเตือนได้",
-        variant: "destructive",
+        variant: "destructive", 
       })
     }
   }

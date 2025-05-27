@@ -1,15 +1,16 @@
 "use client"
 
 import type React from "react"
-
+import { useState, FormEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Eye, EyeOff, ShieldCheck } from "lucide-react"
-import { useState } from "react"
+import { Eye, EyeOff, ShieldCheck, Loader2 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
+import { toast } from "sonner"
+import { notificationsApi } from "@/lib/real-api"
 
 export type ReminderFormData = {
   title: string
@@ -35,6 +36,7 @@ type ReminderFormProps = {
   setAuthPassword?: (value: string) => void
   hasLogin: boolean
   setHasLogin: (value: boolean) => void
+  onSubmit?: (e: FormEvent<HTMLFormElement>) => void
 }
 
 export default function ReminderForm({
@@ -49,12 +51,77 @@ export default function ReminderForm({
   setAuthPassword,
   hasLogin,
   setHasLogin,
+  onSubmit,
 }: ReminderFormProps) {
   const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false) 
   const prefix = isEdit ? "edit-" : ""
 
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      // Form validation
+      if (!formData.title.trim()) {
+        toast.error('กรุณาระบุหัวข้องาน')
+        return
+      }
+
+      if (!formData.date) {
+        toast.error('กรุณาระบุวันที่แจ้งเตือน')
+        return
+      }
+
+      if (hasLogin && !formData.username) {
+        toast.error('กรุณาระบุ username สำหรับการล็อคอิน')
+        return
+      }
+
+      if (hasLogin && !formData.password) {
+        toast.error('กรุณาระบุ password สำหรับการล็อคอิน')
+        return
+      }
+
+      const scheduledDate = new Date(formData.date)
+      
+      // Build notification payload
+      const notification = {
+        title: formData.title,
+        message: formData.details || 'ไม่มีรายละเอียด',
+        type: 'TODO' as const,
+        category: 'REMINDER',
+        scheduledAt: scheduledDate.toISOString(),
+        dueDate: scheduledDate.toISOString(), 
+        link: formData.link || undefined,
+        linkUsername: hasLogin ? formData.username : undefined,
+        linkPassword: hasLogin ? formData.password : undefined,
+        urgencyDays: 0,
+        repeatIntervalDays: getRepeatIntervalDays(formData.frequency),
+        recipients: [{ type: 'ALL' as const }]
+      }
+
+      // Call notifications API
+      await notificationsApi.create(notification)
+
+      // Show success message
+      toast.success(isEdit ? 'แก้ไขการแจ้งเตือนสำเร็จ' : 'สร้างการแจ้งเตือนสำเร็จ')
+
+      // Reset form
+      if (onSubmit) {
+        onSubmit(e)
+      }
+
+    } catch (error) {
+      console.error('Error saving reminder:', error)
+      toast.error('ไม่สามารถบันทึกการแจ้งเตือนได้')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
-    <div className="grid gap-6 py-6">
+    <form onSubmit={handleSubmit} className="grid gap-6 py-6">
       <div className="grid gap-2">
         <Label htmlFor={`${prefix}title`} className="text-sm font-medium text-[#2c3e50]">
           หัวข้องาน
@@ -159,11 +226,12 @@ export default function ReminderForm({
             onCheckedChange={(checked) => {
               const isChecked = checked === true
               setHasLogin(isChecked)
+              // Form data is managed by parent component
               handleInputChange({
                 target: {
-                  name: "hasLogin",
-                  value: isChecked,
-                },
+                  name: 'hasLogin',
+                  value: isChecked
+                }
               } as React.ChangeEvent<HTMLInputElement>)
             }}
             className="text-[#2c3e50] focus:ring-[#2c3e50]"
@@ -266,6 +334,41 @@ export default function ReminderForm({
           </div>
         )}
       </div>
-    </div>
+
+      <div className="flex justify-end mt-4">
+        <Button 
+          type="submit" 
+          className="bg-[#2c3e50] hover:bg-[#1a2530] text-white"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              กำลังบันทึก...
+            </>
+          ) : (
+            'บันทึก'
+          )}
+        </Button>
+      </div>
+    </form>
   )
+}
+
+// Helper function to convert frequency to days
+function getRepeatIntervalDays(frequency: string): number {
+  switch (frequency) {
+    case 'daily':
+      return 1
+    case 'weekly':
+      return 7
+    case 'monthly':
+      return 30 
+    case 'quarterly':
+      return 90
+    case 'yearly':
+      return 365
+    default:
+      return 0
+  }
 }

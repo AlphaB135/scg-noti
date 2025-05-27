@@ -46,7 +46,23 @@ const withCache = async <T>(key: string, fn: () => Promise<T>): Promise<T> => {
   return data
 }
 
+// Cache invalidation helper
+export const invalidateCache = (pattern?: string) => {
+  if (pattern) {
+    // Invalidate specific cache entries matching pattern
+    for (const key of cache.keys()) {
+      if (key.includes(pattern)) {
+        cache.delete(key)
+      }
+    }
+  } else {
+    // Clear all cache
+    cache.clear()
+  }
+}
+
 export async function getDashboardStats(): Promise<DashboardStats> {
+  // Remove cache for dashboard stats to ensure immediate updates
   const resp = await api.get<DashboardStats>('/dashboard/overview')
   return resp.data
 }
@@ -80,8 +96,12 @@ export const notificationsApi = {
   update: (id: string, data: UpdateNotificationInput): Promise<Notification> =>
     api.put<Notification>(`/notifications/${id}`, data).then(r => r.data),
 
-  updateStatus: (id: string, status: keyof NotificationStatus): Promise<Notification> =>
-    api.patch<Notification>(`/notifications/${id}/status`, { status }).then(r => r.data),
+  updateStatus: async (id: string, status: keyof NotificationStatus): Promise<Notification> => {
+    const result = await api.patch<Notification>(`/notifications/${id}`, { status }).then(r => r.data)
+    // Invalidate all notification and dashboard caches after status update
+    invalidateCache('notifications')
+    return result
+  },
 
   reopen: (id: string, reason: string): Promise<Notification> =>
     api.post<Notification>(`/notifications/${id}/reopen`, { reason }).then(r => r.data),
@@ -91,6 +111,34 @@ export const notificationsApi = {
 
   remove: (id: string): Promise<void> =>
     api.delete<void>(`/notifications/${id}`).then(r => r.data),
+}
+
+// Team API
+export const teamApi = {
+  getTeams: (): Promise<any[]> =>
+    api.get('/teams').then(r => r.data.data || r.data),
+
+  getTeamById: (teamId: string): Promise<any> =>
+    api.get(`/teams/${teamId}`).then(r => r.data.data || r.data),
+
+  getTeamMembers: (teamId: string): Promise<any[]> =>
+    api.get(`/teams/${teamId}/members`).then(r => r.data.data || r.data),
+
+  addTeamMember: (teamId: string, employeeId: string, role: string): Promise<any> =>
+    api.post(`/teams/${teamId}/members`, {
+      employeeId,
+      isLeader: role === 'หัวหน้างาน',
+      role
+    }).then(r => r.data.data || r.data),
+
+  removeTeamMember: (teamId: string, memberId: string): Promise<void> =>
+    api.delete(`/teams/${teamId}/members/${memberId}`).then(r => r.data),
+
+  leaveTeam: (teamId: string, userId: string): Promise<void> =>
+    api.delete(`/teams/${teamId}/members/${userId}`).then(r => r.data),
+
+  getAvailableEmployees: (teamId: string): Promise<any[]> =>
+    api.get(`/teams/${teamId}/available-employees`).then(r => r.data.data || r.data).catch(() => []),
 }
 
 export default api

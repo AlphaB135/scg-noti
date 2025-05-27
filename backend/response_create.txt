@@ -1,0 +1,30 @@
+Note: Unnecessary use of -X or --request, POST is already inferred.
+* Host localhost:3001 was resolved.
+* IPv6: ::1
+* IPv4: 127.0.0.1
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying [::1]:3001...
+* Connected to localhost (::1) port 3001
+> POST /api/notifications HTTP/1.1
+> Host: localhost:3001
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Type: application/json
+> Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI0NDRkNTI0MS0wMzJiLTQ5YTgtODdkOC1jZjBlZjU2ZDg5ZGQiLCJ1c2VySWQiOiJhNzc0MTI0Ny0zNzYxLTRiMjEtOTI4OC1hN2ZjNzU0NzZmZmEiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NDgyNTk0MDEsImV4cCI6MTc0ODI2MDMwMX0.7ZJU8z_KYY4QqMROkoEm68--VeH31EGg5-HIuzeir-U
+> Content-Length: 423
+> 
+} [423 bytes data]
+< HTTP/1.1 500 Internal Server Error
+< X-Powered-By: Express
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 73
+< ETag: W/"49-xWXVt5Kwa0VypWc/0hge2lNdRPE"
+< Date: Mon, 26 May 2025 11:36:41 GMT
+< Connection: keep-alive
+< Keep-Alive: timeout=5
+< 
+{ [73 bytes data]
+100   496  100    73  100   423   5648  32732 --:--:-- --:--:-- --:--:-- 41333
+* Connection #0 to host localhost left intact
+{"error":"Internal Server Error","detail":"An unexpected error occurred"}
