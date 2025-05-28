@@ -31,6 +31,7 @@ import {
   getTypeIcon,
 } from "@/components/manage-reminder/reminder-utils"
 import { useToast } from "@/hooks/use-toast"
+import AddNotificationButton from '@/components/AddNotificationButton'
 
 // Convert UnifiedTask to Reminder type for the UI
 type Reminder = {
@@ -118,7 +119,7 @@ export default function ManageReminderPage() {
     try {
       console.log('Loading reminders for page:', targetPage)
       // เปลี่ยนมาใช้ API ดึงทุกรายการ
-const response = await notificationsApi.getAll(targetPage, 20)
+const response = await notificationsApi.getAll(targetPage, -1)
 
       console.log('API response:', response)
       
@@ -128,7 +129,7 @@ const response = await notificationsApi.getAll(targetPage, 20)
       setReminders(convertedReminders)
 
       // Calculate total pages based on response
-      setTotalPages(response.meta.totalPages || Math.ceil(response.meta.total / 20))
+      setTotalPages(response.meta.totalPages || Math.ceil(response.meta.total / -1))
     } catch (error) {
       console.error("Failed to load reminders:", error)
       toast({
@@ -520,15 +521,12 @@ const response = await notificationsApi.getAll(targetPage, 20)
               >
                 ตัวกรอง {isFiltersVisible ? "▲" : "▼"}
               </Button>
-              <Button
-                onClick={() => {
-                  resetForm()
-                  setIsAddDialogOpen(true)
+              <AddNotificationButton
+                onCreated={(newTask) => {
+                  const newReminder = convertNotificationToReminder(newTask);
+                  setReminders((prev) => [newReminder, ...prev]);
                 }}
-                className="flex-1 sm:flex-none bg-[#2c3e50] hover:bg-[#1a2530] text-white transition-colors"
-              >
-                <Plus className="mr-2 h-4 w-4" /> สร้างการแจ้งเตือน
-              </Button>
+              />
             </div>
           </div>
 
