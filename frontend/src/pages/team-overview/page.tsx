@@ -1,3 +1,5 @@
+//team-overview
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,12 +11,9 @@ import { TeamFilter } from "@/components/team-overview/team-filter";
 import { MemberDetailsModal } from "@/components/team-overview/member-details-modal";
 import AppLayout from "@/components/layout/app-layout";
 import { teamsApi } from "@/lib/api/teams";
-<<<<<<< HEAD
-=======
 import { notificationsApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
->>>>>>> 9c9168b83a58a57f2055ca73d7fac4b3753d7707
 import type { Team } from "@/components/types/team";
 
 // Task status interfaces for member stats
@@ -46,6 +45,12 @@ interface Member {
 // No longer need MemberWithStats interface since we're using Member interface
 
 export default function TeamOverviewPage() {
+  const { toast } = useToast();
+  const { user } = useAuth();
+  
+  // Derive isLeader from user role
+  const isLeader = user?.role === "TEAM_LEAD" || user?.role === "ADMIN" || user?.role === "SUPERADMIN";
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState("");
@@ -54,6 +59,55 @@ export default function TeamOverviewPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [memberStats, setMemberStats] = useState<Record<string, MemberTaskStats>>({});
+
+  // Notification handling functions
+  const sendTeamNotification = async (message: string) => {
+    if (!selectedTeamId) return;
+    
+    try {
+      await notificationsApi.create({
+        title: "Team Overview Alert",
+        message,
+        scheduledAt: new Date().toISOString(),
+        recipients: [{ type: "GROUP", groupId: selectedTeamId }]
+      });
+
+      toast({
+        title: "Notification sent",
+        description: "Team notification sent successfully"
+      });
+    } catch (error) {
+      console.error("Failed to send team notification:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send team notification",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const sendMemberNotification = async (memberId: string, message: string) => {
+    try {
+      await notificationsApi.create({
+        title: "Member Task Alert",
+        message,
+        scheduledAt: new Date().toISOString(),
+        recipients: [{ type: "USER", userId: memberId }]
+      });
+
+      toast({
+        title: "Notification sent",
+        description: "Member notification sent successfully"
+      });
+    } catch (error) {
+      console.error("Failed to send member notification:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send member notification",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Load teams data
   useEffect(() => {
@@ -233,6 +287,7 @@ export default function TeamOverviewPage() {
         onSelectTeam={setSelectedTeamId}
         hasMultipleTeams={teams.length > 1}
         onRenameTeam={handleRenameTeam}
+        isLeader={isLeader}
       />
 
       <div className="mt-6">
@@ -243,6 +298,7 @@ export default function TeamOverviewPage() {
           totalTasks={totalTasks}
           completionRate={completionRate}
           onStatsClick={handleStatsClick}
+          onNotifyTeam={sendTeamNotification}
         />
       </div>
 
@@ -268,7 +324,11 @@ export default function TeamOverviewPage() {
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredMembers.length > 0 ? (
           filteredMembers.map((member) => (
-            <MemberCard key={member.id} member={member} />
+            <MemberCard 
+              key={member.id} 
+              member={member}
+              onNotify={sendMemberNotification}
+            />
           ))
         ) : (
           <div className="col-span-full bg-white rounded-lg shadow p-6 text-center">

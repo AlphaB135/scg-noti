@@ -95,8 +95,11 @@ export default function AdminNotificationPage() {
   const loadCurrentMonthData = useCallback(async () => {
     try {
       // โหลดข้อมูลการแจ้งเตือนทั้งหมด
-      const allResponse = await notificationsApi.getCurrentMonthNotifications(selectedMonth, selectedYear);
-      console.log('📥 Raw API response:', allResponse);
+      const allResponse = await notificationsApi.getCurrentMonthNotifications(
+        selectedMonth,
+        selectedYear
+      );
+      console.log("📥 Raw API response:", allResponse);
 
       if (!allResponse?.data) {
         throw new Error("Invalid response format");
@@ -119,31 +122,47 @@ export default function AdminNotificationPage() {
             password: "",
           } satisfies Task)
       );
-      console.log('🔄 Mapped tasks:', allMappedTasks);
+      console.log("🔄 Mapped tasks:", allMappedTasks);
 
       // อัพเดทสถานะงานก่อนเซ็ตค่า
-      const updatedAllTasks = allMappedTasks.map((task) => updateTaskPriority(task));
-      console.log('⭐ Tasks with priority:', updatedAllTasks);
-      
+      const updatedAllTasks = allMappedTasks.map((task) =>
+        updateTaskPriority(task)
+      );
+      console.log("⭐ Tasks with priority:", updatedAllTasks);
+
       // กรองข้อมูลตามเดือนและปีที่เลือก
       const filteredTasks = updatedAllTasks.filter((task) => {
         if (!task.dueDate) {
-          console.log('⚠️ Task missing dueDate:', task);
+          console.log("⚠️ Task missing dueDate:", task);
           return false;
         }
-        
-        const [taskYear, taskMonth] = task.dueDate.split('-').map(Number);
-        const matches = taskMonth === selectedMonth && taskYear === selectedYear;
-        
+
+        const [taskYear, taskMonth] = task.dueDate.split("-").map(Number);
+        const matches =
+          taskMonth === selectedMonth && taskYear === selectedYear;
+
         if (matches) {
-          console.log('✅ Task matches current month/year:', task);
+          console.log("✅ Task matches current month/year:", task);
         } else {
-          console.log('❌ Task does not match:', {task, taskMonth, taskYear, selectedMonth, selectedYear});
+          console.log("❌ Task does not match:", {
+            task,
+            taskMonth,
+            taskYear,
+            selectedMonth,
+            selectedYear,
+          });
         }
-        
+
         return matches;
       });
-      console.log('📅 Filtered tasks for', selectedMonth, '/', selectedYear, ':', filteredTasks);
+      console.log(
+        "📅 Filtered tasks for",
+        selectedMonth,
+        "/",
+        selectedYear,
+        ":",
+        filteredTasks
+      );
 
       setTasks(filteredTasks);
       setAllTasks(updatedAllTasks); // เก็บข้อมูลทั้งหมดไว้สำหรับใช้งานอื่น
@@ -161,13 +180,13 @@ export default function AdminNotificationPage() {
   useEffect(() => {
     const handleFocus = () => {
       // Invalidate cache และโหลดข้อมูลใหม่
-      invalidateCache('notifications');
+      invalidateCache("notifications");
       loadCurrentMonthData();
     };
 
-    window.addEventListener('focus', handleFocus);
+    window.addEventListener("focus", handleFocus);
     return () => {
-      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener("focus", handleFocus);
     };
   }, [loadCurrentMonthData]);
 
@@ -291,22 +310,22 @@ export default function AdminNotificationPage() {
     // กรองข้อมูลใหม่จาก allTasks
     const filteredTasks = allTasks.filter((task: Task) => {
       if (!task.dueDate) {
-        console.log('⚠️ Task has no dueDate:', task);
+        console.log("⚠️ Task has no dueDate:", task);
         return false;
       }
       // แปลง date string เป็น UTC เพื่อให้แน่ใจว่าไม่มีปัญหาเรื่อง timezone
-      const [y, m, d] = task.dueDate.split('-').map(Number);
+      const [y, m, d] = task.dueDate.split("-").map(Number);
       if (!y || !m || !d) {
-        console.log('⚠️ Invalid date format:', task.dueDate);
+        console.log("⚠️ Invalid date format:", task.dueDate);
         return false;
       }
       return y === year && m === month;
     });
-    console.log('🔍 Filtered tasks for', month, '/', year, ':', filteredTasks);
+    console.log("🔍 Filtered tasks for", month, "/", year, ":", filteredTasks);
 
     // อัพเดทสถานะงานก่อนเซ็ตค่า
     const updatedTasks = filteredTasks.map((task) => updateTaskPriority(task));
-    console.log('✨ Final tasks with priority:', updatedTasks);
+    console.log("✨ Final tasks with priority:", updatedTasks);
     setTasks(updatedTasks);
   };
 
@@ -315,27 +334,18 @@ export default function AdminNotificationPage() {
     if (!taskToReopen || !reopenReason.trim()) return;
 
     try {
-      const updatedTask = await notificationsApi.reopen(
-        taskToReopen.id,
-        reopenReason
-      );
+      // ใช้ updateStatus แทน reopen
+      await notificationsApi.updateStatus(taskToReopen.id, "PENDING");
 
       // อัปเดตทั้ง tasks และ allTasks
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === updatedTask.id
-            ? { ...t, done: false, reopenHistory: updatedTask.reopenHistory }
-            : t
-        )
-      );
+      const updateTask = (t: Task) =>
+        t.id === taskToReopen.id ? { ...t, done: false } : t;
 
-      setAllTasks((prev) =>
-        prev.map((t) =>
-          t.id === updatedTask.id
-            ? { ...t, done: false, reopenHistory: updatedTask.reopenHistory }
-            : t
-        )
-      );
+      setTasks((prev) => prev.map(updateTask));
+      setAllTasks((prev) => prev.map(updateTask));
+
+      // รีเฟรชข้อมูลสำหรับอัพเดท dashboard stats
+      await loadCurrentMonthData();
 
       setTaskToReopen(null);
       setReopenReason("");
@@ -354,67 +364,27 @@ export default function AdminNotificationPage() {
     )
       return;
 
-<<<<<<< HEAD
-    const newDate =
-      rescheduleSource === "manual" ? newDueDate : taskToReschedule.dueDate!;
-    await notificationsApi.reschedule(
-      taskToReschedule.id,
-      newDate,
-      rescheduleReason
-    );
-    try {
-      const updatedTask = await notificationsApi.reschedule(
-        taskToReschedule.id,
-        rescheduleSource === "manual" ? newDueDate : taskToReschedule.dueDate!,
-        rescheduleReason
-      );
-
-      // อัปเดตทั้ง tasks และ allTasks เพื่อให้แน่ใจว่าข้อมูลตรงกัน
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === updatedTask.id
-            ? {
-                ...t,
-                dueDate: updatedTask.scheduledAt?.split("T")[0],
-                rescheduleHistory: updatedTask.rescheduleHistory,
-              }
-            : t
-        )
-      );
-
-      setAllTasks((prev) =>
-        prev.map((t) =>
-          t.id === updatedTask.id
-            ? {
-                ...t,
-                dueDate: updatedTask.scheduledAt?.split("T")[0],
-                rescheduleHistory: updatedTask.rescheduleHistory,
-              }
-            : t
-        )
-      );
-
-=======
     setIsRescheduling(true);
     try {
       // ใช้ newDueDate สำหรับทั้ง manual และ drag
       const targetDate = newDueDate;
-      
+
       // บันทึกข้อมูลใหม่ไปยัง server
       await notificationsApi.update(taskToReschedule.id, {
         scheduledAt: new Date(targetDate).toISOString(),
       } as any);
 
       // ปิด dialog และ clear form
->>>>>>> 9c9168b83a58a57f2055ca73d7fac4b3753d7707
       setTaskToReschedule(null);
       setRescheduleReason("");
       setNewDueDate("");
       setIsRescheduleDialogOpen(false);
-      
+
       // แสดงการแจ้งเตือนความสำเร็จ
-      console.log(`✅ Task "${taskToReschedule.title}" rescheduled to ${targetDate} successfully!`);
-      
+      console.log(
+        `✅ Task "${taskToReschedule.title}" rescheduled to ${targetDate} successfully!`
+      );
+
       // Refresh หน้าทั้งหมดเพื่อให้แน่ใจว่า UI อัพเดท
       window.location.reload();
     } catch (error) {
@@ -430,27 +400,14 @@ export default function AdminNotificationPage() {
     if (!target) return;
 
     if (!target.done) {
+      // ถ้างานยังไม่เสร็จ ให้แสดง submit dialog
       setSubmitTask(target);
       setIsSubmitDialogOpen(true);
       return;
     }
 
+    // ถ้างานเสร็จแล้ว ให้เปิด reopen dialog
     openReopenDialog(target);
-    try {
-      const form = new FormData();
-      form.append("attachment", submitEvidence!);
-      await notificationsApi.complete(submitTask.id, form);
-
-      // อัปเดตทั้ง tasks และ allTasks
-      setTasks((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, done: true } : t))
-      );
-      setAllTasks((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, done: true } : t))
-      );
-    } catch (error) {
-      console.error("Failed to update task status:", error);
-    }
   };
   // Load existing task data when editing
   useEffect(() => {
@@ -480,53 +437,39 @@ export default function AdminNotificationPage() {
     }
 
     try {
-      // Create message with all details
       const message = `${formData.details}\n\nผลกระทบ: ${formData.impact}${
         formData.hasLogin
           ? `\n\nข้อมูลการเข้าสู่ระบบ:\nUsername: ${formData.username}\nPassword: ${formData.password}`
           : ""
       }`;
 
-      const repeatIntervalMap = {
-        "no-repeat": 0,
-        daily: 1,
-        weekly: 7,
-        monthly: 30,
-        quarterly: 90,
-        yearly: 365,
-      };
-
       if (editTask) {
         // Update existing task
-        try {
-          await notificationsApi.update(editTask.id, {
-            title: formData.title,
-            message: message,
-            scheduledAt: new Date(formData.date).toISOString(),
-          } as any); // TODO: Fix types
+        await notificationsApi.update(editTask.id, {
+          title: formData.title,
+          message: message,
+          scheduledAt: new Date(formData.date).toISOString(),
+        } as any);
 
-          // Update local state
-          setTasks((prev) =>
-            prev.map((t) =>
-              t.id === editTask.id
-                ? {
-                    ...t,
-                    title: formData.title,
-                    details: message,
-                    dueDate: formData.date,
-                    frequency: formData.frequency as Task["frequency"],
-                    impact: formData.impact,
-                    link: formData.link,
-                    hasLogin: formData.hasLogin,
-                    username: formData.username,
-                    password: formData.password,
-                  }
-                : t
-            )
-          );
-        } catch (error) {
-          console.error("Error updating notification:", error);
-        }
+        // Update local state - ทั้ง tasks และ allTasks
+        const updateTask = (t: Task) =>
+          t.id === editTask.id
+            ? {
+                ...t,
+                title: formData.title,
+                details: message,
+                dueDate: formData.date,
+                frequency: formData.frequency as Task["frequency"],
+                impact: formData.impact,
+                link: formData.link,
+                hasLogin: formData.hasLogin,
+                username: formData.username,
+                password: formData.password,
+              }
+            : t;
+
+        setTasks((prev) => prev.map(updateTask));
+        setAllTasks((prev) => prev.map(updateTask));
       } else {
         // Create new task
         const notification = await notificationsApi.create({
@@ -537,14 +480,10 @@ export default function AdminNotificationPage() {
           category: "TASK",
           link: formData.link || undefined,
           urgencyDays: 3,
-          repeatIntervalDays:
-            repeatIntervalMap[
-              formData.frequency as keyof typeof repeatIntervalMap
-            ],
+          repeatIntervalDays: 0,
           recipients: [{ type: "ALL" }],
-        } as any); // TODO: Fix types
+        } as any);
 
-        // Convert API response to Task format
         const newTask: Task = {
           id: notification.id,
           title: notification.title,
@@ -560,7 +499,19 @@ export default function AdminNotificationPage() {
           password: formData.password,
         };
 
-        setTasks((prev) => [...prev, updateTaskPriority(newTask)]);
+        const updatedTask = updateTaskPriority(newTask);
+
+        // เพิ่มใน allTasks
+        setAllTasks((prev) => [...prev, updatedTask]);
+
+        // ถ้าอยู่ในเดือนปัจจุบัน ให้เพิ่มใน tasks ด้วย
+        const taskDate = new Date(formData.date);
+        const taskMonth = taskDate.getMonth() + 1;
+        const taskYear = taskDate.getFullYear();
+
+        if (taskYear === selectedYear && taskMonth === selectedMonth) {
+          setTasks((prev) => [...prev, updatedTask]);
+        }
       }
 
       setIsAddDialogOpen(false);
@@ -625,8 +576,6 @@ export default function AdminNotificationPage() {
   );
   const [isRescheduling, setIsRescheduling] = useState(false);
 
-<<<<<<< HEAD
-=======
   // Load notifications function
   const loadNotifications = async () => {
     try {
@@ -649,32 +598,50 @@ export default function AdminNotificationPage() {
               password: "",
             } satisfies Task)
         );
-        
-        const updatedAllTasks = mappedTasks.map((task) => updateTaskPriority(task));
+
+        const updatedAllTasks = mappedTasks.map((task) =>
+          updateTaskPriority(task)
+        );
         setAllTasks(updatedAllTasks);
-        
+
         // กรองข้อมูลสำหรับเดือนปัจจุบัน
         const filteredTasks = updatedAllTasks.filter((task: Task) => {
           if (!task.dueDate) {
-            console.log('⚠️ Task missing dueDate:', task);
+            console.log("⚠️ Task missing dueDate:", task);
             return false;
           }
-          
+
           // แยกปีและเดือนจาก dueDate string โดยตรง ("YYYY-MM-DD")
-          const [taskYear, taskMonth] = task.dueDate.split('-').map(Number);
-          const matches = taskMonth === selectedMonth && taskYear === selectedYear;
-          
+          const [taskYear, taskMonth] = task.dueDate.split("-").map(Number);
+          const matches =
+            taskMonth === selectedMonth && taskYear === selectedYear;
+
           if (matches) {
-            console.log('✅ Task matches current month/year:', task);
+            console.log("✅ Task matches current month/year:", task);
           } else {
-            console.log('❌ Task does not match:', {task, taskMonth, taskYear, selectedMonth, selectedYear});
+            console.log("❌ Task does not match:", {
+              task,
+              taskMonth,
+              taskYear,
+              selectedMonth,
+              selectedYear,
+            });
           }
-          
+
           return matches;
         });
-        console.log('📅 Filtered tasks for', selectedMonth, '/', selectedYear, ':', filteredTasks);
-        
-        const updatedTasks = filteredTasks.map((task) => updateTaskPriority(task));
+        console.log(
+          "📅 Filtered tasks for",
+          selectedMonth,
+          "/",
+          selectedYear,
+          ":",
+          filteredTasks
+        );
+
+        const updatedTasks = filteredTasks.map((task) =>
+          updateTaskPriority(task)
+        );
         setTasks(updatedTasks);
       }
     } catch (error) {
@@ -682,7 +649,22 @@ export default function AdminNotificationPage() {
     }
   };
 
->>>>>>> 9c9168b83a58a57f2055ca73d7fac4b3753d7707
+  const handleDeleteTask = async (id: string) => {
+    try {
+      await notificationsApi.delete(id);
+
+      // ตัดออกจาก state ทุกชุด
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+      setAllTasks((prev) => prev.filter((t) => t.id !== id));
+
+      // (ถ้าใช้สถิติบทความ/การ์ด) โหลดข้อมูลใหม่
+      await loadCurrentMonthData();
+    } catch (err) {
+      console.error("ลบงานไม่สำเร็จ:", err);
+      alert("เกิดข้อผิดพลาด — ลบงานไม่สำเร็จ");
+    }
+  };
+
   return (
     <AppLayout
       title="ระบบเตือนความจำ"
@@ -720,9 +702,10 @@ export default function AdminNotificationPage() {
             }}
             onViewTaskDetail={openTaskDetailDialog}
             onRescheduleTask={openRescheduleDialog}
-            onAddTask={() => {
-              resetForm();
-              setIsAddDialogOpen(true);
+            onDeleteTask={handleDeleteTask} // 🆕
+            onAddTask={(newTask) => {
+              const withPriority = updateTaskPriority(newTask);
+              setAllTasks((prev) => [...prev, withPriority]);
             }}
             onExpandTodo={() => {
               setExpandTodo(true);
@@ -1105,7 +1088,7 @@ export default function AdminNotificationPage() {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 002 2h10a2 2 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                         />
                       </svg>
                     </a>
@@ -1156,6 +1139,18 @@ export default function AdminNotificationPage() {
               className="w-full md:w-auto"
             >
               แก้ไข
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (taskDetail && confirm("ยืนยันลบงานนี้?")) {
+                  handleDeleteTask(taskDetail.id);
+                  setIsTaskDetailDialogOpen(false);
+                }
+              }}
+              className="w-full md:w-auto"
+            >
+              ลบงาน
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1268,19 +1263,11 @@ export default function AdminNotificationPage() {
               onClick={async () => {
                 if (!submitTask) return;
 
-                const form = new FormData();
-                form.append("status", "DONE");
-                if (submitEvidence) {
-                  form.append("attachment", submitEvidence);
-                }
-
                 try {
-                  await fetch(`/api/notifications/${submitTask.id}/complete`, {
-                    method: "POST",
-                    body: form,
-                    credentials: "include",
-                  });
+                  // Use proper API call instead of direct fetch
+                  await notificationsApi.updateStatus(submitTask.id, "DONE");
 
+                  // Update UI state
                   setTasks((prev) =>
                     prev.map((t) =>
                       t.id === submitTask.id ? { ...t, done: true } : t
@@ -1291,6 +1278,9 @@ export default function AdminNotificationPage() {
                       t.id === submitTask.id ? { ...t, done: true } : t
                     )
                   );
+
+                  // Refresh data for dashboard stats
+                  await loadCurrentMonthData();
                 } catch (e) {
                   console.error("ส่งงานล้มเหลว", e);
                 }

@@ -4,6 +4,7 @@ import { TeamSelector } from "./team-selector"
 import type { Team } from "@/lib/team-data"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 
 interface TeamHeaderProps {
   teamName: string
@@ -13,6 +14,7 @@ interface TeamHeaderProps {
   onSelectTeam?: (teamId: string) => void
   hasMultipleTeams?: boolean
   onRenameTeam?: (newName: string) => void // ✅ เพิ่มเพื่อให้แก้ชื่อได้
+  isLeader: boolean
 }
 
 export function TeamHeader({
@@ -23,6 +25,7 @@ export function TeamHeader({
   onSelectTeam = () => {},
   hasMultipleTeams = false,
   onRenameTeam = () => {}, // ✅ default ไม่ทำอะไร
+  isLeader,
 }: TeamHeaderProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [newName, setNewName] = useState(teamName)
@@ -57,6 +60,7 @@ export function TeamHeader({
             ) : (
               <>
                 <h1 className="text-2xl font-bold text-gray-800">{teamName}</h1>
+                {isLeader && <Badge className="ml-2">หัวหน้าทีม</Badge>}
                 <button
                   className="text-gray-400 hover:text-gray-600"
                   onClick={() => {

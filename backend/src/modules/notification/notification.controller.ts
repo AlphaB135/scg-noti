@@ -1,5 +1,28 @@
 /**
- * @fileoverview Controller for managing notifications in the SCG Notification System.
+ * @fileoverview Controller for managing notifications in the Sexport async function updateStatus(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { id } = req.params;
+    const data = updateStatusSchema.parse(req.body);
+    
+    // Update notification via service
+    const notification = await updateNotificationStatus(id, data.status);
+    
+    // Invalidate caches
+    await CacheService.invalidateNotificationCaches();
+    
+    res.json({
+      id: notification.id,
+      status: notification.status,
+      updatedAt: notification.updatedAt
+    });
+  } catch (err) {
+    next(err);
+  }
+}stem.
  * Handles creation, updates, listing, and scheduling of notifications with proper
  * caching and database interactions.
  */
@@ -9,6 +32,8 @@ import { prisma } from '../../prisma'
 import { BadRequestError } from '../../lib/errors'
 import { CacheService } from '../../services/cache.service'
 import type { Notification } from '@prisma/client'
+import { createNotificationSchema, updateNotificationSchema, updateStatusSchema } from './notification.dto'
+import { create, update, updateStatus as updateNotificationStatus } from './notification.service'
 
 /**
  * Creates a new notification with recipients and approval workflow.
@@ -30,32 +55,16 @@ export async function createNotification(
   next: NextFunction
 ): Promise<void> {
   try {
-    // Create notification with nested recipient and approval relations
-    const notification = await prisma.notification.create({
-      data: {
-        ...req.body,
-        createdBy: req.user!.id
-      },
-      include: {
-        recipients: true,
-        approvals: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                employeeProfile: {
-                  select: {
-                    firstName: true,
-                    lastName: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    })
+    const notificationData = createNotificationSchema.parse({
+      ...req.body,
+      createdBy: req.user!.id
+    });
+
+    // Use the service to create the notification
+    const notification = await create({
+      ...notificationData,
+      createdBy: req.user!.id
+    });
 
     // Invalidate caches to ensure fresh data
     await CacheService.invalidateNotificationCaches()
@@ -85,39 +94,52 @@ export async function updateStatus(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { id } = req.params
-    const { status } = req.body
-
-    // Update notification and fetch related data
-    const notification = await prisma.notification.update({
-      where: { id },
-      data: { status },
-      include: {
-        recipients: true,
-        approvals: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                employeeProfile: {
-                  select: {
-                    firstName: true,
-                    lastName: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    })
-
-    await CacheService.invalidateNotificationCaches()
-
-    res.json(notification)
+    const { id } = req.params;
+    const validatedData = updateStatusSchema.parse(req.body);
+    
+    const notification = await updateNotificationStatus(id, validatedData.status);
+    
+    await CacheService.invalidateNotificationCaches();
+    
+    res.json(notification);
   } catch (err) {
-    next(err)
+    next(err);
+  }
+}
+
+/**
+ * Updates a notification with new data including linkUsername and linkPassword.
+ * 
+ * @param {Request} req - Express request object containing notification data in body
+ *                       and notification ID in params
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} Resolves when notification is updated
+ * @throws {Error} If notification not found or update fails
+ * 
+ * @endpoint PUT /api/notifications/:id
+ * @auth Requires authenticated user
+ */
+export async function updateNotification(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { id } = req.params;
+    
+    // Validate update data
+    const updateData = updateNotificationSchema.parse(req.body);
+
+    // Call service to handle update
+    const notification = await update(id, updateData);
+
+    // Invalidate caches
+    await CacheService.invalidateNotificationCaches();
+
+    res.json(notification);
+  } catch (err) {
+    next(err);
   }
 }
 
@@ -382,39 +404,6 @@ export async function reschedule(
   }
 }
 
-<<<<<<< HEAD
-// PUT /api/notifications/:id
-export async function updateNotification(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { id } = req.params
-    const data   = req.body
-    const notification = await prisma.notification.update({
-      where: { id },
-      data,
-      include: { recipients: true },
-    })
-    await CacheService.invalidateNotificationCaches()
-    res.json(notification)
-  } catch (err) { next(err) }
-}
-
-// POST /api/notifications/:id/complete
-export async function completeNotification(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { id } = req.params
-    const file   = req.file
-    const notification = await prisma.notification.update({
-      where: { id },
-      data: {
-        status: 'DONE',
-        completedAt: new Date(),
-        attachmentPath: file ? `/uploads/${file.filename}` : undefined,
-      },
-    })
-    await CacheService.invalidateNotificationCaches()
-    res.json(notification)
-  } catch (err) { next(err) }
-=======
 /**
  * Lists personal notifications (created by the authenticated user).
  * 
@@ -623,5 +612,4 @@ export async function listCurrentMonthPersonalNotifications(
     console.error('Error in listCurrentMonthPersonalNotifications:', err)
     next(err)
   }
->>>>>>> 9c9168b83a58a57f2055ca73d7fac4b3753d7707
 }

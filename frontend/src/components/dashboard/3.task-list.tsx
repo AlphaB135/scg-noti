@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Task } from "@/lib/types/task";
+import AddNotificationButton from "@/components/AddNotificationButton";
 
 type TaskListProps = {
   tasks: Task[];
@@ -18,7 +19,8 @@ type TaskListProps = {
   onEditTask: (task: Task) => void;
   onViewTaskDetail: (task: Task) => void;
   onRescheduleTask: (task: Task) => void;
-  onAddTask: () => void;
+  onAddTask: (newTask: Task) => void;
+  onDeleteTask: (id: string) => void;
   onExpandTodo: () => void;
   onFilterChange: (filter: string) => void;
 };
@@ -31,6 +33,7 @@ export default function TaskList({
   onViewTaskDetail,
   onRescheduleTask,
   onAddTask,
+  onDeleteTask,
   onExpandTodo,
   onFilterChange,
 }: TaskListProps) {
@@ -42,12 +45,7 @@ export default function TaskList({
             สิ่งที่ต้องทำ
           </h2>
           <div className="flex items-center gap-2">
-            <Button
-              onClick={onAddTask}
-              className="bg-gradient-to-b from-red-700 to-red-800 hover:bg-red-700 text-white text-xs md:text-sm py-1 md:py-2 px-2 md:px-3 h-auto"
-            >
-              <Plus className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" /> เพิ่มงาน
-            </Button>
+            <AddNotificationButton onCreated={onAddTask} />
           </div>
         </div>
 
@@ -177,6 +175,16 @@ export default function TaskList({
                                 className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 text-gray-600 hover:bg-gray-100 rounded border border-gray-200"
                               >
                                 เลื่อนกำหนด
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (confirm("ยืนยันลบงานนี้?"))
+                                    onDeleteTask(task.id);
+                                }}
+                                className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 text-red-600 hover:bg-red-50 rounded border border-red-200"
+                              >
+                                ลบ
                               </button>
                             </div>
                           </div>

@@ -1,11 +1,12 @@
 import { Client } from '@line/bot-sdk'
+import { sendLineNotification } from '../line-notifier'
 
 const config = {
-  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-  channelSecret: process.env.LINE_CHANNEL_SECRET
+  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || '',
+  channelSecret: process.env.LINE_CHANNEL_SECRET || ''
 }
 
-// Initialize LINE client
+// Initialize LINE client - kept for backward compatibility
 const client = new Client(config)
 
 /**
@@ -15,19 +16,7 @@ const client = new Client(config)
  * @returns Promise<any>
  */
 export async function pushMessage(lineToken: string, message: string): Promise<any> {
-  if (!lineToken) {
-    throw new Error('LINE token is required')
-  }
-
-  try {
-    return await client.pushMessage(lineToken, {
-      type: 'text',
-      text: message
-    })
-  } catch (error) {
-    console.error('LINE push message failed:', error)
-    throw error // Re-throw for handling by caller
-  }
+  return sendLineNotification(lineToken, message);
 }
 
 /**
@@ -38,12 +27,5 @@ export async function pushMessageWithRetry(
   message: string,
   maxRetries: number = 1
 ): Promise<any> {
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await pushMessage(lineToken, message)
-    } catch (error) {
-      if (attempt === maxRetries) throw error
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1s before retry
-    }
-  }
+  return sendLineNotification(lineToken, message, maxRetries);
 }

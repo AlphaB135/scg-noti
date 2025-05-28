@@ -1,7 +1,15 @@
 "use client";
 
 import { Progress } from "@/components/ui/progress";
-import { BarChart3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { BarChart3, Bell } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 interface TeamStatsProps {
   completedTasks: number;
   pendingTasks: number;
@@ -9,6 +17,7 @@ interface TeamStatsProps {
   totalTasks: number;
   completionRate: number;
   onStatsClick: (type: "completed" | "late" | "pending" | "all") => void;
+  onNotifyTeam: (message: string) => void;
 }
 
 export function TeamStats({
@@ -18,6 +27,7 @@ export function TeamStats({
   totalTasks,
   completionRate,
   onStatsClick,
+  onNotifyTeam,
 }: TeamStatsProps) {
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
@@ -27,13 +37,43 @@ export function TeamStats({
             <BarChart3 className="h-6 w-6 text-red-700" />
             <span>สถิติความสำเร็จ</span>
           </div>
-          <div className="text-sm font-medium">{completionRate}%</div>
+
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-medium">{completionRate}%</div>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0 hover:bg-red-50"
+                    onClick={() => {
+                      let message = "";
+                      if (lateTasks > 0) {
+                        message = `มีงานล่าช้า ${lateTasks} งาน และงานรอดำเนินการ ${pendingTasks} งาน กรุณาตรวจสอบและเร่งดำเนินการ`;
+                      } else if (pendingTasks > 0) {
+                        message = `มีงานรอดำเนินการ ${pendingTasks} งาน กรุณาติดตามความคืบหน้า`;
+                      } else {
+                        message = "ทีมดำเนินการได้ตามแผน ขอบคุณทุกคนสำหรับความร่วมมือ";
+                      }
+                      onNotifyTeam(message);
+                    }}
+                  >
+                    <Bell className="h-4 w-4 text-red-600" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>แจ้งเตือนทั้งทีม</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
 
         <Progress
           value={completionRate}
           className="h-2 bg-gray-200"
-          indicatorClassName="bg-red-600"
         />
 
         <div className="mt-4 grid grid-cols-4 gap-2">

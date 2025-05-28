@@ -34,18 +34,29 @@ export const recipientSchema = z.object({
   companyCode: z.string().min(1).optional(),
 })
 
-// Schema สำหรับสร้าง notification ใหม่
-export const createNotificationSchema = z.object({
+// Base schema for notifications
+const notificationBaseSchema = {
   title: z.string().min(1),
   message: z.string().min(1),
-  scheduledAt: z.coerce.date(),                  // แปลงเป็น Date อัตโนมัติ
-  dueDate: z.coerce.date().optional(),           // กรณีมี deadline
+  scheduledAt: z.coerce.date(),
+  dueDate: z.coerce.date().optional(),
   type: z.enum(['SYSTEM', 'TODO', 'REMINDER']),
   category: z.string().min(1),
-  link: z.string().url(),                        // ควรเป็น URL
+  link: z.string().url().nullish(),
+  linkUsername: z.string().min(1).nullish(),
+  linkPassword: z.string().min(1).nullish(),
   urgencyDays: z.coerce.number().int().min(0).default(0),
   repeatIntervalDays: z.coerce.number().int().min(0).default(0),
-  recipients: z.array(recipientSchema).min(1),    // ระบุ recipients
-})
+  recipients: z.array(recipientSchema).min(1)
+};
 
-export type CreateNotificationInput = z.infer<typeof createNotificationSchema>
+// Schema for creating notifications
+export const createNotificationSchema = z.object(notificationBaseSchema);
+
+// Schema for updating notifications - all fields optional
+export const updateNotificationSchema = z.object({
+  ...Object.entries(notificationBaseSchema).reduce((acc, [key, schema]) => ({
+    ...acc,
+    [key]: schema.optional()
+  }), {})
+});

@@ -14,9 +14,6 @@ export interface Notification {
     title: string
     message: string
     scheduledAt?: string
-<<<<<<< HEAD
-    status?: string
-=======
     dueDate?: string
     type?: 'SYSTEM' | 'TODO' | 'REMINDER'
     category: string
@@ -31,7 +28,6 @@ export interface Notification {
       groupId?: string
       companyCode?: string
     }>
->>>>>>> 9c9168b83a58a57f2055ca73d7fac4b3753d7707
   }
   
   export interface UpdateNotificationInput {

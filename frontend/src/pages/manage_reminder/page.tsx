@@ -319,17 +319,10 @@ export default function ManageReminderPage() {
       const passwordLines = reminder.password.split("\n")
 
       for (const line of passwordLines) {
-<<<<<<< HEAD
-        if (line.toLowerCase().startsWith("User:")) {
-          username = line.substring(line.indexOf(":") + 1).trim();
-        } else if (line.toLowerCase().startsWith("Password:")) {
-          password = line.substring(line.indexOf(":") + 1).trim();
-=======
         if (line.toLowerCase().startsWith("user:")) {
           username = line.substring(line.indexOf(":") + 1).trim()
         } else if (line.toLowerCase().startsWith("password:")) {
           password = line.substring(line.indexOf(":") + 1).trim()
->>>>>>> 9c9168b83a58a57f2055ca73d7fac4b3753d7707
         }
       }
     }

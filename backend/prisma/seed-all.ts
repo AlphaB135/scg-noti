@@ -6,120 +6,152 @@
  *  - เติม Notification + Recipient + Attachment (system + todo)
  *  - เติม Teams และ Team Notifications (mock_team_notifications.json)
  ******************************************************************/
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcrypt'
-import fs from 'fs'
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
+import fs from "fs";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 // ── Mock Data ────────────────────────────────────────────────────
-const users        = JSON.parse(fs.readFileSync('./prisma/mock-users.json',           'utf8')).users
-const sysData      = JSON.parse(fs.readFileSync('./prisma/system-notifications.json',  'utf8'))
-const todoData     = JSON.parse(fs.readFileSync('./prisma/todo-notifications.json',    'utf8'))
-const secLogs      = JSON.parse(fs.readFileSync('./prisma/mock-security-logs.json',     'utf8'))
-const teamNotiData = JSON.parse(fs.readFileSync('./prisma/mock_team_notifications.json','utf8'))
+const users = JSON.parse(
+  fs.readFileSync("./prisma/mock-users.json", "utf8")
+).users;
+const sysData = JSON.parse(
+  fs.readFileSync("./prisma/system-notifications.json", "utf8")
+);
+const todoData = JSON.parse(
+  fs.readFileSync("./prisma/todo-notifications.json", "utf8")
+);
+const secLogs = JSON.parse(
+  fs.readFileSync("./prisma/mock-security-logs.json", "utf8")
+);
+const teamNotiData = JSON.parse(
+  fs.readFileSync("./prisma/mock_team_notifications.json", "utf8")
+);
 
 // ── Clear database ─────────────────────────────────────────────────
 async function clearDatabase() {
-  console.log('🧹 Clearing tables in FK-safe order…')
-  await prisma.$transaction([
-    prisma.notificationAttachment.deleteMany(),
-    prisma.recipient.deleteMany(),
-    prisma.approval.deleteMany(),
-    prisma.notification.deleteMany(),
-    prisma.teamMember.deleteMany(),
-    prisma.team.deleteMany(),
-    prisma.session.deleteMany(),
-    prisma.securityLog.deleteMany(),
-    prisma.adminProfile.deleteMany(),
-    prisma.employeeProfile.deleteMany(),
-    prisma.user.deleteMany(),
-  ])
+  console.log("🧹 Clearing tables in FK-safe order…");
+
+  try {
+    await prisma.$transaction([
+      prisma.$executeRaw`IF OBJECT_ID('dbo.NotificationAttachment', 'U') IS NOT NULL 
+        DELETE FROM [dbo].[NotificationAttachment]`,
+      prisma.$executeRaw`IF OBJECT_ID('dbo.Recipient', 'U') IS NOT NULL 
+        DELETE FROM [dbo].[Recipient]`,
+      prisma.$executeRaw`IF OBJECT_ID('dbo.Approval', 'U') IS NOT NULL 
+        DELETE FROM [dbo].[Approval]`,
+      prisma.$executeRaw`IF OBJECT_ID('dbo.Notification', 'U') IS NOT NULL 
+        DELETE FROM [dbo].[Notification]`,
+      prisma.$executeRaw`IF OBJECT_ID('dbo.TeamMember', 'U') IS NOT NULL 
+        DELETE FROM [dbo].[TeamMember]`,
+      prisma.$executeRaw`IF OBJECT_ID('dbo.Team', 'U') IS NOT NULL 
+        DELETE FROM [dbo].[Team]`,
+      prisma.$executeRaw`IF OBJECT_ID('dbo.Session', 'U') IS NOT NULL 
+        DELETE FROM [dbo].[Session]`,
+      prisma.$executeRaw`IF OBJECT_ID('dbo.SecurityLog', 'U') IS NOT NULL 
+        DELETE FROM [dbo].[SecurityLog]`,
+      prisma.$executeRaw`IF OBJECT_ID('dbo.AdminProfile', 'U') IS NOT NULL 
+        DELETE FROM [dbo].[AdminProfile]`,
+      prisma.$executeRaw`IF OBJECT_ID('dbo.EmployeeProfile', 'U') IS NOT NULL 
+        DELETE FROM [dbo].[EmployeeProfile]`,
+      prisma.$executeRaw`IF OBJECT_ID('dbo.User', 'U') IS NOT NULL 
+        DELETE FROM [dbo].[User]`,
+    ]);
+    console.log("✅ Database cleared successfully");
+  } catch (error) {
+    console.error("❌ Error clearing database:", error);
+    throw error;
+  }
 }
 
 // ── Seed Users ─────────────────────────────────────────────────────
 async function seedUsers() {
-  console.log('👤 Seeding users…')
+  console.log("👤 Seeding users…");
   for (const u of users) {
-    const hash = await bcrypt.hash(u.password, 10)
+    const hash = await bcrypt.hash(u.password, 10);
     await prisma.user.create({
       data: {
-        id:           u.id,
-        email:        u.email,
+        id: u.id,
+        email: u.email,
         passwordHash: hash,
-        role:         u.role,
-        status:       u.status,
+        role: u.role,
+        status: u.status,
         adminProfile: {
           create: {
-            firstName:       u.employeeProfile.firstName,
-            lastName:        u.employeeProfile.lastName,
-            nickname:        u.employeeProfile.nickname ?? undefined,
-            position:        u.employeeProfile.position ?? undefined,
+            firstName: u.employeeProfile.firstName,
+            lastName: u.employeeProfile.lastName,
+            nickname: u.employeeProfile.nickname ?? undefined,
+            position: u.employeeProfile.position ?? undefined,
             profileImageUrl: u.employeeProfile.profileImageUrl ?? undefined,
-          }
+          },
         },
         employeeProfile: {
           create: {
-            companyCode:     u.employeeProfile.companyCode,
-            employeeCode:    u.employeeProfile.employeeCode,
-            firstName:       u.employeeProfile.firstName,
-            lastName:        u.employeeProfile.lastName,
-            nickname:        u.employeeProfile.nickname ?? undefined,
-            position:        u.employeeProfile.position ?? undefined,
+            companyCode: u.employeeProfile.companyCode,
+            employeeCode: u.employeeProfile.employeeCode,
+            firstName: u.employeeProfile.firstName,
+            lastName: u.employeeProfile.lastName,
+            nickname: u.employeeProfile.nickname ?? undefined,
+            position: u.employeeProfile.position ?? undefined,
             profileImageUrl: u.employeeProfile.profileImageUrl ?? undefined,
-            lineToken:       u.employeeProfile.lineToken ?? undefined,
-          }
-        }
-      }
-    })
+            lineToken: u.employeeProfile.lineToken ?? undefined,
+          },
+        },
+      },
+    });
   }
-  console.log(`✅ Users seeded (${users.length})`)
+  console.log(`✅ Users seeded (${users.length})`);
 }
 
 // ── Seed Security Logs ────────────────────────────────────────────
 async function seedSecurityLog() {
-  console.log('🔐 Seeding security logs…')
-  await prisma.securityLog.createMany({ data: secLogs })
-  console.log(`✅ SecurityLog seeded (${secLogs.length})`)
+  console.log("🔐 Seeding security logs…");
+  await prisma.securityLog.createMany({ data: secLogs });
+  console.log(`✅ SecurityLog seeded (${secLogs.length})`);
 }
 
 // ── Seed Notifications ─────────────────────────────────────────────
 async function seedNotifications() {
-  console.log('🌐 Seeding SYSTEM notifications…')
-  await prisma.notification.createMany({ data: sysData.Notification })
-  await prisma.recipient.createMany({ data: sysData.Recipient })
-  await prisma.notificationAttachment.createMany({ data: sysData.NotificationAttachment })
+  console.log("🌐 Seeding SYSTEM notifications…");
+  await prisma.notification.createMany({ data: sysData.Notification });
+  await prisma.recipient.createMany({ data: sysData.Recipient });
+  await prisma.notificationAttachment.createMany({
+    data: sysData.NotificationAttachment,
+  });
 
-  console.log('📝 Seeding TODO notifications…')
-  await prisma.notification.createMany({ data: todoData.Notification })
-  await prisma.recipient.createMany({ data: todoData.Recipient })
-  await prisma.notificationAttachment.createMany({ data: todoData.NotificationAttachment })
+  console.log("📝 Seeding TODO notifications…");
+  await prisma.notification.createMany({ data: todoData.Notification });
+  await prisma.recipient.createMany({ data: todoData.Recipient });
+  await prisma.notificationAttachment.createMany({
+    data: todoData.NotificationAttachment,
+  });
 
-  console.log('✅ Notifications seeded')
+  console.log("✅ Notifications seeded");
 }
 
 // ── Seed Teams ────────────────────────────────────────────────────
 async function seedTeams() {
-  console.log('🌳 Seeding teams…')
-  const teamsObj = (teamNotiData as { teams: Record<string, any[]> }).teams
+  console.log("🌳 Seeding teams…");
+  const teamsObj = (teamNotiData as { teams: Record<string, any[]> }).teams;
   for (const teamName of Object.keys(teamsObj)) {
-    const existing = await prisma.team.findFirst({ where: { name: teamName } })
+    const existing = await prisma.team.findFirst({ where: { name: teamName } });
     if (!existing) {
-      await prisma.team.create({ data: { name: teamName } })
-      console.log(`✅ Team created: ${teamName}`)
+      await prisma.team.create({ data: { name: teamName } });
+      console.log(`✅ Team created: ${teamName}`);
     }
   }
 }
 
 // ── Seed Team Notifications ───────────────────────────────────────
 async function seedTeamNotifications() {
-  console.log('🔗 Seeding team notifications…')
-  const teamsObj = (teamNotiData as { teams: Record<string, any[]> }).teams
+  console.log("🔗 Seeding team notifications…");
+  const teamsObj = (teamNotiData as { teams: Record<string, any[]> }).teams;
   for (const [teamName, notifs] of Object.entries(teamsObj)) {
-    const team = await prisma.team.findFirst({ where: { name: teamName } })
+    const team = await prisma.team.findFirst({ where: { name: teamName } });
     if (!team) {
-      console.warn(`Team not found: ${teamName}`)
-      continue
+      console.warn(`Team not found: ${teamName}`);
+      continue;
     }
     for (const n of notifs) {
       // Upsert to avoid duplicates
@@ -127,40 +159,40 @@ async function seedTeamNotifications() {
         where: { id: n.id },
         update: {},
         create: {
-          id:                 n.id,
-          title:              n.title,
-          message:            n.message,
-          scheduledAt:        n.scheduledAt ? new Date(n.scheduledAt) : undefined,
-          type:               n.type,
-          category:           n.category,
-          link:               n.link,
-          urgencyDays:        n.urgencyDays,
+          id: n.id,
+          title: n.title,
+          message: n.message,
+          scheduledAt: n.scheduledAt ? new Date(n.scheduledAt) : undefined,
+          type: n.type,
+          category: n.category,
+          link: n.link,
+          urgencyDays: n.urgencyDays,
           repeatIntervalDays: n.repeatIntervalDays,
-          createdBy:          n.createdBy,
+          createdBy: n.createdBy,
           recipients: {
-            create: [{ type: 'GROUP', groupId: team.id }]
-          }
-        }
-      })
+            create: [{ type: "GROUP", groupId: team.id }],
+          },
+        },
+      });
     }
   }
-  console.log('✅ Team notifications seeded')
+  console.log("✅ Team notifications seeded");
 }
 
 // ── Main Flow ────────────────────────────────────────────────────
 async function main() {
-  await clearDatabase()
-  await seedUsers()
-  await seedSecurityLog()
-  await seedNotifications()
-  await seedTeams()
-  await seedTeamNotifications()
-  console.log('🎉 ALL SEED TASKS COMPLETED')
+  await clearDatabase();
+  await seedUsers();
+  await seedSecurityLog();
+  await seedNotifications();
+  await seedTeams();
+  await seedTeamNotifications();
+  console.log("🎉 ALL SEED TASKS COMPLETED");
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Seed failed:', e)
-    process.exit(1)
+    console.error("❌ Seed failed:", e);
+    process.exit(1);
   })
-  .finally(() => prisma.$disconnect())
+  .finally(() => prisma.$disconnect());

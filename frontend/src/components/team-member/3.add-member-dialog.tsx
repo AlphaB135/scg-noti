@@ -15,9 +15,10 @@ interface AddMemberDialogProps {
   setIsOpen: (isOpen: boolean) => void
   teamId: string
   teamName: string
+  onSuccess?: () => void
 }
 
-export default function AddMemberDialog({ isOpen, setIsOpen, teamId, teamName }: AddMemberDialogProps) {
+export default function AddMemberDialog({ isOpen, setIsOpen, teamId, teamName, onSuccess }: AddMemberDialogProps) {
   const [employees, setEmployees] = useState<(Employee & { selected: boolean; role: "หัวหน้างาน" | "พนักงาน" })[]>([])
   const [filteredEmployees, setFilteredEmployees] = useState<
     (Employee & { selected: boolean; role: "หัวหน้างาน" | "พนักงาน" })[]
