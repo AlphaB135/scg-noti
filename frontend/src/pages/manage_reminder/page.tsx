@@ -117,7 +117,9 @@ export default function ManageReminderPage() {
     const targetPage = page || currentPage
     try {
       console.log('Loading reminders for page:', targetPage)
-      const response = await notificationsApi.getMine(targetPage, 20)
+      // เปลี่ยนมาใช้ API ดึงทุกรายการ
+const response = await notificationsApi.getAll(targetPage, 20)
+
       console.log('API response:', response)
       
       const convertedReminders = response.data.map(convertNotificationToReminder)
