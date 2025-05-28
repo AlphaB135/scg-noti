@@ -71,6 +71,7 @@ export default function NotificationFilters({
               <SelectItem value="data">ข้อมูล</SelectItem>
               <SelectItem value="training">การอบรม</SelectItem>
               <SelectItem value="finance">การเงิน</SelectItem>
+              <SelectItem value="TODO">งานที่ต้องทำ</SelectItem>
             </SelectContent>
           </Select>
         </div>

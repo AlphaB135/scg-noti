@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
-import { Plus, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import AppLayout from "@/components/layout/app-layout"
 import { notificationsApi, invalidateCache } from "@/lib/api"
-import type { Notification, CreateNotificationInput, UpdateNotificationInput } from "@/lib/types"
+import type { CreateNotificationInput, UpdateNotificationInput } from "@/lib/types"
 import ReminderTabs from "@/components/manage-reminder/reminder-tabs"
 import ReminderFilters from "@/components/manage-reminder/reminder-filters"
 import AddReminderDialog from "@/components/manage-reminder/add-reminder-dialog"
@@ -129,7 +129,7 @@ const response = await notificationsApi.getAll(targetPage, -1)
       setReminders(convertedReminders)
 
       // Calculate total pages based on response
-      setTotalPages(response.meta.totalPages || Math.ceil(response.meta.total / -1))
+      setTotalPages(response.meta.totalPages || Math.ceil(response.meta.total / (targetPage > 0 ? targetPage : 1))); // Fixed calculation for totalPages
     } catch (error) {
       console.error("Failed to load reminders:", error)
       toast({

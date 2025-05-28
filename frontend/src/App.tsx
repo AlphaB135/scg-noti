@@ -24,6 +24,7 @@ import SuperAdmin from "./pages/super-admin-logs/page";
 import TeamOverview from "./pages/team-overview/page";
 import TeamNoti from "./pages/team-notification/page";
 import AddAdmin from "./pages/add-admin-dialog/page";
+import NotificationTestPage from "./pages/notification_test/page";
 
 // HOC ตรวจสอบสิทธิ์
 import { RequireAuth } from "./components/RequireAuth";
@@ -132,6 +133,14 @@ function App() {
           element={
             <RequireAuth>
               <AddAdmin />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/manage_reminder_TEST"
+          element={
+            <RequireAuth>
+              <NotificationTestPage />
             </RequireAuth>
           }
         />

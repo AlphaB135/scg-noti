@@ -74,13 +74,10 @@ export function MonthCalendar({
     setMonthDate(new Date(currentYear, currentMonth - 1));
   }, [currentMonth, currentYear]);
 
-  // Debug: Log tasks changes (simplified)
+  // Debug: Log tasks changes
   useEffect(() => {
-    if (tasks.length > 0) {
-      console.log('📅 MonthCalendar: received', tasks.length, 'tasks');
-    } else {
-      console.log('⚠️ MonthCalendar: no tasks received');
-    }
+    console.log('📅 MonthCalendar received tasks:', tasks.length, 'tasks');
+    console.log('📅 Tasks by date:', tasks.map(t => ({ id: t.id, title: t.title, dueDate: t.dueDate })));
     // Force update เมื่อ tasks เปลี่ยน
     setForceUpdateKey(prev => prev + 1);
   }, [tasks]);

@@ -182,6 +182,8 @@ export async function list(
     const month = parseInt(req.query.month as string);
     const year = parseInt(req.query.year as string);
 
+    console.log("Limit received:", req.query.limit);
+
     if (page < 1) throw new BadRequestError("Page must be >= 1");
     if (limit < 1) throw new BadRequestError("Limit must be >= 1");
 
@@ -243,7 +245,7 @@ export async function list(
       prisma.notification.findMany({
         where,
         skip: (page - 1) * limit,
-        take: limit,
+        take: limit === -1 ? undefined : limit, // Allow fetching all notifications if limit is -1
         orderBy: { createdAt: "desc" },
         include: {
           recipients: true,

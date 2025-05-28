@@ -1,41 +1,109 @@
 # Dependencies
+/node_modules
 **/node_modules
-frontend/node_modules
-backend/node_modules
+**/node_modules/**
+node_modules/
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+.pnpm-store/
+**/.pnpm/
+.yarn/
 
-# Build directories
-**/dist
-frontend/.next
-frontend/build
-backend/build
+# Testing
+/coverage
 
-# Environment files
-**/.env
-**/.env.*
-!**/.env.example
+# Next.js
+/.next/
+/out/
+next-env.d.ts
 
-# Development files
-**/.turbo
-**/.cache
-**/coverage
+# Production
+/build
+/dist
 
-# Logs
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# IDE
-.vscode/
-.idea/
-*.sublime-*
+# Environment Variables
+.env
+.env*.local
 
-# OS
-.DS_Store
+# IDE and Editor files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+## Windows
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+## Linux
+*~
+.directory
+.Trash-*
+
+# Misc
+*.log
+.vercel
+.turbo
 
 # TypeScript
-**/*.tsbuildinfo
-**/next-env.d.ts
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Project specific
+public/uploads/
+**/uploads/*
+!**/uploads/.gitkeep
+tmp/
+logs/
+coverage/
+
+# Database related
+prisma/*.db
+*.sqlite
+*.sqlite3
+
+# Docker volumes
+sqlserver_data/
+redis_data/
+/volumes/
+docker-volumes/
+ci.yml
 
 # Prisma
 backend/prisma/migrations/
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
+
+# Coverage and test
+*.test.ts
+*.spec.ts
+
+# Local only files
+*.local.*
+*.secret.*

@@ -7,13 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar, Clock, Pencil, Trash2, Users, User, AlertCircle, CheckCircle, BarChart } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 
-type TeamMember = {
-  id: string
-  name: string
-  role: string
-  avatar?: string
-}
-
 type NotificationAssignment = {
   memberId: string
   memberName: string
@@ -41,7 +34,6 @@ type NotificationListProps = {
   onEdit: (notification: Notification) => void
   onDelete: (notification: Notification) => void
   onViewAssignments: (notification: Notification) => void
-  teamMembers: TeamMember[]
 }
 
 export default function NotificationList({
@@ -49,8 +41,12 @@ export default function NotificationList({
   onEdit,
   onDelete,
   onViewAssignments,
-  teamMembers,
 }: NotificationListProps) {
+  // Filter notifications to include type "TODO"
+  const filteredNotifications = notifications.filter(
+    (notification) => notification.type === "TODO" || notification.type === "SYSTEM"
+  )
+
   // Helper functions
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -160,7 +156,7 @@ export default function NotificationList({
   }
 
   // If no notifications
-  if (notifications.length === 0) {
+  if (filteredNotifications.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4">
         <Calendar className="h-20 w-20 text-gray-300 mb-6" />
@@ -174,7 +170,7 @@ export default function NotificationList({
 
   return (
     <div className="divide-y divide-gray-200">
-      {notifications.map((notification) => (
+      {filteredNotifications.map((notification) => (
         <div
           key={notification.id}
           className={`p-5 hover:bg-gray-50 transition-colors ${notification.status === "completed" ? "bg-[#f7fafc]" : ""}`}
@@ -230,7 +226,7 @@ export default function NotificationList({
                     <Users className="h-4 w-4" /> มอบหมายให้
                   </div>
                   <div className="flex -space-x-2 mt-1">
-                    {notification.assignments.slice(0, 5).map((assignment, index) => (
+                    {notification.assignments.slice(0, 5).map((assignment) => (
                       <TooltipProvider key={assignment.memberId}>
                         <Tooltip>
                           <TooltipTrigger asChild>

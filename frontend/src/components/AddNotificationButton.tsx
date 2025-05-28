@@ -103,6 +103,8 @@ export default function AddNotificationButton({
         recipients: [{ type: "ALL" }],
       } as any);
 
+      console.log("Notification created successfully:", res);
+
       /* === 2. map เป็น Task แล้วส่งกลับ caller === */
       const newTask: Task = {
         id: res.id,
