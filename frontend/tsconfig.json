@@ -3,7 +3,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "esModuleInterop": true, // Enable default imports for modules
+    "jsx": "react" // Enable JSX support
   },
   "include": ["src/**/*"],
   "references": [

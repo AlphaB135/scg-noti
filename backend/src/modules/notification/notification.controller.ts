@@ -177,7 +177,7 @@ export async function list(
   try {
     // Parse and validate parameters
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
+    const limit = parseInt(req.query.limit as string) || 999;
     const status = req.query.status as Notification["status"] | undefined;
     const month = parseInt(req.query.month as string);
     const year = parseInt(req.query.year as string);
@@ -655,30 +655,33 @@ export async function listCurrentMonthPersonalNotifications(
 }
 
 // ⬇️ วางต่อท้ายไฟล์ (export ร่วมกับเมท็อดอื่น)
-export async function deleteNotification(req, res, next) {
-  const { id } = req.params
-  const user = req.user                // มาจาก jwtGuard
+export async function deleteNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const { id } = req.params;
+  const user = req.user!; // Assert user is defined
 
   try {
-    const notif = await prisma.notification.findUnique({ where: { id } })
-    if (!notif) return res.status(404).json({ message: 'NOT_FOUND' })
+    const notif = await prisma.notification.findUnique({ where: { id } });
+    if (!notif) {
+      res.status(404).json({ message: "NOT_FOUND" });
+      return;
+    }
 
-    const isAdmin =
-      user.role === 'ADMIN' || user.role === 'SUPERADMIN'
-    const isOwner = notif.creatorId === user.id
+    const isAdmin = user.role === "ADMIN" || user.role === "SUPERADMIN";
+    const isOwner = notif.createdBy === user.id; // Updated to use `createdBy`
 
     if (!isAdmin && !isOwner) {
-      return res.status(403).json({ message: 'FORBIDDEN' })
+      res.status(403).json({ message: "FORBIDDEN" });
+      return;
     }
 
     await prisma.$transaction([
       prisma.recipient.deleteMany({ where: { notificationId: id } }),
       prisma.notificationAttachment.deleteMany({ where: { notificationId: id } }),
-      prisma.notification.delete({ where: { id } })
-    ])
+      prisma.notification.delete({ where: { id } }),
+    ]);
 
-    return res.sendStatus(204)
+    res.sendStatus(204);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }

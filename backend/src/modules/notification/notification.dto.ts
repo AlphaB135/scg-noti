@@ -47,7 +47,8 @@ const notificationBaseSchema = {
   linkPassword: z.string().min(1).nullish(),
   urgencyDays: z.coerce.number().int().min(0).default(0),
   repeatIntervalDays: z.coerce.number().int().min(0).default(0),
-  recipients: z.array(recipientSchema).min(1)
+  recipients: z.array(recipientSchema).min(1),
+  creatorId: z.string().uuid(), // Added creatorId property
 };
 
 // Schema for creating notifications

@@ -79,9 +79,27 @@ export class CacheService {
    * เรียกเมื่อมีการเปลี่ยนแปลงข้อมูลพนักงาน
    */
   static async invalidateEmployeeCaches(): Promise<void> {
-    const keys = await cache.keys('employees:*')
-    if (keys.length > 0) {
-      await Promise.all(keys.map(key => cache.del(key)))
-    }
+    await cache.invalidateByPrefix('employees:');
+  }
+
+  /**
+   * Invalidate all keys matching a prefix
+   */
+  static async invalidateByPrefix(prefix: string): Promise<void> {
+    await cache.invalidateByPrefix(prefix);
+  }
+
+  /**
+   * Generic method to get data from cache
+   */
+  static async get(key: string): Promise<any> {
+    return cache.get(key);
+  }
+
+  /**
+   * Generic method to set data in cache
+   */
+  static async set(key: string, value: any, ttl: number = 300): Promise<void> {
+    await cache.set(key, value, ttl);
   }
 }
