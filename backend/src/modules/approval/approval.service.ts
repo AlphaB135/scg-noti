@@ -47,7 +47,7 @@ export async function listApprovals(
     prisma.approval.findMany({
       where,
       skip: opts.skip,
-      take: opts.take,
+      take: opts.size === -1 ? undefined : opts.take,
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
@@ -69,7 +69,7 @@ export async function listApprovals(
       total,
       page: opts.page,
       size: opts.size,
-      totalPages: Math.ceil(total / opts.size),
+      totalPages: opts.size === -1 ? 1 : Math.ceil(total / opts.size),
     },
   }
 }

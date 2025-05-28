@@ -23,8 +23,8 @@ export async function listApprovals(
           notificationId,
           ...(query.status && { response: query.status })
         },
-        skip: (query.page - 1) * query.size,
-        take: query.size,
+        skip: query.skip,
+        take: query.take,
         orderBy: { createdAt: 'desc' },
         include: {
           user: {
@@ -50,16 +50,13 @@ export async function listApprovals(
     ])
 
     res.json({
-      data: approvals,
-      meta: {
-        total,
-        page: query.page,
-        size: query.size,
-        totalPages: Math.ceil(total / query.size)
-      }
+      approvals,
+      total,
+      page: query.page,
+      size: query.size
     })
-  } catch (err) {
-    next(err)
+  } catch (error) {
+    next(error)
   }
 }
 

@@ -9,12 +9,12 @@ import { z } from 'zod'
 export const listApprovalQuerySchema = z
   .object({
     page:   z.coerce.number().int().min(1).default(1),
-    size:   z.coerce.number().int().min(1).max(100).default(20),
+    size:   z.coerce.number().int().min(-1).max(100).default(20),
     status: z.enum(['PENDING', 'APPROVED', 'REJECTED']).optional(),
   })
   .transform(({ page, size, status }) => ({
-    skip:       (page - 1) * size,
-    take:       size,
+    skip:       size === -1 ? undefined : (page - 1) * size,
+    take:       size === -1 ? undefined : size,
     status,
     page,
     size,
