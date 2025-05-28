@@ -209,4 +209,9 @@ export const teamApi = {
       .catch(() => []),
 };
 
+export const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  withCredentials: true, // ส่ง cookie / JWT
+});
+
 export default api;

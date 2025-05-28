@@ -27,17 +27,25 @@
  * caching and database interactions.
  */
 
-import { Request, Response, NextFunction } from 'express'
-import { prisma } from '../../prisma'
-import { BadRequestError } from '../../lib/errors'
-import { CacheService } from '../../services/cache.service'
-import type { Notification } from '@prisma/client'
-import { createNotificationSchema, updateNotificationSchema, updateStatusSchema } from './notification.dto'
-import { create, update, updateStatus as updateNotificationStatus } from './notification.service'
+import { Request, Response, NextFunction } from "express";
+import { prisma } from "../../prisma";
+import { BadRequestError } from "../../lib/errors";
+import { CacheService } from "../../services/cache.service";
+import type { Notification } from "@prisma/client";
+import {
+  createNotificationSchema,
+  updateNotificationSchema,
+  updateStatusSchema,
+} from "./notification.dto";
+import {
+  create,
+  update,
+  updateStatus as updateNotificationStatus,
+} from "./notification.service";
 
 /**
  * Creates a new notification with recipients and approval workflow.
- * 
+ *
  * @param {Request} req - Express request object containing notification data in body
  *                       and authenticated user in req.user
  * @param {Response} res - Express response object
@@ -45,7 +53,7 @@ import { create, update, updateStatus as updateNotificationStatus } from './noti
  * @returns {Promise<void>} Resolves when notification is created
  * @throws {BadRequestError} If required fields are missing
  * @throws {Error} If database operations fail
- * 
+ *
  * @endpoint POST /api/notifications
  * @auth Requires authenticated user
  */
@@ -57,34 +65,34 @@ export async function createNotification(
   try {
     const notificationData = createNotificationSchema.parse({
       ...req.body,
-      createdBy: req.user!.id
+      createdBy: req.user!.id,
     });
 
     // Use the service to create the notification
     const notification = await create({
       ...notificationData,
-      createdBy: req.user!.id
+      createdBy: req.user!.id,
     });
 
     // Invalidate caches to ensure fresh data
-    await CacheService.invalidateNotificationCaches()
+    await CacheService.invalidateNotificationCaches();
 
-    res.status(201).json(notification)
+    res.status(201).json(notification);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
 /**
  * Updates the status of an existing notification.
- * 
+ *
  * @param {Request} req - Express request object containing status in body
  *                       and notification ID in params
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  * @returns {Promise<void>} Resolves when notification is updated
  * @throws {Error} If notification not found or update fails
- * 
+ *
  * @endpoint PATCH /api/notifications/:id
  * @auth Requires authenticated user
  */
@@ -96,11 +104,14 @@ export async function updateStatus(
   try {
     const { id } = req.params;
     const validatedData = updateStatusSchema.parse(req.body);
-    
-    const notification = await updateNotificationStatus(id, validatedData.status);
-    
+
+    const notification = await updateNotificationStatus(
+      id,
+      validatedData.status
+    );
+
     await CacheService.invalidateNotificationCaches();
-    
+
     res.json(notification);
   } catch (err) {
     next(err);
@@ -109,14 +120,14 @@ export async function updateStatus(
 
 /**
  * Updates a notification with new data including linkUsername and linkPassword.
- * 
+ *
  * @param {Request} req - Express request object containing notification data in body
  *                       and notification ID in params
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  * @returns {Promise<void>} Resolves when notification is updated
  * @throws {Error} If notification not found or update fails
- * 
+ *
  * @endpoint PUT /api/notifications/:id
  * @auth Requires authenticated user
  */
@@ -127,7 +138,7 @@ export async function updateNotification(
 ): Promise<void> {
   try {
     const { id } = req.params;
-    
+
     // Validate update data
     const updateData = updateNotificationSchema.parse(req.body);
 
@@ -145,7 +156,7 @@ export async function updateNotification(
 
 /**
  * Lists notifications with pagination, filtering, and full relational data.
- * 
+ *
  * @param {Request} req - Express request object containing query parameters:
  *                       - page: Current page number (default: 1)
  *                       - limit: Items per page (default: 20)
@@ -154,7 +165,7 @@ export async function updateNotification(
  * @param {NextFunction} next - Express next middleware function
  * @returns {Promise<void>} Resolves with paginated notifications
  * @throws {BadRequestError} If pagination parameters are invalid
- * 
+ *
  * @endpoint GET /api/notifications
  * @auth Requires authenticated user
  */
@@ -163,61 +174,68 @@ export async function list(
   res: Response,
   next: NextFunction
 ): Promise<void> {
-  try {    // Parse and validate parameters
-    const page = parseInt(req.query.page as string) || 1
-    const limit = parseInt(req.query.limit as string) || 20
-    const status = req.query.status as Notification['status'] | undefined
-    const month = parseInt(req.query.month as string)
-    const year = parseInt(req.query.year as string)
+  try {
+    // Parse and validate parameters
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const status = req.query.status as Notification["status"] | undefined;
+    const month = parseInt(req.query.month as string);
+    const year = parseInt(req.query.year as string);
 
-    if (page < 1) throw new BadRequestError('Page must be >= 1')
-    if (limit < 1) throw new BadRequestError('Limit must be >= 1')
+    if (page < 1) throw new BadRequestError("Page must be >= 1");
+    if (limit < 1) throw new BadRequestError("Limit must be >= 1");
 
     // Build dynamic where clause for filtering
     let where: any = {
-      ...(status && { status })
-    }
+      ...(status && { status }),
+    };
 
     // Add company-based filtering if not SUPERADMIN
-    if (req.user?.role !== 'SUPERADMIN' && req.companyCode) {
+    if (req.user?.role !== "SUPERADMIN" && req.companyCode) {
       where.OR = [
-        { recipients: { some: { type: 'ALL' } } },
-        { recipients: { some: { type: 'COMPANY', companyCode: req.companyCode } } },
+        { recipients: { some: { type: "ALL" } } },
         {
-          recipients: { 
-            some: { 
-              type: 'GROUP',
+          recipients: {
+            some: { type: "COMPANY", companyCode: req.companyCode },
+          },
+        },
+        {
+          recipients: {
+            some: {
+              type: "GROUP",
               groupId: {
-                in: (await prisma.team.findMany({
-                  where: {
-                    members: {
-                      some: {
-                        user: {
-                          employeeProfile: {
-                            companyCode: req.companyCode
-                          }
-                        }
-                      }
-                    }
-                  },
-                  select: { id: true }
-                })).map(t => t.id)
-              }
-            }
-          }
-        }
-      ]
+                in: (
+                  await prisma.team.findMany({
+                    where: {
+                      members: {
+                        some: {
+                          user: {
+                            employeeProfile: {
+                              companyCode: req.companyCode,
+                            },
+                          },
+                        },
+                      },
+                    },
+                    select: { id: true },
+                  })
+                ).map((t) => t.id),
+              },
+            },
+          },
+        },
+      ];
     }
 
     // Add date range filter if month and year are provided
     if (!isNaN(month) && !isNaN(year)) {
-      const startOfMonth = new Date(year, month - 1, 1)
-      const endOfMonth = new Date(year, month, 0, 23, 59, 59)
-      
+      const startOfMonth = new Date(year, month - 1, 1);
+      const endOfMonth = new Date(year, month, 0, 23, 59, 59);
+
       where.scheduledAt = {
         gte: startOfMonth,
-        lte: endOfMonth
-      }
+        lte: endOfMonth,
+      };
     }
 
     // Fetch notifications and total count in parallel for efficiency
@@ -226,7 +244,7 @@ export async function list(
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         include: {
           recipients: true,
           approvals: {
@@ -238,17 +256,17 @@ export async function list(
                   employeeProfile: {
                     select: {
                       firstName: true,
-                      lastName: true
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+                      lastName: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       }),
-      prisma.notification.count({ where })
-    ])
+      prisma.notification.count({ where }),
+    ]);
 
     res.json({
       data: notifications,
@@ -256,11 +274,11 @@ export async function list(
         total,
         page,
         limit,
-        totalPages: Math.ceil(total / limit)
-      }
-    })
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
@@ -269,13 +287,13 @@ export async function list(
  * - Direct notifications (where user is recipient)
  * - Team notifications (where user's team is recipient)
  * - Global notifications (type = 'ALL')
- * 
+ *
  * @param {Request} req - Express request object with authenticated user
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  * @returns {Promise<void>} Resolves with user's notifications
  * @throws {Error} If query fails
- * 
+ *
  * @endpoint GET /api/notifications/mine
  * @auth Requires authenticated user
  */
@@ -285,18 +303,20 @@ export async function listMyNotifications(
   next: NextFunction
 ): Promise<void> {
   try {
-    const userId = req.user!.id
-    const companyCode = req.companyCode
+    const userId = req.user!.id;
+    const companyCode = req.companyCode;
 
     if (!companyCode) {
-      throw new BadRequestError('Company code is required')
+      throw new BadRequestError("Company code is required");
     }
 
     // Get user's team IDs
-    const teamIds = (await prisma.teamMember.findMany({
-      where: { employeeId: userId },
-      select: { teamId: true }
-    })).map(tm => tm.teamId)
+    const teamIds = (
+      await prisma.teamMember.findMany({
+        where: { employeeId: userId },
+        select: { teamId: true },
+      })
+    ).map((tm) => tm.teamId);
 
     // Complex query to fetch notifications based on multiple recipient types
     const notifications = await prisma.notification.findMany({
@@ -307,14 +327,14 @@ export async function listMyNotifications(
               // Direct notifications to user
               { userId },
               // Global notifications (if SUPERADMIN)
-              ...(req.user?.role === 'SUPERADMIN' ? [{ type: 'ALL' }] : []),
+              ...(req.user?.role === "SUPERADMIN" ? [{ type: "ALL" }] : []),
               // Company notifications for user's company
-              { type: 'COMPANY', companyCode },
+              { type: "COMPANY", companyCode },
               // Team notifications for user's teams
-              { type: 'GROUP', groupId: { in: teamIds } }
-            ]
-          }
-        }
+              { type: "GROUP", groupId: { in: teamIds } },
+            ],
+          },
+        },
       },
       include: {
         recipients: true,
@@ -327,26 +347,26 @@ export async function listMyNotifications(
                 employeeProfile: {
                   select: {
                     firstName: true,
-                    lastName: true
-                  }
-                }
-              }
-            }
-          }
-        }
+                    lastName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
-      orderBy: { createdAt: 'desc' }
-    })
+      orderBy: { createdAt: "desc" },
+    });
 
-    res.json(notifications)
+    res.json(notifications);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
 /**
  * Reschedules a notification by updating its scheduledAt time and resetting status.
- * 
+ *
  * @param {Request} req - Express request object containing:
  *                       - id: Notification ID in params
  *                       - scheduledAt: New schedule time in body
@@ -354,7 +374,7 @@ export async function listMyNotifications(
  * @param {NextFunction} next - Express next middleware function
  * @returns {Promise<void>} Resolves when notification is rescheduled
  * @throws {Error} If notification not found or update fails
- * 
+ *
  * @endpoint POST /api/notifications/:id/reschedule
  * @auth Requires authenticated user
  */
@@ -364,15 +384,15 @@ export async function reschedule(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { id } = req.params
-    const { scheduledAt } = req.body
+    const { id } = req.params;
+    const { scheduledAt } = req.body;
 
     const notification = await prisma.notification.update({
       where: { id },
-      data: { 
+      data: {
         scheduledAt: new Date(scheduledAt),
         // Reset status to pending since we're rescheduling
-        status: 'PENDING'
+        status: "PENDING",
       },
       include: {
         recipients: true,
@@ -385,33 +405,33 @@ export async function reschedule(
                 employeeProfile: {
                   select: {
                     firstName: true,
-                    lastName: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    })
+                    lastName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
 
     // Invalidate caches since we modified a notification
-    await CacheService.invalidateNotificationCaches()
+    await CacheService.invalidateNotificationCaches();
 
-    res.json(notification)
+    res.json(notification);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
 /**
  * Lists personal notifications (created by the authenticated user).
- * 
+ *
  * @param {Request} req - Express request object containing pagination params
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  * @returns {Promise<void>} Resolves when notifications are fetched
- * 
+ *
  * @endpoint GET /api/notifications/personal
  * @auth Requires authenticated user
  */
@@ -421,35 +441,42 @@ export async function listPersonalNotifications(
   next: NextFunction
 ): Promise<void> {
   try {
-    const page = parseInt(req.query.page as string) || 1
-    const size = parseInt(req.query.size as string) || 20
-    const skip = (page - 1) * size
+    const page = parseInt(req.query.page as string) || 1;
+    const size = parseInt(req.query.size as string) || 20;
+    const skip = (page - 1) * size;
 
     // Get month and year from query params for filtering
-    const month = req.query.month ? parseInt(req.query.month as string) : undefined
-    const year = req.query.year ? parseInt(req.query.year as string) : undefined
+    const month = req.query.month
+      ? parseInt(req.query.month as string)
+      : undefined;
+    const year = req.query.year
+      ? parseInt(req.query.year as string)
+      : undefined;
 
     // Build date filter if month and year are provided
-    let dateFilter = {}
+    let dateFilter = {};
     if (month && year) {
-      const startDate = new Date(year, month - 1, 1) // month is 0-indexed
-      const endDate = new Date(year, month, 0, 23, 59, 59, 999) // last day of month
+      const startDate = new Date(year, month - 1, 1); // month is 0-indexed
+      const endDate = new Date(year, month, 0, 23, 59, 59, 999); // last day of month
       dateFilter = {
         scheduledAt: {
           gte: startDate,
-          lte: endDate
-        }
-      }
+          lte: endDate,
+        },
+      };
     }
 
-    console.log('Fetching personal notifications from database for user:', req.user!.id)
+    console.log(
+      "Fetching personal notifications from database for user:",
+      req.user!.id
+    );
 
     // Get notifications created by the authenticated user with pagination
     const [notifications, total] = await Promise.all([
       prisma.notification.findMany({
         where: {
           createdBy: req.user!.id,
-          ...dateFilter
+          ...dateFilter,
         },
         include: {
           recipients: true,
@@ -462,25 +489,25 @@ export async function listPersonalNotifications(
                   employeeProfile: {
                     select: {
                       firstName: true,
-                      lastName: true
-                    }
-                  }
-                }
-              }
-            }
-          }
+                      lastName: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip,
-        take: size
+        take: size,
       }),
       prisma.notification.count({
         where: {
           createdBy: req.user!.id,
-          ...dateFilter
-        }
-      })
-    ])
+          ...dateFilter,
+        },
+      }),
+    ]);
 
     const response = {
       data: notifications,
@@ -488,32 +515,32 @@ export async function listPersonalNotifications(
         total,
         page,
         size,
-        totalPages: Math.ceil(total / size)
-      }
-    }
+        totalPages: Math.ceil(total / size),
+      },
+    };
 
     console.log(`Personal notifications response for user ${req.user!.id}:`, {
       count: notifications.length,
       total,
       page,
-      hasData: notifications.length > 0
-    })
+      hasData: notifications.length > 0,
+    });
 
-    res.json(response)
+    res.json(response);
   } catch (err) {
-    console.error('Error in listPersonalNotifications:', err)
-    next(err)
+    console.error("Error in listPersonalNotifications:", err);
+    next(err);
   }
 }
 
 /**
  * Lists current month personal notifications (created by the authenticated user).
- * 
+ *
  * @param {Request} req - Express request object
- * @param {Response} res - Express response object  
+ * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  * @returns {Promise<void>} Resolves when notifications are fetched
- * 
+ *
  * @endpoint GET /api/notifications/personal/current-month
  * @auth Requires authenticated user
  */
@@ -523,26 +550,34 @@ export async function listCurrentMonthPersonalNotifications(
   next: NextFunction
 ): Promise<void> {
   try {
-    const now = new Date()
-    const currentMonth = now.getMonth() + 1 // Convert to 1-based month
-    const currentYear = now.getFullYear()
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1; // Convert to 1-based month
+    const currentYear = now.getFullYear();
 
     // Build date filter for current month
-    const startDate = new Date(currentYear, currentMonth - 1, 1) // month is 0-indexed
-    const endDate = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999) // last day of month
+    const startDate = new Date(currentYear, currentMonth - 1, 1); // month is 0-indexed
+    const endDate = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999); // last day of month
 
     // Create cache key
-    const cacheKey = `personal_notifications_current_month:${req.user!.id}:${currentMonth}:${currentYear}`
-    
+    const cacheKey = `personal_notifications_current_month:${
+      req.user!.id
+    }:${currentMonth}:${currentYear}`;
+
     // Try cache first
-    const cached = await CacheService.get(cacheKey)
+    const cached = await CacheService.get(cacheKey);
     if (cached) {
-      console.log('Returning cached current month personal notifications for user:', req.user!.id)
-      res.json(cached)
-      return
+      console.log(
+        "Returning cached current month personal notifications for user:",
+        req.user!.id
+      );
+      res.json(cached);
+      return;
     }
 
-    console.log('Fetching current month personal notifications from database for user:', req.user!.id)
+    console.log(
+      "Fetching current month personal notifications from database for user:",
+      req.user!.id
+    );
 
     // Get notifications created by the authenticated user for current month
     const [notifications, total] = await Promise.all([
@@ -551,8 +586,8 @@ export async function listCurrentMonthPersonalNotifications(
           createdBy: req.user!.id,
           scheduledAt: {
             gte: startDate,
-            lte: endDate
-          }
+            lte: endDate,
+          },
         },
         include: {
           recipients: true,
@@ -565,26 +600,26 @@ export async function listCurrentMonthPersonalNotifications(
                   employeeProfile: {
                     select: {
                       firstName: true,
-                      lastName: true
-                    }
-                  }
-                }
-              }
-            }
-          }
+                      lastName: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: "desc" },
       }),
       prisma.notification.count({
         where: {
           createdBy: req.user!.id,
           scheduledAt: {
             gte: startDate,
-            lte: endDate
-          }
-        }
-      })
-    ])
+            lte: endDate,
+          },
+        },
+      }),
+    ]);
 
     const response = {
       data: notifications,
@@ -592,24 +627,56 @@ export async function listCurrentMonthPersonalNotifications(
         total,
         page: 1,
         size: notifications.length,
-        totalPages: 1
-      }
-    }
+        totalPages: 1,
+      },
+    };
 
     // Cache the response
-    await CacheService.set(cacheKey, response, 300) // 5 minutes cache
+    await CacheService.set(cacheKey, response, 300); // 5 minutes cache
 
-    console.log(`Current month personal notifications response for user ${req.user!.id}:`, {
-      count: notifications.length,
-      total,
-      month: currentMonth,
-      year: currentYear,
-      hasData: notifications.length > 0
-    })
+    console.log(
+      `Current month personal notifications response for user ${req.user!.id}:`,
+      {
+        count: notifications.length,
+        total,
+        month: currentMonth,
+        year: currentYear,
+        hasData: notifications.length > 0,
+      }
+    );
 
-    res.json(response)
+    res.json(response);
   } catch (err) {
-    console.error('Error in listCurrentMonthPersonalNotifications:', err)
+    console.error("Error in listCurrentMonthPersonalNotifications:", err);
+    next(err);
+  }
+}
+
+// ⬇️ วางต่อท้ายไฟล์ (export ร่วมกับเมท็อดอื่น)
+export async function deleteNotification(req, res, next) {
+  const { id } = req.params
+  const user = req.user                // มาจาก jwtGuard
+
+  try {
+    const notif = await prisma.notification.findUnique({ where: { id } })
+    if (!notif) return res.status(404).json({ message: 'NOT_FOUND' })
+
+    const isAdmin =
+      user.role === 'ADMIN' || user.role === 'SUPERADMIN'
+    const isOwner = notif.creatorId === user.id
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ message: 'FORBIDDEN' })
+    }
+
+    await prisma.$transaction([
+      prisma.recipient.deleteMany({ where: { notificationId: id } }),
+      prisma.notificationAttachment.deleteMany({ where: { notificationId: id } }),
+      prisma.notification.delete({ where: { id } })
+    ])
+
+    return res.sendStatus(204)
+  } catch (err) {
     next(err)
   }
 }

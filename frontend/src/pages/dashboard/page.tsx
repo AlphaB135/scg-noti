@@ -659,9 +659,17 @@ export default function AdminNotificationPage() {
 
       // (ถ้าใช้สถิติบทความ/การ์ด) โหลดข้อมูลใหม่
       await loadCurrentMonthData();
-    } catch (err) {
-      console.error("ลบงานไม่สำเร็จ:", err);
-      alert("เกิดข้อผิดพลาด — ลบงานไม่สำเร็จ");
+    } catch (err: any) {
+      /* แสดงสถานะ-ข้อความที่ backend ส่งกลับมาชัด ๆ */
+      if (err.response) {
+        console.error(
+          "⛔ DELETE",
+          err.response.status, // เลขสถานะ
+          err.response.data // body/errorMessage
+        );
+      } else {
+        console.error("⛔ DELETE (no response)", err.message);
+      }
     }
   };
 

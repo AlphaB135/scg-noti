@@ -210,7 +210,7 @@ model Recipient {
   userId         String?      @db.UniqueIdentifier
   companyCode    String?      @db.VarChar(12)
   groupId        String?      @db.UniqueIdentifier
-  notification   Notification @relation(fields: [notificationId], references: [id])
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 }
 
 model NotificationAttachment {
@@ -219,7 +219,7 @@ model NotificationAttachment {
   fileName       String       @db.NVarChar(255)
   fileUrl        String       @db.NVarChar(255)
   mimeType       String       @db.NVarChar(100)
-  Notification   Notification @relation(fields: [notificationId], references: [id])
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 }
 
 model Team {
