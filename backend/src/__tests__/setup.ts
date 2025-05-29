@@ -1,6 +1,6 @@
-import { jest, afterEach } from '@jest/globals'
 import type { Request, Response, NextFunction } from 'express'
 
+// Use global jest and afterEach for compatibility
 // Mock express request & response
 export const mockRequest = () => {
   const req: Partial<Request> = {}
@@ -21,16 +21,11 @@ export const mockResponse = () => {
 }
 
 // Mock auth middleware
-export const mockAuthMiddleware = jest.fn(
+export const mockAuthMiddleware = (jest as any).fn(
   (_req: Request, _res: Response, next: NextFunction) => next()
 )
 
 // Mock authorization middleware
-export const mockAuthorize = jest.fn(
+export const mockAuthorize = (jest as any).fn(
   () => (_req: Request, _res: Response, next: NextFunction) => next()
 )
-
-// Reset all mocks after each test
-afterEach(() => {
-  jest.clearAllMocks()
-})

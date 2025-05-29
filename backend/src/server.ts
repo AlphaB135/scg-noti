@@ -55,9 +55,10 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req) => {
     // Use IP and fingerprint if available for better rate limiting
-    return (req.body?.fingerprint 
-      ? `${req.ip}-${req.body.fingerprint}`
-      : req.ip) || req.ip // Ensure we always return a string
+    if (req.body && req.body.fingerprint) {
+      return `${req.ip}-${req.body.fingerprint}`;
+    }
+    return req.ip || '';
   }
 })
 
@@ -181,7 +182,6 @@ app.use('/api/mobile', mobileRoutes)
 // Mount base routes last to avoid conflicts
 app.use('/api', routes)
 app.use('/api/notifications/:id/approvals', approvalRoutes)
-app.use('/api/teams/:teamId/timeline', timelineRoutes)
 
 // Mount Swagger UI with enhanced configuration
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapiDocument, {

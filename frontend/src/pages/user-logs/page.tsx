@@ -13,6 +13,7 @@ import {
   getActionTypeIcon,
   type ActionType,
 } from "@/components/user-logs/utils"
+import { timelineApi } from "@/lib/api/timeline"
 
 // ข้อมูลประวัติการดำเนินการ
 interface AuditLog {
@@ -41,91 +42,104 @@ export default function UserActivityLogsPage() {
     department: "Developer",
   })
 
-  // ===== MOCK DATA LOADING =====
+  // ===== DATA LOADING =====
   useEffect(() => {
-    const todayStr = new Date().toISOString().split("T")[0]
-    const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split("T")[0]
-    const twoDaysAgoStr = new Date(Date.now() - 86400000 * 2).toISOString().split("T")[0]
-
-    // สร้างข้อมูลประวัติการดำเนินการตัวอย่าง - เฉพาะของผู้ใช้ปัจจุบัน (สมชาย ใจดี)
-    const mockAuditLogs: AuditLog[] = [
-      // วันนี้
-      {
-        id: "log1",
-        taskId: 1,
-        taskTitle: "สรุปรายงานผลประกอบการ",
-        actionType: "task_created",
-        actionBy: "สมชาย ใจดี",
-        actionDate: `${todayStr}T09:15:00`,
-        details: "สร้างงานใหม่",
-      },
-      // 2 วันที่แล้ว
-      {
-        id: "log7",
-        taskId: 3,
-        taskTitle: "เตรียมเอกสารประชุม",
-        actionType: "task_created",
-        actionBy: "สมชาย ใจดี",
-        actionDate: `${twoDaysAgoStr}T09:00:00`,
-        details: "สร้างงานใหม่",
-      },
-      {
-        id: "log11",
-        taskId: 6,
-        taskTitle: "อัปโหลดข้อมูลเข้าระบบ",
-        actionType: "task_reopened",
-        actionBy: "สมชาย ใจดี",
-        actionDate: `${twoDaysAgoStr}T17:30:00`,
-        details: "เปิดงานใหม่เนื่องจากข้อมูลไม่ครบถ้วน",
-      },
-      // เพิ่มข้อมูลเพิ่มเติมเพื่อให้มีประวัติมากขึ้น
-      {
-        id: "log12",
-        taskId: 9,
-        taskTitle: "ส่งรายงานประจำเดือน",
-        actionType: "task_postponed",
-        actionBy: "สมชาย ใจดี",
-        actionDate: `${yesterdayStr}T10:15:00`,
-        details: "เลื่อนกำหนดส่งงานจากวันที่ 3 พ.ค. ไปเป็นวันที่ 5 พ.ค.",
-        oldValue: "2025-05-03",
-        newValue: "2025-05-05",
-      },
-      {
-        id: "log13",
-        taskId: 2,
-        taskTitle: "ปฐมนิเทศพนักงานใหม่",
-        actionType: "task_updated",
-        actionBy: "สมชาย ใจดี",
-        actionDate: `${yesterdayStr}T14:30:00`,
-        details: "แก้ไขรายละเอียดงาน",
-        oldValue: "เตรียมการปฐมนิเทศ",
-        newValue: "เริ่มปฐมนิเทศในวันนี้",
-      },
-      {
-        id: "log14",
-        taskId: 4,
-        taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
-        actionType: "task_completed",
-        actionBy: "สมชาย ใจดี",
-        actionDate: `${yesterdayStr}T16:45:00`,
-        details: "ทำงานเสร็จแล้ว",
-      },
-      {
-        id: "log15",
-        taskId: 4,
-        taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
-        actionType: "task_reopened",
-        actionBy: "สมชาย ใจดี",
-        actionDate: `${todayStr}T08:30:00`,
-        details: "เปิดงานใหม่เนื่องจากต้องสั่งซื้อเพิ่มเติม",
-      },
-    ]
-
-    // เรียงลำดับตามวันที่ล่าสุด
-    mockAuditLogs.sort((a, b) => new Date(b.actionDate).getTime() - new Date(a.actionDate).getTime())
-
-    setAuditLogs(mockAuditLogs)
-  }, [])
+    // ดึง timeline จริงจาก backend
+    timelineApi.fetchTimeline({ limit: 50 })
+      .then((res) => {
+        // แปลงข้อมูลให้เข้ากับ AuditLog (ตัวอย่าง mapping)
+        const logs: AuditLog[] = res.events.map((event) => ({
+          id: event.id,
+          taskId: 0, // ไม่มีใน timeline event จริง
+          taskTitle: event.title,
+          actionType: event.type === 'notification' ? 'task_created' : 'task_updated',
+          actionBy: currentUser.name,
+          actionDate: event.createdAt,
+          details: event.status,
+        }));
+        setAuditLogs(logs);
+      })
+      .catch(() => {
+        // fallback: mock data
+        const todayStr = new Date().toISOString().split("T")[0]
+        const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split("T")[0]
+        const twoDaysAgoStr = new Date(Date.now() - 86400000 * 2).toISOString().split("T")[0]
+        const mockAuditLogs: AuditLog[] = [
+          // วันนี้
+          {
+            id: "log1",
+            taskId: 1,
+            taskTitle: "สรุปรายงานผลประกอบการ",
+            actionType: "task_created",
+            actionBy: "สมชาย ใจดี",
+            actionDate: `${todayStr}T09:15:00`,
+            details: "สร้างงานใหม่",
+          },
+          // 2 วันที่แล้ว
+          {
+            id: "log7",
+            taskId: 3,
+            taskTitle: "เตรียมเอกสารประชุม",
+            actionType: "task_created",
+            actionBy: "สมชาย ใจดี",
+            actionDate: `${twoDaysAgoStr}T09:00:00`,
+            details: "สร้างงานใหม่",
+          },
+          {
+            id: "log11",
+            taskId: 6,
+            taskTitle: "อัปโหลดข้อมูลเข้าระบบ",
+            actionType: "task_reopened",
+            actionBy: "สมชาย ใจดี",
+            actionDate: `${twoDaysAgoStr}T17:30:00`,
+            details: "เปิดงานใหม่เนื่องจากข้อมูลไม่ครบถ้วน",
+          },
+          // เพิ่มข้อมูลเพิ่มเติมเพื่อให้มีประวัติมากขึ้น
+          {
+            id: "log12",
+            taskId: 9,
+            taskTitle: "ส่งรายงานประจำเดือน",
+            actionType: "task_postponed",
+            actionBy: "สมชาย ใจดี",
+            actionDate: `${yesterdayStr}T10:15:00`,
+            details: "เลื่อนกำหนดส่งงานจากวันที่ 3 พ.ค. ไปเป็นวันที่ 5 พ.ค.",
+            oldValue: "2025-05-03",
+            newValue: "2025-05-05",
+          },
+          {
+            id: "log13",
+            taskId: 2,
+            taskTitle: "ปฐมนิเทศพนักงานใหม่",
+            actionType: "task_updated",
+            actionBy: "สมชาย ใจดี",
+            actionDate: `${yesterdayStr}T14:30:00`,
+            details: "แก้ไขรายละเอียดงาน",
+            oldValue: "เตรียมการปฐมนิเทศ",
+            newValue: "เริ่มปฐมนิเทศในวันนี้",
+          },
+          {
+            id: "log14",
+            taskId: 4,
+            taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
+            actionType: "task_completed",
+            actionBy: "สมชาย ใจดี",
+            actionDate: `${yesterdayStr}T16:45:00`,
+            details: "ทำงานเสร็จแล้ว",
+          },
+          {
+            id: "log15",
+            taskId: 4,
+            taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
+            actionType: "task_reopened",
+            actionBy: "สมชาย ใจดี",
+            actionDate: `${todayStr}T08:30:00`,
+            details: "เปิดงานใหม่เนื่องจากต้องสั่งซื้อเพิ่มเติม",
+          },
+        ];
+        mockAuditLogs.sort((a, b) => new Date(b.actionDate).getTime() - new Date(a.actionDate).getTime())
+        setAuditLogs(mockAuditLogs)
+      });
+  }, [currentUser.name])
 
   // ===== HELPER FUNCTIONS =====
   // แปลงวันที่เป็นรูปแบบที่อ่านง่ายสำหรับหัวข้อกลุ่ม

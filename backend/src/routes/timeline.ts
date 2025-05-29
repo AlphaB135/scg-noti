@@ -1,17 +1,20 @@
-// File: backend/src/routes/timeline.ts
-import { Router } from 'express'
-import { authMiddleware } from '../middleware/auth.middleware'
-import { authorize } from '../middleware/authz'
-import { getTeamTimeline } from '../modules/timeline/timeline.controller'
+// backend/src/routes/timeline.ts
 
-const router = Router({ mergeParams: true })
+import { Router } from 'express';
+import { getTimeline } from '../controllers/timeline.controller';
+import { authMiddleware } from '../middleware/auth.middleware';
 
-// GET /api/teams/:teamId/timeline
-router.get(
-  '/',
-  authMiddleware,
-  authorize(['USER','ADMIN','SUPERADMIN']),
-  getTeamTimeline
-)
+const router = Router();
 
-export default router
+/**
+ * GET /api/timeline
+ * Get timeline events for authenticated user
+ * 
+ * Query params:
+ * - limit: number (default 20, max 100)
+ * - cursor: string (base64 encoded cursor for pagination)
+ * - types: string (comma-separated: notification,approval)
+ */
+router.get('/', authMiddleware, getTimeline);
+
+export default router;

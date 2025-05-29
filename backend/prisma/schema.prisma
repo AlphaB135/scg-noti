@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
-  url      = env("DATABASE_URL")
+  provider          = "sqlserver"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
@@ -187,6 +188,7 @@ model Notification {
   @@index([status])
   @@index([taskStatus])
   @@index([taskCompletedBy])
+  @@index([createdBy, createdAt, id])
 }
 
 model Approval {
@@ -201,6 +203,7 @@ model Approval {
 
   @@index([notificationId])
   @@index([userId])
+  @@index([userId, createdAt, id])
 }
 
 model Recipient {

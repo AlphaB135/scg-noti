@@ -9,5 +9,8 @@ module.exports = {
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest'
   },
-  setupFiles: ['<rootDir>/src/__tests__/setup.ts']
+  setupFiles: ['<rootDir>/src/__tests__/setup.ts'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  }
 }
