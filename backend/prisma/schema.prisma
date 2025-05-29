@@ -211,6 +211,10 @@ model Recipient {
   companyCode    String?      @db.VarChar(12)
   groupId        String?      @db.UniqueIdentifier
   notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([groupId])
+  @@index([companyCode])
 }
 
 model NotificationAttachment {
