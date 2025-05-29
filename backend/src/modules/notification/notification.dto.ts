@@ -48,7 +48,11 @@ const notificationBaseSchema = {
   urgencyDays: z.coerce.number().int().min(0).default(0),
   repeatIntervalDays: z.coerce.number().int().min(0).default(0),
   recipients: z.array(recipientSchema).min(1),
-  creatorId: z.string().uuid(), // Added creatorId property
+  /**
+   * createdBy จะถูกเซ็ตโดย backend จาก req.user.id เท่านั้น
+   * ห้ามรับค่าจาก client โดยตรง (controller จะ merge ให้ก่อน validate)
+   */
+  createdBy: z.string().uuid(),
 };
 
 // Schema for creating notifications

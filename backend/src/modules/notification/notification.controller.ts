@@ -65,13 +65,13 @@ export async function createNotification(
   try {
     const notificationData = createNotificationSchema.parse({
       ...req.body,
-      createdBy: req.user!.id,
+      createdBy: req.user!.id, // เปลี่ยนกลับเป็น createdBy ให้ตรงกับ Prisma model
     });
 
     // Use the service to create the notification
     const notification = await create({
       ...notificationData,
-      createdBy: req.user!.id,
+      createdBy: req.user!.id, // เปลี่ยนกลับเป็น createdBy ให้ตรงกับ Prisma model
     });
 
     // Invalidate caches to ensure fresh data
