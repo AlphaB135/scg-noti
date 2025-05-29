@@ -243,6 +243,7 @@ const response = await notificationsApi.getAll(targetPage, -1)
       const updatedNotification: UpdateNotificationInput = {
         title: formData.title || currentReminder.title,
         message: formData.details || "ไม่มีรายละเอียด",
+        impact: formData.impact || "", // ส่ง impact แยก field
         scheduledAt: new Date(`${formData.date}T09:00:00`).toISOString(),
       }
 

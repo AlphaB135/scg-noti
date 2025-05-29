@@ -49,6 +49,7 @@ export interface Notification {
       companyCode?: string
     }>
     status?: string
+    impact?: string // เพิ่ม field impact ให้รองรับการแก้ไข
   }
   
   export interface DashboardStats {
@@ -78,4 +79,3 @@ export interface Notification {
       createdAt: string
     }>
   }
-  

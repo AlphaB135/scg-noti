@@ -72,7 +72,10 @@ export default function EditReminderDialog({
             ยกเลิก
           </Button>
           <Button
-            onClick={handleEditReminder}
+            onClick={() => {
+              // ส่งข้อมูลแยก impact กับ details (message)
+              handleEditReminder();
+            }}
             className="flex-1 sm:flex-none bg-[#2c3e50] hover:bg-[#1a2530] text-white"
           >
             บันทึกการแก้ไข

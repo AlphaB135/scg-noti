@@ -115,8 +115,8 @@ export default function AdminNotificationPage() {
             done: notification.status === "DONE",
             priority: "pending" as const,
             frequency: "no-repeat" as const,
-            impact: "",
-            link: "",
+            impact: notification.impact || "", // ดึง impact จาก API ตรง ๆ
+            link: notification.link || "",
             hasLogin: false,
             username: "",
             password: "",
@@ -437,17 +437,12 @@ export default function AdminNotificationPage() {
     }
 
     try {
-      const message = `${formData.details}\n\nผลกระทบ: ${formData.impact}${
-        formData.hasLogin
-          ? `\n\nข้อมูลการเข้าสู่ระบบ:\nUsername: ${formData.username}\nPassword: ${formData.password}`
-          : ""
-      }`;
-
       if (editTask) {
         // Update existing task
         await notificationsApi.update(editTask.id, {
           title: formData.title,
-          message: message,
+          message: formData.details, // ไม่รวม impact ใน message
+          impact: formData.impact,   // ส่ง impact แยก field
           scheduledAt: new Date(formData.date).toISOString(),
         } as any);
 
@@ -457,7 +452,7 @@ export default function AdminNotificationPage() {
             ? {
                 ...t,
                 title: formData.title,
-                details: message,
+                details: formData.details,
                 dueDate: formData.date,
                 frequency: formData.frequency as Task["frequency"],
                 impact: formData.impact,
@@ -474,7 +469,8 @@ export default function AdminNotificationPage() {
         // Create new task
         const notification = await notificationsApi.create({
           title: formData.title,
-          message,
+          message: formData.details, // ไม่รวม impact ใน message
+          impact: formData.impact,   // ส่ง impact แยก field
           type: "TODO",
           scheduledAt: new Date(formData.date).toISOString(),
           category: "TASK",
@@ -1046,6 +1042,16 @@ export default function AdminNotificationPage() {
                     {taskDetail.details}
                   </div>
                 </div>
+                {taskDetail.impact && (
+                  <div className="space-y-1 md:space-y-2">
+                    <h4 className="text-xs md:text-sm font-medium text-gray-700">
+                      ผลกระทบหากงานไม่เสร็จ
+                    </h4>
+                    <div className="p-2 md:p-3 bg-gray-50 rounded-lg whitespace-pre-wrap text-xs md:text-sm text-gray-700">
+                      {taskDetail.impact}
+                    </div>
+                  </div>
+                )}
 
                 {taskDetail.hasLogin && (
                   <div className="space-y-1 md:space-y-2">

@@ -38,6 +38,7 @@ export const recipientSchema = z.object({
 const notificationBaseSchema = {
   title: z.string().min(1),
   message: z.string().min(1),
+  impact: z.string().nullish(), // เพิ่ม field impact ให้แยกจาก message
   scheduledAt: z.coerce.date(),
   dueDate: z.coerce.date().optional(),
   type: z.enum(['SYSTEM', 'TODO', 'REMINDER']),

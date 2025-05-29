@@ -36,6 +36,7 @@ type Notification = {
   id: string
   title: string
   details: string
+  impact?: string // เพิ่ม impact
   date: string
   dueDate: string
   frequency: string
@@ -73,6 +74,7 @@ export default function TeamNotificationsPage({ teamId }: Props) {
   const [formData, setFormData] = useState({
     title: "",
     details: "",
+    impact: "", // เพิ่ม impact
     date: new Date().toISOString().split("T")[0],
     dueDate: new Date().toISOString().split("T")[0],
     link: "",
@@ -297,6 +299,7 @@ export default function TeamNotificationsPage({ teamId }: Props) {
       const payload = {
         title: formData.title,
         message: formData.details,
+        impact: formData.impact, // ส่ง impact แยก field
         scheduledAt: new Date(formData.date).toISOString(),
         link: formData.link || undefined,
         linkUsername: formData.username || undefined,
@@ -337,7 +340,9 @@ export default function TeamNotificationsPage({ teamId }: Props) {
       const payload = {
         title: formData.title,
         message: formData.details,
+        impact: formData.impact, // ส่ง impact แยก field
         scheduledAt: new Date(formData.date).toISOString(),
+        category: "TASK", // เพิ่ม category ให้ตรง type
         link: formData.link || undefined,
         linkUsername: formData.username || undefined,
         linkPassword: formData.password || undefined,
@@ -359,7 +364,7 @@ export default function TeamNotificationsPage({ teamId }: Props) {
     } catch (error) {
       console.error("Failed to update notification:", error)
       toast({
-        title: "เกิดข้อผิดพลาด", 
+        title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถแก้ไขการแจ้งเตือนได้",
         variant: "destructive",
       })
@@ -396,6 +401,7 @@ export default function TeamNotificationsPage({ teamId }: Props) {
     setFormData({
       title: notification.title,
       details: notification.details,
+      impact: notification.impact || "", // map impact
       date: notification.date,
       dueDate: notification.dueDate,
       frequency: notification.frequency,
@@ -424,6 +430,7 @@ export default function TeamNotificationsPage({ teamId }: Props) {
     setFormData({
       title: "",
       details: "",
+      impact: "", // reset impact
       date: new Date().toISOString().split("T")[0],
       dueDate: new Date().toISOString().split("T")[0],
       frequency: "no-repeat",
