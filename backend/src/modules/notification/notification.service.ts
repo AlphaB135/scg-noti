@@ -401,6 +401,18 @@ export async function listMine(
       ],
     },
     orderBy: { scheduledAt: 'asc' },
-    include: { recipients: true },
+    // include: { recipients: true }, // ดึง recipients เฉพาะเมื่อจำเป็น
+    select: {
+      id: true,
+      title: true,
+      message: true,
+      scheduledAt: true,
+      status: true,
+      type: true,
+      dueDate: true,
+      category: true,
+      createdBy: true,
+      // recipients: true // ถ้าต้องการ recipients ให้ uncomment บรรทัดนี้
+    }
   })
 }

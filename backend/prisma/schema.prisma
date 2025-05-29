@@ -4,7 +4,8 @@ generator client {
 
 datasource db {
   provider = "sqlserver"
-  url      = env("DATABASE_URL")
+  url      = env("sqlserver://localhost:1433;database=scg_dashboard;user=scg_app;password=Password212547;encrypt=DANGER_PLAINTEXT"
+)
 }
 
 model User {
