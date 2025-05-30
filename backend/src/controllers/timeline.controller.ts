@@ -21,6 +21,9 @@ interface TimelineEvent {
   title: string;
   status: string;
   createdAt: Date;
+  updatedAt?: Date;
+  message?: string;
+  metadata?: Record<string, any>;
 }
 
 /**
@@ -71,7 +74,7 @@ export async function getTimeline(req: Request, res: Response) {
     } : {};
 
     // Fetch notifications where user is recipient or creator
-    let notificationPromise = Promise.resolve([]);
+    let notificationPromise: Promise<any[]> = Promise.resolve([]);
     if (types.includes('notification')) {
       notificationPromise = prisma.notification.findMany({
         where: {
@@ -94,7 +97,9 @@ export async function getTimeline(req: Request, res: Response) {
           title: true,
           status: true,
           createdAt: true,
-          type: true
+          updatedAt: true,
+          type: true,
+          message: true
         },
         orderBy: [
           { createdAt: 'desc' },
@@ -105,7 +110,7 @@ export async function getTimeline(req: Request, res: Response) {
     }
 
     // Fetch approvals by user
-    let approvalPromise = Promise.resolve([]);
+    let approvalPromise: Promise<any[]> = Promise.resolve([]);
     if (types.includes('approval')) {
       approvalPromise = prisma.approval.findMany({
         where: {
@@ -140,13 +145,34 @@ export async function getTimeline(req: Request, res: Response) {
     });
 
     // Map notifications to timeline events
-    const notificationEvents: TimelineEvent[] = notifications.map(notification => ({
-      id: notification.id,
-      type: 'notification' as const,
-      title: notification.title,
-      status: notification.status,
-      createdAt: notification.createdAt
-    }));
+    const notificationEvents: TimelineEvent[] = notifications.map(notification => {
+      // Detect if notification was edited
+      const wasEdited = notification.updatedAt && 
+                       new Date(notification.updatedAt).getTime() !== new Date(notification.createdAt).getTime();
+      
+      // Create metadata to help frontend detect edits
+      const metadata: Record<string, any> = {
+        notificationId: notification.id,
+        type: notification.type,
+        hasEdit: wasEdited
+      };
+      
+      if (wasEdited) {
+        metadata.editedAt = notification.updatedAt;
+        metadata.originalCreatedAt = notification.createdAt;
+      }
+
+      return {
+        id: notification.id,
+        type: 'notification' as const,
+        title: notification.title,
+        status: notification.status,
+        createdAt: notification.createdAt,
+        updatedAt: notification.updatedAt,
+        message: notification.message,
+        metadata
+      };
+    });
 
     // Map approvals to timeline events
     const approvalEvents: TimelineEvent[] = approvals.map(approval => ({
@@ -154,7 +180,12 @@ export async function getTimeline(req: Request, res: Response) {
       type: 'approval' as const,
       title: `Approval: ${approval.notification.title}`,
       status: approval.response,
-      createdAt: approval.createdAt
+      createdAt: approval.createdAt,
+      metadata: {
+        approvalId: approval.id,
+        notificationTitle: approval.notification.title,
+        response: approval.response
+      }
     }));
 
     // Merge and sort all events

@@ -79,16 +79,18 @@ export default function LogsTabs({
                           <p className="text-sm text-gray-600">{log.details}</p>
 
                           {/* แสดงค่าเก่าและค่าใหม่ถ้ามี */}
-                          {(log.oldValue || log.newValue) && (
-                            <div className="mt-2 text-sm">
-                              {log.oldValue && (
-                                <div className="text-gray-500">
-                                  <span className="font-medium">ค่าเดิม:</span> {log.oldValue}
+                          {(log.oldValue || log.newValue) && (log.oldValue?.trim() !== "" || log.newValue?.trim() !== "") && (
+                            <div className="mt-3 p-3 bg-gray-50 rounded-lg text-sm border-l-4 border-blue-200">
+                              {log.oldValue && log.oldValue.trim() !== "" && (
+                                <div className="text-red-600 mb-2">
+                                  <span className="font-medium">ค่าเดิม:</span> 
+                                  <span className="ml-2 px-2 py-1 bg-red-100 rounded text-red-700">{log.oldValue}</span>
                                 </div>
                               )}
-                              {log.newValue && (
-                                <div className="text-gray-500">
-                                  <span className="font-medium">ค่าใหม่:</span> {log.newValue}
+                              {log.newValue && log.newValue.trim() !== "" && (
+                                <div className="text-green-600">
+                                  <span className="font-medium">ค่าใหม่:</span> 
+                                  <span className="ml-2 px-2 py-1 bg-green-100 rounded text-green-700">{log.newValue}</span>
                                 </div>
                               )}
                             </div>

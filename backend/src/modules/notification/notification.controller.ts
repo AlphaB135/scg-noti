@@ -387,7 +387,22 @@ export async function reschedule(
 ): Promise<void> {
   try {
     const { id } = req.params;
-    const { scheduledAt } = req.body;
+    const { scheduledAt, reason } = req.body;
+    const currentUser = req.user!;
+
+    // Get the current notification first to capture old scheduled date
+    const currentNotification = await prisma.notification.findUnique({
+      where: { id },
+      select: { scheduledAt: true, title: true }
+    });
+
+    if (!currentNotification) {
+      res.status(404).json({ 
+        success: false, 
+        error: { message: "Notification not found" } 
+      });
+      return;
+    }
 
     const notification = await prisma.notification.update({
       where: { id },
@@ -416,6 +431,36 @@ export async function reschedule(
         },
       },
     });
+
+    // บันทึก timeline event สำหรับการเลื่อนงาน
+    try {
+      await prisma.timelineEvent.create({
+        data: {
+          type: "notification",
+          action: "RESCHEDULED",
+          entityId: id,
+          entityType: "Notification",
+          userId: currentUser.id,
+          companyCode: currentUser.companyCode,
+          title: `เลื่อนกำหนด: ${currentNotification.title}`,
+          message: reason || "เลื่อนกำหนดการแจ้งเตือน",
+          status: "RESCHEDULED",
+          metadata: {
+            oldScheduledAt: currentNotification.scheduledAt?.toISOString(),
+            newScheduledAt: new Date(scheduledAt).toISOString(),
+            reason: reason || "ไม่ระบุเหตุผล",
+            rescheduledBy: {
+              id: currentUser.id,
+              firstName: currentUser.employeeProfile?.firstName,
+              lastName: currentUser.employeeProfile?.lastName,
+            }
+          }
+        }
+      });
+    } catch (timelineError) {
+      console.error("Failed to create timeline event for reschedule:", timelineError);
+      // ไม่ให้ error นี้หยุดการทำงานหลัก
+    }
 
     // Invalidate caches since we modified a notification
     await CacheService.invalidateNotificationCaches();
