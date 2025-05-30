@@ -87,128 +87,31 @@ export default function TeamNotificationsPage({ teamId }: Props) {
     selectedMembers: [] as string[],
   })
 
-  // Mock data loading
+  // Data loading (เปลี่ยนจาก mock เป็น API จริง)
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true)
       try {
-        // Mock team members data
-        const mockTeamMembers: TeamMember[] = [
-          { id: "1", name: "สมชาย ใจดี", role: "นักพัฒนาซอฟต์แวร์" },
-          { id: "2", name: "สมหญิง รักงาน", role: "นักออกแบบ UI/UX" },
-          { id: "3", name: "วิชัย เก่งกาจ", role: "วิศวกรระบบ" },
-          { id: "4", name: "นภา สดใส", role: "ผู้จัดการโครงการ" },
-          { id: "5", name: "ประสิทธิ์ มากความสามารถ", role: "นักทดสอบระบบ" },
-        ]
+        // โหลดสมาชิกทีม
+        const membersRes = await fetch(`/api/teams/${teamId}/members`)
+        const membersData = await membersRes.json()
+        const rawMembers = membersData.data || membersData.members || []
+        // Normalize ข้อมูลสมาชิกทีมให้ตรงกับ API จริง
+        const normalizedMembers: TeamMember[] = (rawMembers || []).map((m: any) => ({
+          id: m.user?.id || m.employeeId || m.id,
+          name: m.user?.employeeProfile
+            ? `${m.user.employeeProfile.firstName} ${m.user.employeeProfile.lastName}`
+            : m.user?.email || m.employeeId || '-',
+          role: m.role || '-',
+          avatar: m.user?.employeeProfile?.profileImageUrl || undefined,
+        }))
+        setTeamMembers(normalizedMembers)
 
-        // Mock notifications data
-        const mockNotifications: Notification[] = [
-          {
-            id: "1",
-            title: "ส่งรายงานประจำเดือน",
-            details: "กรุณาส่งรายงานความคืบหน้าประจำเดือนภายในวันที่กำหนด",
-            date: "2025-05-15",
-            dueDate: "2025-05-20",
-            frequency: "monthly",
-            type: "report",
-            priority: "high",
-            status: "active",
-            isTeamAssignment: true,
-            assignments: [
-              {
-                memberId: "1",
-                memberName: "สมชาย ใจดี",
-                status: "completed",
-                assignedAt: "2025-05-15",
-                completedAt: "2025-05-18",
-              },
-              {
-                memberId: "2",
-                memberName: "สมหญิง รักงาน",
-                status: "completed",
-                assignedAt: "2025-05-15",
-                completedAt: "2025-05-17",
-              },
-              { memberId: "3", memberName: "วิชัย เก่งกาจ", status: "pending", assignedAt: "2025-05-15" },
-              { memberId: "4", memberName: "นภา สดใส", status: "in-progress", assignedAt: "2025-05-15" },
-              {
-                memberId: "5",
-                memberName: "ประสิทธิ์ มากความสามารถ",
-                status: "completed",
-                assignedAt: "2025-05-15",
-                completedAt: "2025-05-16",
-              },
-            ],
-          },
-          {
-            id: "2",
-            title: "ประชุมทีมประจำสัปดาห์",
-            details: "ประชุมติดตามความคืบหน้าและวางแผนงานประจำสัปดาห์",
-            date: "2025-05-18",
-            dueDate: "2025-05-18",
-            frequency: "weekly",
-            type: "meeting",
-            priority: "medium",
-            status: "completed",
-            isTeamAssignment: true,
-            assignments: [
-              {
-                memberId: "1",
-                memberName: "สมชาย ใจดี",
-                status: "completed",
-                assignedAt: "2025-05-18",
-                completedAt: "2025-05-18",
-              },
-              {
-                memberId: "2",
-                memberName: "สมหญิง รักงาน",
-                status: "completed",
-                assignedAt: "2025-05-18",
-                completedAt: "2025-05-18",
-              },
-              {
-                memberId: "3",
-                memberName: "วิชัย เก่งกาจ",
-                status: "completed",
-                assignedAt: "2025-05-18",
-                completedAt: "2025-05-18",
-              },
-              {
-                memberId: "4",
-                memberName: "นภา สดใส",
-                status: "completed",
-                assignedAt: "2025-05-18",
-                completedAt: "2025-05-18",
-              },
-              {
-                memberId: "5",
-                memberName: "ประสิทธิ์ มากความสามารถ",
-                status: "completed",
-                assignedAt: "2025-05-18",
-                completedAt: "2025-05-18",
-              },
-            ],
-          },
-          {
-            id: "3",
-            title: "ส่งแบบร่างการออกแบบ UI",
-            details: "ส่งแบบร่างการออกแบบ UI สำหรับฟีเจอร์ใหม่",
-            date: "2025-05-19",
-            dueDate: "2025-05-25",
-            frequency: "no-repeat",
-            type: "document",
-            priority: "high",
-            status: "active",
-            isTeamAssignment: false,
-            assignments: [
-              { memberId: "2", memberName: "สมหญิง รักงาน", status: "in-progress", assignedAt: "2025-05-19" },
-            ],
-          },
-        ]
-
-        setTeamMembers(mockTeamMembers)
-        setNotifications(mockNotifications)
-        setTotalPages(1) // Mock single page
+        // โหลด notifications ของทีม
+        const notiRes = await fetch(`/api/teams/${teamId}/notifications`)
+        const notiData = await notiRes.json()
+        setNotifications(notiData.notifications || notiData.data || [])
+        setTotalPages(notiData.totalPages || 1)
       } catch (error) {
         console.error("Failed to load data:", error)
         toast({
@@ -220,9 +123,8 @@ export default function TeamNotificationsPage({ teamId }: Props) {
         setIsLoading(false)
       }
     }
-
     loadData()
-  }, [])
+  }, [teamId])
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -301,12 +203,13 @@ export default function TeamNotificationsPage({ teamId }: Props) {
         message: formData.details,
         impact: formData.impact, // ส่ง impact แยก field
         scheduledAt: new Date(formData.date).toISOString(),
+        category: "TASK", // เพิ่ม category ให้ตรง type
         link: formData.link || undefined,
         linkUsername: formData.username || undefined,
         linkPassword: formData.password || undefined,
-        recipients: formData.isTeamAssignment ? 
-          [{ type: 'GROUP' as const, groupId: teamId }] :
-          formData.selectedMembers.map(memberId => ({ type: 'USER' as const, userId: memberId }))
+        recipients: formData.isTeamAssignment
+          ? teamMembers.map(member => ({ type: 'USER' as const, userId: member.id }))
+          : formData.selectedMembers.map(memberId => ({ type: 'USER' as const, userId: memberId }))
       }
 
       // Call API
@@ -322,6 +225,11 @@ export default function TeamNotificationsPage({ teamId }: Props) {
       setIsAddDialogOpen(false)
       resetForm()
 
+      // โหลดข้อมูลใหม่
+      const notiRes = await fetch(`/api/teams/${teamId}/notifications`)
+      const notiData = await notiRes.json()
+      setNotifications(notiData.notifications || [])
+      setTotalPages(notiData.totalPages || 1)
     } catch (error) {
       console.error("Failed to create notification:", error) 
       toast({
@@ -346,9 +254,9 @@ export default function TeamNotificationsPage({ teamId }: Props) {
         link: formData.link || undefined,
         linkUsername: formData.username || undefined,
         linkPassword: formData.password || undefined,
-        recipients: formData.isTeamAssignment ?
-          [{ type: 'GROUP' as const, groupId: teamId }] :
-          formData.selectedMembers.map(memberId => ({ type: 'USER' as const, userId: memberId }))
+        recipients: formData.isTeamAssignment
+          ? teamMembers.map(member => ({ type: 'USER' as const, userId: member.id }))
+          : formData.selectedMembers.map(memberId => ({ type: 'USER' as const, userId: memberId }))
       }
 
       await notificationsApi.update(currentNotification.id, payload)
@@ -361,6 +269,11 @@ export default function TeamNotificationsPage({ teamId }: Props) {
       setIsEditDialogOpen(false)
       resetForm()
 
+      // โหลดข้อมูลใหม่
+      const notiRes = await fetch(`/api/teams/${teamId}/notifications`)
+      const notiData = await notiRes.json()
+      setNotifications(notiData.notifications || [])
+      setTotalPages(notiData.totalPages || 1)
     } catch (error) {
       console.error("Failed to update notification:", error)
       toast({
@@ -385,6 +298,11 @@ export default function TeamNotificationsPage({ teamId }: Props) {
 
       setIsDeleteDialogOpen(false)
 
+      // โหลดข้อมูลใหม่
+      const notiRes = await fetch(`/api/teams/${teamId}/notifications`)
+      const notiData = await notiRes.json()
+      setNotifications(notiData.notifications || [])
+      setTotalPages(notiData.totalPages || 1)
     } catch (error) {
       console.error("Failed to delete notification:", error)
       toast({
@@ -606,6 +524,7 @@ export default function TeamNotificationsPage({ teamId }: Props) {
         handleMemberSelection={handleMemberSelection}
         handleAddNotification={handleAddNotification}
         teamMembers={teamMembers}
+        isLoading={isLoading}
       />
 
       {/* Edit Notification Dialog */}
@@ -619,6 +538,7 @@ export default function TeamNotificationsPage({ teamId }: Props) {
         handleMemberSelection={handleMemberSelection}
         handleEditNotification={handleEditNotification}
         teamMembers={teamMembers}
+        isLoading={isLoading}
       />
 
       {/* Delete Confirmation Dialog */}

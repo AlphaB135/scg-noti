@@ -36,6 +36,7 @@ type NotificationFormProps = {
   handleMemberSelection: (memberId: string, isSelected: boolean) => void
   teamMembers: TeamMember[]
   isEdit?: boolean
+  isLoading?: boolean
 }
 
 export default function NotificationForm({
@@ -46,8 +47,18 @@ export default function NotificationForm({
   handleMemberSelection,
   teamMembers,
   isEdit = false,
+  isLoading = false,
 }: NotificationFormProps) {
   const prefix = isEdit ? "edit-" : ""
+
+  // Show loading skeleton if loading and no members
+  if (isLoading && teamMembers.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10">
+        <div className="animate-pulse text-gray-400">กำลังโหลดรายชื่อสมาชิกทีม...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="grid gap-6 py-6">

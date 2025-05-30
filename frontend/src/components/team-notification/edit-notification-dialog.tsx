@@ -33,6 +33,7 @@ type EditNotificationDialogProps = {
   handleMemberSelection: (memberId: string, isSelected: boolean) => void
   handleEditNotification: () => void
   teamMembers: TeamMember[]
+  isLoading?: boolean
 }
 
 export default function EditNotificationDialog({
@@ -45,7 +46,21 @@ export default function EditNotificationDialog({
   handleMemberSelection,
   handleEditNotification,
   teamMembers,
+  isLoading = false,
 }: EditNotificationDialogProps) {
+  // Normalize teamMembers อีกชั้น (กันพลาด)
+  const normalizedTeamMembers = Array.isArray(teamMembers)
+    ? teamMembers.map((m) => ({
+        id: m.id,
+        name: m.name || '-',
+        role: m.role || '-',
+        avatar: m.avatar || undefined,
+      }))
+    : []
+
+  // Debug log (สามารถลบออกได้)
+  // console.log('EditDialog teamMembers:', normalizedTeamMembers)
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="w-full max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[60vw] h-[90vh] overflow-y-auto">
@@ -58,8 +73,9 @@ export default function EditNotificationDialog({
           handleSelectChange={handleSelectChange}
           handleTeamAssignmentChange={handleTeamAssignmentChange}
           handleMemberSelection={handleMemberSelection}
-          teamMembers={teamMembers}
+          teamMembers={normalizedTeamMembers}
           isEdit={true}
+          isLoading={isLoading}
         />
         <DialogFooter className="flex gap-2 sm:gap-0 border-t pt-4">
           <Button

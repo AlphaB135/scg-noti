@@ -63,13 +63,24 @@ export default function TeamOverviewPage() {
   // Notification handling functions
   const sendTeamNotification = async (message: string) => {
     if (!selectedTeamId) return;
-    
+    const team = teams.find(t => t.id === selectedTeamId);
+    if (!team || !team.members || team.members.length === 0) {
+      toast({
+        title: "ไม่พบสมาชิกในทีม",
+        description: "ไม่สามารถส่งการแจ้งเตือนได้เพราะทีมไม่มีสมาชิก",
+        variant: "destructive"
+      });
+      return;
+    }
     try {
       await notificationsApi.create({
         title: "Team Overview Alert",
         message,
         scheduledAt: new Date().toISOString(),
-        recipients: [{ type: "GROUP", groupId: selectedTeamId }]
+        recipients: team.members.map(member => ({
+          type: "USER",
+          userId: member.id // ถ้า member มี userId ให้เปลี่ยนเป็น member.userId
+        }))
       });
 
       toast({
