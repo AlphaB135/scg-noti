@@ -79,10 +79,10 @@ export const notificationApi = {
     reason: string
   ) {
     return retryRequest(async () => {
-      const { data } = await api.patch(
+      const { data } = await api.post(
         `/notifications/${id}/reschedule`,
         {
-          dueDate: newDueDate,
+          scheduledAt: newDueDate,
           reason
         }
       )

@@ -36,6 +36,8 @@ export default function UserActivityLogsPage() {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
+  const [autoRefresh, setAutoRefresh] = useState(false)
   const [currentUser, setCurrentUser] = useState({
     id: "user1",
     name: "Shogun",
@@ -51,7 +53,7 @@ export default function UserActivityLogsPage() {
     
     // Helper: สร้าง query params สำหรับ timeline API
     const buildTimelineParams = () => {
-      const params: any = { limit: 5 } // ลดจาก 50 เป็น 5 เพื่อทดสอบ
+      const params: any = { limit: 50 }
       if (filterType !== "all") params.types = [filterType]
       // filterDate/searchQuery: filter ฝั่ง client
       return params
@@ -59,34 +61,20 @@ export default function UserActivityLogsPage() {
     
     timelineApi.fetchTimeline(buildTimelineParams())
       .then((res: any) => {
-        console.log('🔍 Timeline API Response:', res) // Debug log
-        
         // Enhanced mapping: สร้าง multiple audit logs จาก single timeline event
         const logs: AuditLog[] = []
         
         if (!res?.events || !Array.isArray(res.events)) {
-          console.log('❌ No events found in response')
           setAuditLogs([])
           setIsLoading(false)
           return
         }
-        
-        console.log(`📋 Processing ${res.events.length} events`) // Debug log
         
         res.events.forEach((event: any) => {
           // ตรวจสอบว่า event มีข้อมูลพื้นฐานที่จำเป็น
           if (!event?.id || !event?.createdAt || !event?.type) {
             return
           }
-
-          console.log(`🔍 Event ${event.id}:`, {
-            type: event.type,
-            hasReschedule: event.metadata?.hasReschedule,
-            hasEdit: event.metadata?.hasEdit,
-            lastPostponedAt: event.metadata?.lastPostponedAt,
-            postponeReason: event.metadata?.postponeReason,
-            editedAt: event.metadata?.editedAt
-          }) // Debug log
 
           const baseLog = {
             taskId: 0,
@@ -106,21 +94,23 @@ export default function UserActivityLogsPage() {
               details: `สร้างการแจ้งเตือน: ${baseLog.taskTitle}`,
             })
 
-            // ===== ตรวจสอบการเลื่อนงาน ใช้ข้อมูลจาก backend =====
+            // ===== ใช้ข้อมูลที่ backend ส่งมาอย่างถูกต้อง =====
+            const hasBeenEdited = event.metadata?.hasEdit === true
             const hasBeenRescheduled = event.metadata?.hasReschedule === true
+            const editedAt = event.metadata?.editedAt
+            const originalCreatedAt = event.metadata?.originalCreatedAt
             const lastPostponedAt = event.metadata?.lastPostponedAt
-            const postponeReason = event.metadata?.postponeReason || event.metadata?.rescheduleReason
+            const postponeReason = event.metadata?.postponeReason
             const postponeCount = event.metadata?.postponeCount || 0
-            const originalDueDate = event.metadata?.originalDueDate
-            const scheduledAt = event.metadata?.scheduledAt
 
+            // เก็บ log สำหรับ reschedule แยกจาก edit
             if (hasBeenRescheduled && lastPostponedAt) {
               const reason = postponeReason || "ไม่มีเหตุผลที่ระบุ"
-              const originalScheduled = originalDueDate ? 
-                new Date(originalDueDate).toLocaleDateString('th-TH') : 
-                "ไม่ระบุ"
-              const newScheduled = scheduledAt ? 
-                new Date(scheduledAt).toLocaleDateString('th-TH') : 
+              const originalScheduled = event.metadata?.originalDueDate ? 
+                new Date(event.metadata.originalDueDate).toLocaleDateString('th-TH') : 
+                new Date(originalCreatedAt).toLocaleDateString('th-TH')
+              const newScheduled = event.metadata?.scheduledAt ? 
+                new Date(event.metadata.scheduledAt).toLocaleDateString('th-TH') : 
                 new Date(lastPostponedAt).toLocaleDateString('th-TH')
               
               logs.push({
@@ -133,17 +123,11 @@ export default function UserActivityLogsPage() {
                 newValue: `กำหนดใหม่: ${newScheduled}`,
               })
             }
-
-            // ===== ตรวจสอบการแก้ไข (แยกจาก reschedule) =====
-            const hasBeenEdited = event.metadata?.hasEdit === true
-            const editedAt = event.metadata?.editedAt
-            const originalCreatedAt = event.metadata?.originalCreatedAt
             
-            // แก้ไขงานทั่วไป (ไม่ใช่การเลื่อนงาน)
+            // เก็บ log สำหรับ edit ทั่วไป (ถ้าไม่ใช่ reschedule)
             if (hasBeenEdited && editedAt && !hasBeenRescheduled) {
-              const originalTime = new Date(originalCreatedAt || event.createdAt).toLocaleString('th-TH')
+              const originalTime = new Date(originalCreatedAt).toLocaleString('th-TH')
               const editTime = new Date(editedAt).toLocaleString('th-TH')
-              
               logs.push({
                 ...baseLog,
                 id: `${event.id}_edited`,
@@ -154,33 +138,14 @@ export default function UserActivityLogsPage() {
                 newValue: `แก้ไขเมื่อ: ${editTime}`,
               })
             }
-            
-            // Fallback: ตรวจสอบการแก้ไขจาก updatedAt (ถ้าไม่มี metadata)
-            else if (!hasBeenRescheduled && event.updatedAt && event.updatedAt !== event.createdAt) {
-              const editDate = event.updatedAt
-              const originalTime = new Date(event.createdAt).toLocaleString('th-TH')
-              const editTime = new Date(editDate).toLocaleString('th-TH')
-              
-              logs.push({
-                ...baseLog,
-                id: `${event.id}_edited`,
-                actionType: "task_updated",
-                actionDate: editDate,
-                details: `แก้ไขงาน: ${baseLog.taskTitle}`,
-                oldValue: `สร้างเมื่อ: ${originalTime}`,
-                newValue: `แก้ไขเมื่อ: ${editTime}`,
-              })
-            }
 
             // หาก status แสดงว่า task ถูก process แล้ว ให้สร้าง additional log
             if (["SENT", "DELIVERED", "COMPLETED", "PROCESSED", "DONE"].includes(event.status)) {
-              // ใช้ createdAt + 2 นาที เป็น processed time เมื่อไม่มี updatedAt
               const processedDate = event.updatedAt || new Date(new Date(event.createdAt).getTime() + 120000).toISOString()
-              
               logs.push({
                 ...baseLog,
                 id: `${event.id}_processed`,
-                actionType: "task_completed", // เปลี่ยนเป็น task_completed เพื่อให้เห็นการเสร็จงาน
+                actionType: "task_completed",
                 actionDate: processedDate,
                 details: `เสร็จสิ้นการแจ้งเตือน: ${baseLog.taskTitle} - สถานะ: ${event.status}`,
               })
@@ -229,8 +194,23 @@ export default function UserActivityLogsPage() {
           }
         })
 
-        // เรียงลำดับตามวันที่ (ใหม่สุดก่อน)
-        logs.sort((a, b) => new Date(b.actionDate).getTime() - new Date(a.actionDate).getTime())
+        // เรียงลำดับตามวันที่ (ใหม่สุดก่อน) และลำดับ actionType
+        const actionTypeOrder = {
+          task_created: 1,
+          task_updated: 2,
+          task_postponed: 3,
+          task_completed: 4,
+          task_reopened: 5
+        };
+        logs.sort((a, b) => {
+          const dateA = new Date(a.actionDate).getTime();
+          const dateB = new Date(b.actionDate).getTime();
+          if (dateA !== dateB) return dateB - dateA; // ใหม่สุดก่อน
+          // ถ้าเวลาเท่ากัน ให้เรียงตามลำดับ actionType
+          const orderA = actionTypeOrder[a.actionType as keyof typeof actionTypeOrder] ?? 99;
+          const orderB = actionTypeOrder[b.actionType as keyof typeof actionTypeOrder] ?? 99;
+          return orderA - orderB;
+        })
         setAuditLogs(logs)
         setIsLoading(false)
       })

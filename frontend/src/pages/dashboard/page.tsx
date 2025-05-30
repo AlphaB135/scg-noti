@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useEffect, useState, useCallback } from "react";
-import { notificationsApi, invalidateCache } from "@/lib/api";
+import { notificationsApi, notificationApi, invalidateCache } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -369,10 +369,12 @@ export default function AdminNotificationPage() {
       // ใช้ newDueDate สำหรับทั้ง manual และ drag
       const targetDate = newDueDate;
 
-      // บันทึกข้อมูลใหม่ไปยัง server
-      await notificationsApi.update(taskToReschedule.id, {
-        scheduledAt: new Date(targetDate).toISOString(),
-      } as any);
+      // บันทึกข้อมูลใหม่ไปยัง server ด้วย reschedule API ที่ถูกต้อง
+      await notificationApi.rescheduleNotification(
+        taskToReschedule.id, 
+        new Date(targetDate).toISOString(),
+        rescheduleReason
+      );
 
       // ปิด dialog และ clear form
       setTaskToReschedule(null);

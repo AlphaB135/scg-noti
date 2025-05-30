@@ -393,7 +393,7 @@ export async function reschedule(
     // Get the current notification first to capture old scheduled date
     const currentNotification = await prisma.notification.findUnique({
       where: { id },
-      select: { scheduledAt: true, title: true }
+      select: { scheduledAt: true, title: true, originalDueDate: true, postponeCount: true }
     });
 
     if (!currentNotification) {
@@ -404,13 +404,22 @@ export async function reschedule(
       return;
     }
 
+    // Prepare update fields for reschedule
+    const updateData: any = {
+      scheduledAt: new Date(scheduledAt),
+      status: "PENDING",
+      lastPostponedAt: new Date(),
+      postponeReason: reason,
+      postponeCount: (currentNotification.postponeCount || 0) + 1,
+    };
+    // Set originalDueDate only if not set yet
+    if (!currentNotification.originalDueDate && currentNotification.scheduledAt) {
+      updateData.originalDueDate = currentNotification.scheduledAt;
+    }
+
     const notification = await prisma.notification.update({
       where: { id },
-      data: {
-        scheduledAt: new Date(scheduledAt),
-        // Reset status to pending since we're rescheduling
-        status: "PENDING",
-      },
+      data: updateData,
       include: {
         recipients: true,
         approvals: {
@@ -432,35 +441,14 @@ export async function reschedule(
       },
     });
 
-    // บันทึก timeline event สำหรับการเลื่อนงาน
-    try {
-      await prisma.timelineEvent.create({
-        data: {
-          type: "notification",
-          action: "RESCHEDULED",
-          entityId: id,
-          entityType: "Notification",
-          userId: currentUser.id,
-          companyCode: currentUser.companyCode,
-          title: `เลื่อนกำหนด: ${currentNotification.title}`,
-          message: reason || "เลื่อนกำหนดการแจ้งเตือน",
-          status: "RESCHEDULED",
-          metadata: {
-            oldScheduledAt: currentNotification.scheduledAt?.toISOString(),
-            newScheduledAt: new Date(scheduledAt).toISOString(),
-            reason: reason || "ไม่ระบุเหตุผล",
-            rescheduledBy: {
-              id: currentUser.id,
-              firstName: currentUser.employeeProfile?.firstName,
-              lastName: currentUser.employeeProfile?.lastName,
-            }
-          }
-        }
-      });
-    } catch (timelineError) {
-      console.error("Failed to create timeline event for reschedule:", timelineError);
-      // ไม่ให้ error นี้หยุดการทำงานหลัก
-    }
+    // Timeline will automatically detect this as an edited notification
+    // since updatedAt is different from createdAt
+    console.log(`📅 Notification ${id} rescheduled from ${currentNotification.scheduledAt?.toISOString()} to ${new Date(scheduledAt).toISOString()}`);
+    console.log(`👤 Rescheduled by user: ${currentUser.id}`);
+    console.log(`💬 Reason: ${reason || "No reason provided"}`);
+    
+    // The timeline will show this as an edited notification with hasEdit: true
+    // because the updatedAt timestamp is now different from createdAt
 
     // Invalidate caches since we modified a notification
     await CacheService.invalidateNotificationCaches();

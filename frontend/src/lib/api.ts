@@ -209,6 +209,9 @@ export const teamApi = {
       .catch(() => []),
 };
 
+// Export the notificationApi from notification.ts to make rescheduleNotification available
+export { notificationApi } from './api/notification';
+
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
   withCredentials: true, // ส่ง cookie / JWT

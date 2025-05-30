@@ -99,7 +99,12 @@ export async function getTimeline(req: Request, res: Response) {
           createdAt: true,
           updatedAt: true,
           type: true,
-          message: true
+          message: true,
+          scheduledAt: true,
+          lastPostponedAt: true,
+          originalDueDate: true,
+          postponeReason: true,
+          postponeCount: true
         },
         orderBy: [
           { createdAt: 'desc' },
@@ -149,18 +154,43 @@ export async function getTimeline(req: Request, res: Response) {
       // Detect if notification was edited
       const wasEdited = notification.updatedAt && 
                        new Date(notification.updatedAt).getTime() !== new Date(notification.createdAt).getTime();
-      
-      // Create metadata to help frontend detect edits
+      // Detect if notification was rescheduled (ถือว่ามี lastPostponedAt คือเลื่อนงาน)
+      const wasRescheduled = !!notification.lastPostponedAt;
+      // Create metadata to help frontend detect edits and reschedules
       const metadata: Record<string, any> = {
         notificationId: notification.id,
         type: notification.type,
-        hasEdit: wasEdited
+        hasEdit: wasEdited,
+        hasReschedule: wasRescheduled
       };
-      
       if (wasEdited) {
         metadata.editedAt = notification.updatedAt;
         metadata.originalCreatedAt = notification.createdAt;
       }
+      // Add reschedule information if available
+      if (wasRescheduled) {
+        metadata.lastPostponedAt = notification.lastPostponedAt;
+        metadata.originalDueDate = notification.originalDueDate;
+        metadata.postponeReason = notification.postponeReason;
+        metadata.postponeCount = notification.postponeCount;
+      }
+      // Current scheduled date
+      if (notification.scheduledAt) {
+        metadata.scheduledAt = notification.scheduledAt;
+      }
+
+      // --- กำหนด actionDate ตามประเภท event ---
+      let actionDate = notification.createdAt;
+      if (wasRescheduled && notification.lastPostponedAt) {
+        actionDate = notification.lastPostponedAt;
+      } else if (wasEdited && notification.updatedAt) {
+        actionDate = notification.updatedAt;
+      }
+      // ถ้ามีสถานะเสร็จงาน (COMPLETED) และ updatedAt หลังสุด ให้ถือว่าเป็น action ล่าสุด
+      if (notification.status === 'COMPLETED' && notification.updatedAt) {
+        actionDate = notification.updatedAt;
+      }
+      metadata.actionDate = actionDate;
 
       return {
         id: notification.id,
@@ -191,8 +221,10 @@ export async function getTimeline(req: Request, res: Response) {
     // Merge and sort all events
     const allEvents = [...notificationEvents, ...approvalEvents]
       .sort((a, b) => {
-        // Sort by createdAt desc, then by id desc for stable ordering
-        const dateCompare = b.createdAt.getTime() - a.createdAt.getTime();
+        // ใช้ actionDate จาก metadata ถ้ามี (notification), ถ้าไม่มีก็ใช้ createdAt
+        const aAction = a.metadata?.actionDate ? new Date(a.metadata.actionDate).getTime() : a.createdAt.getTime();
+        const bAction = b.metadata?.actionDate ? new Date(b.metadata.actionDate).getTime() : b.createdAt.getTime();
+        const dateCompare = bAction - aAction;
         return dateCompare !== 0 ? dateCompare : b.id.localeCompare(a.id);
       })
       .slice(0, limit + 1); // Limit results
