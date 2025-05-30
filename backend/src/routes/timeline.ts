@@ -2,7 +2,7 @@
 
 import { Router } from 'express';
 import { getTimeline } from '../controllers/timeline.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
+import { testAuthMiddleware } from '../middleware/testAuth';
 
 const router = Router();
 
@@ -15,6 +15,6 @@ const router = Router();
  * - cursor: string (base64 encoded cursor for pagination)
  * - types: string (comma-separated: notification,approval)
  */
-router.get('/', authMiddleware, getTimeline);
+router.get('/', testAuthMiddleware, getTimeline);
 
 export default router;

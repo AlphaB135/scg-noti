@@ -27,7 +27,7 @@ interface TimelineEvent {
  * Get timeline events for the authenticated user
  * Combines Notification and Approval events in chronological order
  */
-export async function getTimeline(req: AuthenticatedRequest, res: Response) {
+export async function getTimeline(req: Request, res: Response) {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -70,10 +70,10 @@ export async function getTimeline(req: AuthenticatedRequest, res: Response) {
       ]
     } : {};
 
-    // Fetch data in transaction for consistency
-    const [notifications, approvals] = await prisma.$transaction([
-      // Fetch notifications where user is recipient or creator
-      types.includes('notification') ? prisma.notification.findMany({
+    // Fetch notifications where user is recipient or creator
+    let notificationPromise = Promise.resolve([]);
+    if (types.includes('notification')) {
+      notificationPromise = prisma.notification.findMany({
         where: {
           AND: [
             cursorCondition,
@@ -101,10 +101,13 @@ export async function getTimeline(req: AuthenticatedRequest, res: Response) {
           { id: 'desc' }
         ],
         take: limit + 1 // Take one extra to check if there are more
-      }) : Promise.resolve([]),
+      });
+    }
 
-      // Fetch approvals by user
-      types.includes('approval') ? prisma.approval.findMany({
+    // Fetch approvals by user
+    let approvalPromise = Promise.resolve([]);
+    if (types.includes('approval')) {
+      approvalPromise = prisma.approval.findMany({
         where: {
           AND: [
             cursorCondition,
@@ -126,8 +129,10 @@ export async function getTimeline(req: AuthenticatedRequest, res: Response) {
           { id: 'desc' }
         ],
         take: limit + 1
-      }) : Promise.resolve([])
-    ]);
+      });
+    }
+
+    const [notifications, approvals] = await Promise.all([notificationPromise, approvalPromise]);
 
     console.log('🕒 [Timeline] Query results:', {
       notificationCount: notifications.length,

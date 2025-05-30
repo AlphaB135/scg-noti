@@ -44,102 +44,44 @@ export default function UserActivityLogsPage() {
 
   // ===== DATA LOADING =====
   useEffect(() => {
-    // ดึง timeline จริงจาก backend
-    timelineApi.fetchTimeline({ limit: 50 })
-      .then((res) => {
-        // แปลงข้อมูลให้เข้ากับ AuditLog (ตัวอย่าง mapping)
-        const logs: AuditLog[] = res.events.map((event) => ({
-          id: event.id,
-          taskId: 0, // ไม่มีใน timeline event จริง
-          taskTitle: event.title,
-          actionType: event.type === 'notification' ? 'task_created' : 'task_updated',
-          actionBy: currentUser.name,
-          actionDate: event.createdAt,
-          details: event.status,
-        }));
-        setAuditLogs(logs);
+    // Helper: สร้าง query params สำหรับ timeline API
+    const buildTimelineParams = () => {
+      const params: any = { limit: 50 }
+      if (filterType !== "all") params.types = [filterType]
+      // filterDate/searchQuery: filter ฝั่ง client
+      return params
+    }
+    timelineApi.fetchTimeline(buildTimelineParams())
+      .then((res: any) => {
+        // Mapping timeline API → AuditLog
+        const logs: AuditLog[] = (res.events || []).map((event: any) => {
+          // Mapping event.type, event.status → actionType
+          let actionType: ActionType = "task_updated"
+          if (event.type === "notification") {
+            actionType = event.status === "SENT" ? "task_created" : "task_updated"
+          } else if (event.type === "approval") {
+            if (event.status === "APPROVED") actionType = "task_completed"
+            else if (event.status === "REJECTED") actionType = "task_postponed"
+            else actionType = "task_updated"
+          } else if (event.type === "security") {
+            actionType = "task_reopened"
+          }
+          return {
+            id: event.id,
+            taskId: 0, // ไม่มีใน timeline event จริง
+            taskTitle: event.title || event.metadata?.notificationTitle || event.metadata?.action || "-",
+            actionType,
+            actionBy: event.metadata?.creator?.firstName || currentUser.name,
+            actionDate: event.createdAt,
+            details: event.message || event.status || event.metadata?.comment,
+            oldValue: event.metadata?.oldValue,
+            newValue: event.metadata?.newValue,
+          }
+        })
+        setAuditLogs(logs)
       })
-      .catch(() => {
-        // fallback: mock data
-        const todayStr = new Date().toISOString().split("T")[0]
-        const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split("T")[0]
-        const twoDaysAgoStr = new Date(Date.now() - 86400000 * 2).toISOString().split("T")[0]
-        const mockAuditLogs: AuditLog[] = [
-          // วันนี้
-          {
-            id: "log1",
-            taskId: 1,
-            taskTitle: "สรุปรายงานผลประกอบการ",
-            actionType: "task_created",
-            actionBy: "สมชาย ใจดี",
-            actionDate: `${todayStr}T09:15:00`,
-            details: "สร้างงานใหม่",
-          },
-          // 2 วันที่แล้ว
-          {
-            id: "log7",
-            taskId: 3,
-            taskTitle: "เตรียมเอกสารประชุม",
-            actionType: "task_created",
-            actionBy: "สมชาย ใจดี",
-            actionDate: `${twoDaysAgoStr}T09:00:00`,
-            details: "สร้างงานใหม่",
-          },
-          {
-            id: "log11",
-            taskId: 6,
-            taskTitle: "อัปโหลดข้อมูลเข้าระบบ",
-            actionType: "task_reopened",
-            actionBy: "สมชาย ใจดี",
-            actionDate: `${twoDaysAgoStr}T17:30:00`,
-            details: "เปิดงานใหม่เนื่องจากข้อมูลไม่ครบถ้วน",
-          },
-          // เพิ่มข้อมูลเพิ่มเติมเพื่อให้มีประวัติมากขึ้น
-          {
-            id: "log12",
-            taskId: 9,
-            taskTitle: "ส่งรายงานประจำเดือน",
-            actionType: "task_postponed",
-            actionBy: "สมชาย ใจดี",
-            actionDate: `${yesterdayStr}T10:15:00`,
-            details: "เลื่อนกำหนดส่งงานจากวันที่ 3 พ.ค. ไปเป็นวันที่ 5 พ.ค.",
-            oldValue: "2025-05-03",
-            newValue: "2025-05-05",
-          },
-          {
-            id: "log13",
-            taskId: 2,
-            taskTitle: "ปฐมนิเทศพนักงานใหม่",
-            actionType: "task_updated",
-            actionBy: "สมชาย ใจดี",
-            actionDate: `${yesterdayStr}T14:30:00`,
-            details: "แก้ไขรายละเอียดงาน",
-            oldValue: "เตรียมการปฐมนิเทศ",
-            newValue: "เริ่มปฐมนิเทศในวันนี้",
-          },
-          {
-            id: "log14",
-            taskId: 4,
-            taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
-            actionType: "task_completed",
-            actionBy: "สมชาย ใจดี",
-            actionDate: `${yesterdayStr}T16:45:00`,
-            details: "ทำงานเสร็จแล้ว",
-          },
-          {
-            id: "log15",
-            taskId: 4,
-            taskTitle: "สั่งซื้ออุปกรณ์สำนักงาน",
-            actionType: "task_reopened",
-            actionBy: "สมชาย ใจดี",
-            actionDate: `${todayStr}T08:30:00`,
-            details: "เปิดงานใหม่เนื่องจากต้องสั่งซื้อเพิ่มเติม",
-          },
-        ];
-        mockAuditLogs.sort((a, b) => new Date(b.actionDate).getTime() - new Date(a.actionDate).getTime())
-        setAuditLogs(mockAuditLogs)
-      });
-  }, [currentUser.name])
+      // ลบ fallback mock data: ไม่ต้อง setAuditLogs(mockAuditLogs) อีกต่อไป
+  }, [currentUser.name, filterType, filterDate, searchQuery])
 
   // ===== HELPER FUNCTIONS =====
   // แปลงวันที่เป็นรูปแบบที่อ่านง่ายสำหรับหัวข้อกลุ่ม
@@ -220,9 +162,9 @@ export default function UserActivityLogsPage() {
           filteredLogs={filteredLogs}
           groupedLogs={groupedLogs}
           formatGroupDate={formatGroupDate}
-          getActionTypeColor={getActionTypeColor}
-          getActionTypeIcon={getActionTypeIcon}
-          getActionTypeText={getActionTypeText}
+          getActionTypeColor={(t) => getActionTypeColor(t as ActionType)}
+          getActionTypeIcon={(t) => getActionTypeIcon(t as ActionType)}
+          getActionTypeText={(t) => getActionTypeText(t as ActionType)}
           formatDate={formatDate}
         />
       </div>
