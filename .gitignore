@@ -1,0 +1,74 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+build/
+out/
+coverage/
+.next/
+.cache/
+.nyc_output/
+tmp/
+temp/
+*.tsbuildinfo
+
+# Logs and temp files
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+*.tmp
+*.swp
+*.swo
+*.swn
+*.bak
+
+# Env and config
+.env
+.env.*
+!.env.example
+*.local
+*.secret
+*.key
+*.pem
+
+# IDE/editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Mac system files
+.AppleDouble
+.LSOverride
+
+# Windows system files
+*.stackdump
+
+# Test & coverage
+coverage/
+test-results/
+*.lcov
+
+# Misc
+*.orig
+*.rej
+
+# pnpm
+pnpm-debug.log*
+.pnpm-debug.log*
+.pnpm-store/
+
