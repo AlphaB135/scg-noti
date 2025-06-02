@@ -1,5 +1,6 @@
 // teams.ts
 import api from '../api'
+import { cache, CACHE_KEYS } from '../utils/cache-utils'
 import type { Team } from '@/components/types/team'
 // Using the shared API client from real-api.ts
 

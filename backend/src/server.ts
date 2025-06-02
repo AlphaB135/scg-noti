@@ -107,6 +107,7 @@ import approvalRoutes from './routes/approvals'
 import dashboardRoutes from './routes/dashboard'
 import timelineRoutes from './routes/timeline'
 import mobileRoutes from './routes/mobile'
+import memberRoutes from './routes/members'
 
 /**
  * Load and parse OpenAPI/Swagger documentation for API reference
@@ -179,6 +180,7 @@ app.use('/api/admin', adminRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/mobile', mobileRoutes)
+app.use('/api/members', memberRoutes)
 // Mount base routes last to avoid conflicts
 app.use('/api', routes)
 app.use('/api/notifications/:id/approvals', approvalRoutes)

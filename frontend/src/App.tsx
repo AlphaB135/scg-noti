@@ -1,6 +1,5 @@
 // 📁 frontend/src/App.tsx
 
-import React, { useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -30,14 +29,12 @@ import NotificationTestPage from "./pages/notification_test/page";
 import { RequireAuth } from "./components/RequireAuth";
 
 function App() {
-  const [, setRole] = useState("");
-
   return (
     <Router>
       <Routes>
         {/* Public */}
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage setRole={setRole} />} />
+        <Route path="/login" element={<LoginPage />} />
 
         {/* Protected */}
         <Route
@@ -117,6 +114,14 @@ function App() {
           element={
             <RequireAuth>
               <TeamOverview />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/team-notification/:teamId"
+          element={
+            <RequireAuth>
+              <TeamNoti />
             </RequireAuth>
           }
         />

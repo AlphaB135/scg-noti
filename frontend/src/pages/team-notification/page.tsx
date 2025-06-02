@@ -9,12 +9,14 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import AppLayout from "@/components/layout/app-layout"
 import { notificationsApi } from "@/lib/api"
+import { teamsApi } from "@/lib/api/teams"
 import NotificationFilters from "@/components/team-notification/notification-filters"
 import NotificationTabs from "@/components/team-notification/notification-tabs"
 import AddNotificationDialog from "@/components/team-notification/add-notification-dialog"
 import EditNotificationDialog from "@/components/team-notification/edit-notification-dialog" 
 import DeleteNotificationDialog from "@/components/team-notification/delete-notification-dialog"
 import AssignmentStatusDialog from "@/components/team-notification/assignment-status-dialog"
+import { useParams } from "react-router-dom"
 
 // Types
 type TeamMember = {
@@ -22,6 +24,10 @@ type TeamMember = {
   name: string
   role: string
   avatar?: string
+  teamRole: string
+  department: string
+  email: string
+  isLeader: boolean
 }
 
 type NotificationAssignment = {
@@ -47,11 +53,9 @@ type Notification = {
   assignments: NotificationAssignment[]
 }
 
-type Props = {
-  teamId: string
-}
-
-export default function TeamNotificationsPage({ teamId }: Props) {
+export default function TeamNotificationsPage() {
+  const params = useParams()
+  const teamId = params.teamId // รับ teamId จาก URL parameter
   const { toast } = useToast()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
@@ -87,44 +91,188 @@ export default function TeamNotificationsPage({ teamId }: Props) {
     selectedMembers: [] as string[],
   })
 
-  // Data loading (เปลี่ยนจาก mock เป็น API จริง)
+  // Data loading (ใช้ teamsApi แทน fetch)
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true)
       try {
-        // โหลดสมาชิกทีม
-        const membersRes = await fetch(`/api/teams/${teamId}/members`)
-        const membersData = await membersRes.json()
-        const rawMembers = membersData.data || membersData.members || []
-        // Normalize ข้อมูลสมาชิกทีมให้ตรงกับ API จริง
-        const normalizedMembers: TeamMember[] = (rawMembers || []).map((m: any) => ({
-          id: m.user?.id || m.employeeId || m.id,
-          name: m.user?.employeeProfile
-            ? `${m.user.employeeProfile.firstName} ${m.user.employeeProfile.lastName}`
-            : m.user?.email || m.employeeId || '-',
-          role: m.role || '-',
-          avatar: m.user?.employeeProfile?.profileImageUrl || undefined,
-        }))
-        setTeamMembers(normalizedMembers)
+        console.log("🔍 Loading data for teamId:", teamId);
+        
+        if (teamId) {
+          // โหลดข้อมูลทีมเฉพาะที่เลือก
+          console.log("📥 Fetching team data...");
+          const team = await teamsApi.get(teamId)
+          console.log("📊 Team data received:", team);
+          
+          // Normalize ข้อมูลสมาชิก - ใช้ข้อมูลที่ transform แล้วจาก teamsApi
+          const normalizedMembers = team.members.map((member) => ({
+            id: member.id, // ใช้ id ที่ transform แล้ว
+            name: member.name, // ชื่อเต็มที่ transform แล้ว
+            role: member.position, // ตำแหน่งงาน
+            avatar: member.avatar || "/placeholder.svg",
+            teamRole: member.role, // บทบาทในทีม (หัวหน้างาน, พนักงาน)
+            department: member.department,
+            email: member.email,
+            isLeader: member.isLeader,
+          }))
+          setTeamMembers(normalizedMembers)
+          console.log("👥 Normalized team members:", normalizedMembers);
 
-        // โหลด notifications ของทีม
-        const notiRes = await fetch(`/api/teams/${teamId}/notifications`)
-        const notiData = await notiRes.json()
-        setNotifications(notiData.notifications || notiData.data || [])
-        setTotalPages(notiData.totalPages || 1)
+          // โหลดการแจ้งเตือนของทีม
+          try {
+            console.log("📥 Fetching notifications...");
+            const notiRes = await notificationsApi.getAll(1, 50)
+            console.log("📋 Raw notifications from API:", notiRes);
+            console.log("📊 Notifications count:", notiRes.data.length);
+            
+            // Filter notifications for this team
+            const teamNotifications = notiRes.data.filter((noti: any) => 
+              noti.recipients?.some((r: any) => 
+                team.members.some(member => member.id === r.userId)
+              )
+            )
+            console.log("🎯 Filtered team notifications:", teamNotifications);
+            
+            // Transform API notifications to local format
+            const transformedNotifications = teamNotifications.map((noti: any) => ({
+              id: noti.id,
+              title: noti.title,
+              details: noti.message || noti.details || '',
+              impact: noti.impact || '',
+              date: noti.createdAt || new Date().toISOString(),
+              dueDate: noti.scheduledAt || new Date().toISOString(),
+              frequency: 'no-repeat',
+              type: noti.category || '',
+              priority: noti.priority || 'medium',
+              status: noti.status || 'draft',
+              isTeamAssignment: true,
+              assignments: noti.recipients?.map((r: any) => {
+                const member = team.members.find(m => m.id === r.userId)
+                return {
+                  memberId: r.userId,
+                  memberName: member?.name || 'Unknown',
+                  status: r.status || 'pending',
+                  assignedAt: noti.createdAt || new Date().toISOString()
+                }
+              }) || []
+            }))
+            console.log("✨ Transformed notifications:", transformedNotifications);
+            setNotifications(transformedNotifications)
+          } catch (notiError) {
+            console.log("❌ No notifications found for team, using empty list:", notiError)
+            setNotifications([])
+          }
+        } else {
+          // ถ้าไม่มี teamId ให้โหลดทีมทั้งหมดและใช้ทีมแรก
+          const teamsRes = await teamsApi.list()
+          console.log("📊 All teams data:", teamsRes);
+          
+          if (teamsRes.data.length > 0) {
+            const firstTeam = teamsRes.data[0]
+            
+            // Normalize ข้อมูลสมาชิก
+            const normalizedMembers = firstTeam.members.map((member) => ({
+              id: member.id,
+              name: member.name,
+              role: member.position || member.role,
+              avatar: member.avatar || "/placeholder.svg",
+              teamRole: member.role,
+              department: member.department,
+              email: member.email,
+              isLeader: member.isLeader,
+            }))
+            setTeamMembers(normalizedMembers)
+            setNotifications([]) // Reset notifications
+          } else {
+            // ถ้าไม่มีทีม ใช้ mock data
+            console.log("⚠️ No teams found, using mock data");
+            const mockMembers = [
+              {
+                id: "mock-1",
+                name: "จอห์น สมิธ",
+                role: "นักพัฒนาระบบ",
+                avatar: "/placeholder.svg",
+                teamRole: "พนักงาน",
+                department: "พัฒนาระบบ",
+                email: "john@example.com",
+                isLeader: false,
+              },
+              {
+                id: "mock-2", 
+                name: "เจน โดว์",
+                role: "นักวิเคราะห์ระบบ",
+                avatar: "/placeholder.svg",
+                teamRole: "พนักงาน",
+                department: "วิเคราะห์ระบบ",
+                email: "jane@example.com",
+                isLeader: false,
+              },
+              {
+                id: "mock-3",
+                name: "บ๊อบ จอห์นสัน",
+                role: "หัวหน้าทีม",
+                avatar: "/placeholder.svg",
+                teamRole: "หัวหน้างาน",
+                department: "จัดการโครงการ",
+                email: "bob@example.com",
+                isLeader: true,
+              }
+            ]
+            setTeamMembers(mockMembers)
+            setNotifications([])
+          }
+        }
+        
       } catch (error) {
-        console.error("Failed to load data:", error)
+        console.error("❌ Failed to load team data:", error)
         toast({
           title: "เกิดข้อผิดพลาด",
-          description: "ไม่สามารถโหลดข้อมูลได้",
+          description: teamId ? "ไม่สามารถโหลดข้อมูลทีมได้ กรุณาตรวจสอบ teamId" : "ไม่สามารถโหลดข้อมูลทีมได้",
           variant: "destructive",
         })
+        
+        // Set mock data for testing if team loading fails
+        const mockMembers = [
+          {
+            id: "mock-1",
+            name: "จอห์น สมิธ",
+            role: "นักพัฒนาระบบ",
+            avatar: "/placeholder.svg",
+            teamRole: "พนักงาน",
+            department: "พัฒนาระบบ",
+            email: "john@example.com",
+            isLeader: false,
+          },
+          {
+            id: "mock-2", 
+            name: "เจน โดว์",
+            role: "นักวิเคราะห์ระบบ",
+            avatar: "/placeholder.svg",
+            teamRole: "พนักงาน",
+            department: "วิเคราะห์ระบบ",
+            email: "jane@example.com",
+            isLeader: false,
+          },
+          {
+            id: "mock-3",
+            name: "บ๊อบ จอห์นสัน",
+            role: "หัวหน้าทีม",
+            avatar: "/placeholder.svg",
+            teamRole: "หัวหน้างาน",
+            department: "จัดการโครงการ",
+            email: "bob@example.com",
+            isLeader: true,
+          }
+        ]
+        setTeamMembers(mockMembers)
+        setNotifications([])
       } finally {
         setIsLoading(false)
       }
     }
+
     loadData()
-  }, [teamId])
+  }, [teamId, toast])
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -203,10 +351,14 @@ export default function TeamNotificationsPage({ teamId }: Props) {
         message: formData.details,
         impact: formData.impact, // ส่ง impact แยก field
         scheduledAt: new Date(formData.date).toISOString(),
+        dueDate: new Date(formData.dueDate).toISOString(), // เพิ่ม dueDate
+        type: "TODO" as const, // เพิ่ม type field ที่ backend ต้องการ
         category: "TASK", // เพิ่ม category ให้ตรง type
         link: formData.link || undefined,
         linkUsername: formData.username || undefined,
         linkPassword: formData.password || undefined,
+        urgencyDays: 3, // เพิ่ม field ที่ backend ต้องการ
+        repeatIntervalDays: 0, // เพิ่ม field ที่ backend ต้องการ
         recipients: formData.isTeamAssignment
           ? teamMembers.map(member => ({ type: 'USER' as const, userId: member.id }))
           : formData.selectedMembers.map(memberId => ({ type: 'USER' as const, userId: memberId }))
@@ -226,15 +378,70 @@ export default function TeamNotificationsPage({ teamId }: Props) {
       resetForm()
 
       // โหลดข้อมูลใหม่
-      const notiRes = await fetch(`/api/teams/${teamId}/notifications`)
-      const notiData = await notiRes.json()
-      setNotifications(notiData.notifications || [])
-      setTotalPages(notiData.totalPages || 1)
+      await refreshNotifications()
     } catch (error) {
       console.error("Failed to create notification:", error) 
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถสร้างการแจ้งเตือนได้",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Refresh notifications function
+  const refreshNotifications = async () => {
+    try {
+      if (teamId) {
+        // โหลดข้อมูลทีมเฉพาะที่เลือก
+        const team = await teamsApi.get(teamId)
+        const notiRes = await notificationsApi.getAll(1, 50)
+        
+        // Filter notifications for this team
+        const teamNotifications = notiRes.data.filter((noti: any) => 
+          noti.recipients?.some((r: any) => 
+            team.members.some(member => member.id === r.userId)
+          )
+        )
+        
+        // Transform API notifications to local format
+        const transformedNotifications = teamNotifications.map((noti: any) => ({
+          id: noti.id,
+          title: noti.title,
+          details: noti.message || noti.details || '',
+          impact: noti.impact || '',
+          date: noti.createdAt || new Date().toISOString(),
+          dueDate: noti.scheduledAt || new Date().toISOString(),
+          frequency: 'no-repeat',
+          type: noti.category || '',
+          priority: noti.priority || 'medium',
+          status: noti.status || 'draft',
+          isTeamAssignment: true,
+          assignments: noti.recipients?.map((r: any) => {
+            const member = team.members.find(m => m.id === r.userId)
+            return {
+              memberId: r.userId,
+              memberName: member?.name || 'Unknown',
+              status: r.status || 'pending',
+              assignedAt: noti.createdAt || new Date().toISOString()
+            }
+          }) || []
+        }))
+        setNotifications(transformedNotifications)
+        setTotalPages(Math.ceil(transformedNotifications.length / 10))
+      } else {
+        // ถ้าไม่มี teamId ให้โหลดทีมทั้งหมดและใช้ทีมแรก
+        const teamsRes = await teamsApi.list()
+        if (teamsRes.data.length > 0) {
+          setNotifications([]) // Reset notifications
+          setTotalPages(1)
+        }
+      }
+    } catch (error) {
+      console.error("Failed to refresh notifications:", error)
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลการแจ้งเตือนได้",
         variant: "destructive",
       })
     }
@@ -250,10 +457,14 @@ export default function TeamNotificationsPage({ teamId }: Props) {
         message: formData.details,
         impact: formData.impact, // ส่ง impact แยก field
         scheduledAt: new Date(formData.date).toISOString(),
+        dueDate: new Date(formData.dueDate).toISOString(), // เพิ่ม dueDate
+        type: "TODO" as const, // เพิ่ม type field ที่ backend ต้องการ
         category: "TASK", // เพิ่ม category ให้ตรง type
         link: formData.link || undefined,
         linkUsername: formData.username || undefined,
         linkPassword: formData.password || undefined,
+        urgencyDays: 3, // เพิ่ม field ที่ backend ต้องการ
+        repeatIntervalDays: 0, // เพิ่ม field ที่ backend ต้องการ
         recipients: formData.isTeamAssignment
           ? teamMembers.map(member => ({ type: 'USER' as const, userId: member.id }))
           : formData.selectedMembers.map(memberId => ({ type: 'USER' as const, userId: memberId }))
@@ -270,10 +481,7 @@ export default function TeamNotificationsPage({ teamId }: Props) {
       resetForm()
 
       // โหลดข้อมูลใหม่
-      const notiRes = await fetch(`/api/teams/${teamId}/notifications`)
-      const notiData = await notiRes.json()
-      setNotifications(notiData.notifications || [])
-      setTotalPages(notiData.totalPages || 1)
+      await refreshNotifications()
     } catch (error) {
       console.error("Failed to update notification:", error)
       toast({
@@ -299,10 +507,7 @@ export default function TeamNotificationsPage({ teamId }: Props) {
       setIsDeleteDialogOpen(false)
 
       // โหลดข้อมูลใหม่
-      const notiRes = await fetch(`/api/teams/${teamId}/notifications`)
-      const notiData = await notiRes.json()
-      setNotifications(notiData.notifications || [])
-      setTotalPages(notiData.totalPages || 1)
+      await refreshNotifications()
     } catch (error) {
       console.error("Failed to delete notification:", error)
       toast({
@@ -322,6 +527,9 @@ export default function TeamNotificationsPage({ teamId }: Props) {
       impact: notification.impact || "", // map impact
       date: notification.date,
       dueDate: notification.dueDate,
+      link: "", // เพิ่ม link
+      username: "", // เพิ่ม username 
+      password: "", // เพิ่ม password
       frequency: notification.frequency,
       type: notification.type || "",
       priority: notification.priority,
@@ -351,6 +559,9 @@ export default function TeamNotificationsPage({ teamId }: Props) {
       impact: "", // reset impact
       date: new Date().toISOString().split("T")[0],
       dueDate: new Date().toISOString().split("T")[0],
+      link: "",
+      username: "",
+      password: "",
       frequency: "no-repeat",
       type: "",
       priority: "medium",

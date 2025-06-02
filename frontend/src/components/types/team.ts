@@ -29,6 +29,27 @@ export interface TeamMember {
   isLeader: boolean;
   permissionLevel: PermissionLevel;
   role: string;
+  avatar?: string;
+}
+
+// Raw API response interface for TeamMember
+export interface TeamMemberApiResponse {
+  id: string;
+  teamId: string;
+  employeeId: string;
+  role: 'TEAM_LEAD' | 'MEMBER';
+  joinDate: string;
+  user: {
+    id: string;
+    email: string;
+    employeeProfile: {
+      firstName: string;
+      lastName: string;
+      department: string;
+      position: string;
+      email: string;
+    };
+  };
 }
 
 export interface Team {
@@ -36,6 +57,20 @@ export interface Team {
   name: string;
   members: TeamMember[];
 }
+
+// Utility function to transform API response to frontend TeamMember interface
+export const transformTeamMemberApiResponse = (apiResponse: TeamMemberApiResponse): TeamMember => ({
+  id: apiResponse.user.id,
+  membershipId: apiResponse.id,
+  name: `${apiResponse.user.employeeProfile.firstName} ${apiResponse.user.employeeProfile.lastName}`,
+  department: apiResponse.user.employeeProfile.department,
+  position: apiResponse.user.employeeProfile.position,
+  email: apiResponse.user.employeeProfile.email,
+  isLeader: apiResponse.role === 'TEAM_LEAD',
+  permissionLevel: apiResponse.role === 'TEAM_LEAD' ? 'leader' : 'member',
+  role: apiResponse.role === 'TEAM_LEAD' ? 'หัวหน้างาน' : 'พนักงาน',
+  avatar: '/placeholder.svg'
+});
 
 // Permission descriptions
 export const permissionDescriptions = {

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { AlertTriangle, CheckCircle, Clock, Bell } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
@@ -28,6 +29,7 @@ interface MemberCardProps {
 }
 
 export function MemberCard({ member, onNotify, isLeader, hideTaskStats = false }: MemberCardProps) {
+  const navigate = useNavigate()
   const completionRate = Math.round((member.completedTasks / member.totalTasks) * 100)
 
   const getStatusColor = (status: string) => {
@@ -157,6 +159,18 @@ export function MemberCard({ member, onNotify, isLeader, hideTaskStats = false }
         {!hideTaskStats && (
           <div className="mt-3 text-right">
             <span className="text-xs text-gray-400">อัพเดทล่าสุด: {member.lastActive}</span>
+          </div>
+        )}
+
+        {isLeader && (
+          <div className="mt-4 flex justify-end gap-2">
+            <Button
+              onClick={() => navigate(`/team-notification/${member.teamId}`)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Bell className="w-4 h-4 mr-2" />
+              จัดการแจ้งเตือนทีม
+            </Button>
           </div>
         )}
       </div>
