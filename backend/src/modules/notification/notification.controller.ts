@@ -1,3 +1,5 @@
+//notification.controller.ts
+
 /**
  * @fileoverview Controller for managing notifications in the Sexport async function updateStatus(
   req: Request,
@@ -194,39 +196,41 @@ export async function list(
 
     // Add company-based filtering if not SUPERADMIN
     if (req.user?.role !== "SUPERADMIN" && req.companyCode) {
-      where.OR = [
-        { recipients: { some: { type: "ALL" } } },
-        {
-          recipients: {
-            some: { type: "COMPANY", companyCode: req.companyCode },
-          },
-        },
-        {
-          recipients: {
-            some: {
-              type: "GROUP",
-              groupId: {
-                in: (
-                  await prisma.team.findMany({
-                    where: {
-                      members: {
-                        some: {
-                          user: {
-                            employeeProfile: {
-                              companyCode: req.companyCode,
-                            },
-                          },
+     where.OR = [
+       { recipients: { some: { type: "ALL" } } },
+       {
+         recipients: {
+           some: { type: "COMPANY", companyCode: req.companyCode },
+         },
+       },
+      {
+         recipients: {
+          some: {
+             type: "GROUP",
+             groupId: {
+               in: (
+                 await prisma.team.findMany({
+                   where: {
+                     members: {
+                       some: {
+                         user: {
+                           employeeProfile: {
+                            companyCode: req.companyCode,
+                         },
                         },
-                      },
-                    },
-                    select: { id: true },
-                  })
-                ).map((t) => t.id),
-              },
-            },
-          },
-        },
-      ];
+                       },
+                     },
+                   },
+                   select: { id: true },
+                 })
+               ).map((t) => t.id),
+             },
+           },
+         },
+       },
+       // ➕ เพิ่มตรงนี้ เพื่อกรอง USER เฉพาะคนที่ login
+       { recipients: { some: { type: "USER", userId: req.user!.id } } },
+     ];
     }
 
     // Add date range filter if month and year are provided
@@ -306,11 +310,7 @@ export async function listMyNotifications(
 ): Promise<void> {
   try {
     const userId = req.user!.id;
-    const companyCode = req.companyCode;
-
-    if (!companyCode) {
-      throw new BadRequestError("Company code is required");
-    }
+    const companyCode = req.companyCode; // (1) might be undefined
 
     // Get user's team IDs
     const teamIds = (
@@ -320,19 +320,15 @@ export async function listMyNotifications(
       })
     ).map((tm) => tm.teamId);
 
-    // Complex query to fetch notifications based on multiple recipient types
+    // (2) Adjust the OR condition to include COMPANY only if companyCode exists
     const notifications = await prisma.notification.findMany({
       where: {
         recipients: {
           some: {
             OR: [
-              // Direct notifications to user
-              { userId },
-              // Global notifications (if SUPERADMIN)
+              { type: "USER", userId },
               ...(req.user?.role === "SUPERADMIN" ? [{ type: "ALL" }] : []),
-              // Company notifications for user's company
-              { type: "COMPANY", companyCode },
-              // Team notifications for user's teams
+              ...(companyCode ? [{ type: "COMPANY", companyCode }] : []),
               { type: "GROUP", groupId: { in: teamIds } },
             ],
           },

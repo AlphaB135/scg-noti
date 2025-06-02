@@ -8,17 +8,18 @@
  *
  * เส้นทางที่รองรับ:
  * การแจ้งเตือน:
- * - GET /notifications - ดูรายการแจ้งเตือนทั้งหมด
- * - GET /notifications/scheduled - ดูรายการแจ้งเตือนตามกำหนดเวลา
- * - GET /notifications/mine - ดูรายการแจ้งเตือนของตนเอง
- * - POST /notifications - สร้างการแจ้งเตือนใหม่
- * - PATCH /notifications/:id - อัพเดทสถานะการแจ้งเตือน
- * - PUT /notifications/:id - อัพเดทข้อมูลการแจ้งเตือน รวมถึง linkUsername และ linkPassword
- * - POST /notifications/:id/reschedule - กำหนดเวลาการแจ้งเตือนใหม่
+ * - GET   /notifications           - ดูรายการแจ้งเตือนทั้งหมด
+ * - GET   /notifications/mine      - ดูรายการแจ้งเตือนของตนเอง
+ * - GET   /notifications/personal  - ดูรายการแจ้งเตือนส่วนตัว (TODO ที่สร้างโดยตน)
+ * - POST  /notifications           - สร้างการแจ้งเตือนใหม่
+ * - DELETE/notifications/:id       - ลบการแจ้งเตือน
+ * - PATCH /notifications/:id       - อัพเดทสถานะการแจ้งเตือน
+ * - PUT   /notifications/:id       - อัพเดทข้อมูลการแจ้งเตือน (linkUsername, linkPassword ฯลฯ)
+ * - POST  /notifications/:id/reschedule - กำหนดเวลาการแจ้งเตือนใหม่
  *
  * การอนุมัติ:
- * - GET /notifications/:id/approvals - ดูรายการการอนุมัติของการแจ้งเตือน
- * - POST /notifications/:id/approvals - สร้างการอนุมัติใหม่
+ * - GET   /notifications/:id/approvals  - ดูรายการการอนุมัติของการแจ้งเตือน
+ * - POST  /notifications/:id/approvals  - สร้างการอนุมัติใหม่
  */
 
 import { Router } from "express";
@@ -40,6 +41,8 @@ import {
   updateNotificationSchema,
   updateStatusSchema,
 } from "../modules/notification/notification.dto";
+import { companyAuth } from "../middleware/company-auth";
+import { authorize } from "../middleware/authz";
 
 const router = Router();
 
@@ -50,19 +53,26 @@ router.use(jwtGuard);
  * เส้นทางการจัดการการแจ้งเตือน
  * @security JWT
  */
-import { companyAuth } from "../middleware/company-auth";
-import { authorize } from "../middleware/authz";
 
-// Routes with company auth
-router.get("/mine", companyAuth(true), listMyNotifications);
+// ดูรายการ "ของฉัน" (ไม่บังคับให้มี companyCode เสมอ)
+router.get("/mine", companyAuth(false), listMyNotifications);
+
+// ดูรายการแจ้งเตือนทั้งหมด (กรองตาม ALL/COMPANY/GROUP/USER)
 router.get("/", companyAuth(false), list);
+
+// สร้างการแจ้งเตือนใหม่ (ต้องเป็น ADMIN หรือ SUPERADMIN)
 router.post(
   "/",
   companyAuth(true),
   authorize(["ADMIN", "SUPERADMIN"]),
+  validateRequest({ body: createNotificationSchema }),
   createNotification
 );
-router.delete('/:id', companyAuth(true), deleteNotification)
+
+// ลบการแจ้งเตือน (ต้องมี companyAuth)
+router.delete("/:id", companyAuth(true), deleteNotification);
+
+// อัพเดทสถานะการแจ้งเตือน (ต้องเป็น ADMIN หรือ SUPERADMIN)
 router.patch(
   "/:id",
   companyAuth(true),
@@ -70,6 +80,8 @@ router.patch(
   validateRequest({ body: updateStatusSchema }),
   updateStatus
 );
+
+// อัพเดทข้อมูลการแจ้งเตือน (ต้องเป็น ADMIN หรือ SUPERADMIN)
 router.put(
   "/:id",
   companyAuth(true),
@@ -77,19 +89,23 @@ router.put(
   validateRequest({ body: updateNotificationSchema }),
   updateNotification
 );
+
+// กำหนดเวลาการแจ้งเตือนใหม่ (ต้องมี companyAuth)
+// NOTE: ถ้าต้อง validate ด้วย rescheduleSchema ให้ import แล้วเปลี่ยน validateRequest ให้ถูกต้อง
 router.post(
   "/:id/reschedule",
-  // companyAuth(true), // ชั่วคราวปิดเพื่อทดสอบ
-  // authorize(["ADMIN", "SUPERADMIN"]), // ชั่วคราวปิดเพื่อทดสอบ
+  companyAuth(true),
   reschedule
 );
+
+// ดูรายการแจ้งเตือนส่วนตัว (TODO ที่สร้างโดยผู้ใช้ปัจจุบัน)
 router.get("/personal", companyAuth(true), listPersonalNotifications);
 
 /**
- * เส้นทางการจัดการการอนุมัติ
+ * เส้นทางการจัดการการอนุมัติ (Approval)
  * @security JWT
  */
-router.get("/:id/approvals", approvalController.listApprovals); // ดูรายการการอนุมัติ
-router.post("/:id/approvals", approvalController.createApproval); // สร้างการอนุมัติ
+router.get("/:id/approvals", approvalController.listApprovals);
+router.post("/:id/approvals", approvalController.createApproval);
 
 export default router;

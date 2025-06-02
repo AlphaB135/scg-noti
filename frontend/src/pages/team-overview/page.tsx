@@ -144,27 +144,16 @@ export default function TeamOverviewPage() {
     const stats: Record<string, MemberTaskStats> = {};
     teams.forEach(team => {
       team.members.forEach(member => {
-        if (!stats[member.id]) {
-          // Generate random stats for demo - replace with real data
-          const totalTasks = Math.floor(Math.random() * 30) + 10;
-          const completedTasks = Math.floor(Math.random() * totalTasks);
-          const lateTasks = Math.floor(Math.random() * (totalTasks - completedTasks));
-          const pendingTasks = totalTasks - completedTasks - lateTasks;
-
-          let status: MemberTaskStats["status"] = "normal";
-          if (lateTasks > 5) status = "critical";
-          else if (lateTasks > 2 || pendingTasks > 10) status = "warning";
-
-          stats[member.id] = {
-            totalTasks,
-            completedTasks,
-            lateTasks,
-            pendingTasks,
-            status,
-            lastActive: "1 ชั่วโมงที่แล้ว", // Mock data - should come from API
-            avatar: `/placeholder.svg?id=${member.id}` // Placeholder avatar URL
-          };
-        }
+        // Use the fields already present in each member for stats
+        stats[member.id] = {
+          totalTasks: member.totalTasks ?? 0,
+          completedTasks: member.completedTasks ?? 0,
+          lateTasks: member.lateTasks ?? 0,
+          pendingTasks: member.pendingTasks ?? 0,
+          status: member.status ?? "normal",
+          lastActive: member.lastActive ?? "",
+          avatar: member.avatar ?? ""
+        };
       });
     });
     setMemberStats(stats);
