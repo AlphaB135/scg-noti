@@ -60,11 +60,20 @@ router.get("/mine", companyAuth(false), listMyNotifications);
 // ดูรายการแจ้งเตือนทั้งหมด (กรองตาม ALL/COMPANY/GROUP/USER)
 router.get("/", companyAuth(false), list);
 
+// Middleware: inject createdBy from req.user
+function injectCreatedBy(req, res, next) {
+  if (req.user && req.user.id) {
+    req.body.createdBy = req.user.id;
+  }
+  next();
+}
+
 // สร้างการแจ้งเตือนใหม่ (ต้องเป็น ADMIN หรือ SUPERADMIN)
 router.post(
   "/",
   companyAuth(true),
   authorize(["ADMIN", "SUPERADMIN"]),
+  injectCreatedBy, // <--- เพิ่ม middleware นี้
   validateRequest({ body: createNotificationSchema }),
   createNotification
 );

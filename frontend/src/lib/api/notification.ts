@@ -95,9 +95,13 @@ export const notificationApi = {
     title: string
     message: string
     type: 'SYSTEM' | 'TODO' | 'REMINDER'
-    dueDate: string
+    scheduledAt: string
+    dueDate?: string
     category: string
     link?: string
+    linkUsername?: string
+    linkPassword?: string
+    impact?: string
     urgencyDays: number
     repeatIntervalDays: number
     recipients: Array<{

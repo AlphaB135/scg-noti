@@ -42,11 +42,6 @@ export default function NotificationList({
   onDelete,
   onViewAssignments,
 }: NotificationListProps) {
-  // Filter notifications to include type "TODO"
-  const filteredNotifications = notifications.filter(
-    (notification) => notification.type === "TODO" || notification.type === "SYSTEM"
-  )
-
   // Helper functions
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -156,7 +151,7 @@ export default function NotificationList({
   }
 
   // If no notifications
-  if (filteredNotifications.length === 0) {
+  if (notifications.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4">
         <Calendar className="h-20 w-20 text-gray-300 mb-6" />
@@ -170,7 +165,7 @@ export default function NotificationList({
 
   return (
     <div className="divide-y divide-gray-200">
-      {filteredNotifications.map((notification) => (
+      {notifications.map((notification) => (
         <div
           key={notification.id}
           className={`p-5 hover:bg-gray-50 transition-colors ${notification.status === "completed" ? "bg-[#f7fafc]" : ""}`}

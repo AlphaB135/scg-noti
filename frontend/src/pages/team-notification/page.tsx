@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import AppLayout from "@/components/layout/app-layout"
 import { notificationsApi } from "@/lib/api"
+import { notificationApi } from "@/lib/api/notification"
 import { teamsApi } from "@/lib/api/teams"
 import NotificationFilters from "@/components/team-notification/notification-filters"
 import NotificationTabs from "@/components/team-notification/notification-tabs"
@@ -142,7 +143,7 @@ export default function TeamNotificationsPage() {
               date: noti.createdAt || new Date().toISOString(),
               dueDate: noti.scheduledAt || new Date().toISOString(),
               frequency: 'no-repeat',
-              type: noti.category || '',
+              type: 'TODO', // <<--- fix: set type เป็น 'TODO' เสมอ
               priority: noti.priority || 'medium',
               status: noti.status || 'draft',
               isTeamAssignment: true,
@@ -188,7 +189,7 @@ export default function TeamNotificationsPage() {
             console.log("⚠️ No teams found, using mock data");
             const mockMembers = [
               {
-                id: "mock-1",
+                id: "550e8400-e29b-41d4-a716-446655440001", // Valid UUID
                 name: "จอห์น สมิธ",
                 role: "นักพัฒนาระบบ",
                 avatar: "/placeholder.svg",
@@ -198,7 +199,7 @@ export default function TeamNotificationsPage() {
                 isLeader: false,
               },
               {
-                id: "mock-2", 
+                id: "550e8400-e29b-41d4-a716-446655440002", // Valid UUID
                 name: "เจน โดว์",
                 role: "นักวิเคราะห์ระบบ",
                 avatar: "/placeholder.svg",
@@ -208,7 +209,7 @@ export default function TeamNotificationsPage() {
                 isLeader: false,
               },
               {
-                id: "mock-3",
+                id: "550e8400-e29b-41d4-a716-446655440003", // Valid UUID
                 name: "บ๊อบ จอห์นสัน",
                 role: "หัวหน้าทีม",
                 avatar: "/placeholder.svg",
@@ -234,7 +235,7 @@ export default function TeamNotificationsPage() {
         // Set mock data for testing if team loading fails
         const mockMembers = [
           {
-            id: "mock-1",
+            id: "550e8400-e29b-41d4-a716-446655440001", // Valid UUID
             name: "จอห์น สมิธ",
             role: "นักพัฒนาระบบ",
             avatar: "/placeholder.svg",
@@ -244,7 +245,7 @@ export default function TeamNotificationsPage() {
             isLeader: false,
           },
           {
-            id: "mock-2", 
+            id: "550e8400-e29b-41d4-a716-446655440002", // Valid UUID
             name: "เจน โดว์",
             role: "นักวิเคราะห์ระบบ",
             avatar: "/placeholder.svg",
@@ -254,7 +255,7 @@ export default function TeamNotificationsPage() {
             isLeader: false,
           },
           {
-            id: "mock-3",
+            id: "550e8400-e29b-41d4-a716-446655440003", // Valid UUID
             name: "บ๊อบ จอห์นสัน",
             role: "หัวหน้าทีม",
             avatar: "/placeholder.svg",
@@ -349,23 +350,43 @@ export default function TeamNotificationsPage() {
       const payload = {
         title: formData.title,
         message: formData.details,
-        impact: formData.impact, // ส่ง impact แยก field
+        type: "TODO" as const,
         scheduledAt: new Date(formData.date).toISOString(),
-        dueDate: new Date(formData.dueDate).toISOString(), // เพิ่ม dueDate
-        type: "TODO" as const, // เพิ่ม type field ที่ backend ต้องการ
-        category: "TASK", // เพิ่ม category ให้ตรง type
-        link: formData.link || undefined,
-        linkUsername: formData.username || undefined,
-        linkPassword: formData.password || undefined,
-        urgencyDays: 3, // เพิ่ม field ที่ backend ต้องการ
-        repeatIntervalDays: 0, // เพิ่ม field ที่ backend ต้องการ
+        dueDate: new Date(formData.dueDate).toISOString(),
+        category: "TASK",
+        link: formData.link && formData.link.trim() ? formData.link.trim() : null,
+        linkUsername: formData.username && formData.username.trim() ? formData.username.trim() : null,
+        linkPassword: formData.password && formData.password.trim() ? formData.password.trim() : null,
+        impact: formData.impact && formData.impact.trim() ? formData.impact.trim() : null,
+        urgencyDays: 3,
+        repeatIntervalDays: 0,
         recipients: formData.isTeamAssignment
           ? teamMembers.map(member => ({ type: 'USER' as const, userId: member.id }))
           : formData.selectedMembers.map(memberId => ({ type: 'USER' as const, userId: memberId }))
       }
 
+      // Log the payload before sending
+      console.log("📤 Sending payload to API:", JSON.stringify(payload, null, 2))
+      console.log("👥 Team members IDs:", teamMembers.map(m => ({ id: m.id, name: m.name })))
+      console.log("📝 Selected member IDs:", formData.selectedMembers)
+      
+      // Validate UUIDs before sending
+      const invalidUUIDs = payload.recipients
+        .filter(r => r.userId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(r.userId))
+        .map(r => r.userId)
+      
+      if (invalidUUIDs.length > 0) {
+        console.error("❌ Invalid UUID format detected:", invalidUUIDs)
+        toast({
+          title: "ข้อผิดพลาดในข้อมูล",
+          description: `รหัสสมาชิกไม่ถูกต้อง: ${invalidUUIDs.join(", ")}`,
+          variant: "destructive",
+        })
+        return
+      }
+      
       // Call API
-      await notificationsApi.create(payload)
+      await notificationApi.createNotification(payload)
 
       // Show success toast
       toast({
@@ -379,11 +400,29 @@ export default function TeamNotificationsPage() {
 
       // โหลดข้อมูลใหม่
       await refreshNotifications()
-    } catch (error) {
-      console.error("Failed to create notification:", error) 
+    } catch (error: any) {
+      console.error("Failed to create notification:", error)
+      console.error("Error response:", error?.response?.data)
+      if (error?.response?.data?.details) {
+        console.error("Validation details:", JSON.stringify(error.response.data.details, null, 2));
+      }
+      // Extract detailed error message from validation errors
+      let errorMessage = "ไม่สามารถสร้างการแจ้งเตือนได้"
+      if (error?.response?.data?.details && Array.isArray(error.response.data.details)) {
+        const validationErrors = error.response.data.details.map((detail: any) => {
+          if (detail.message) return detail.message
+          if (detail.path) return `ข้อผิดพลาดในฟิลด์: ${detail.path.join('.')}`
+          return JSON.stringify(detail)
+        }).join(", ")
+        errorMessage = `ข้อผิดพลาดในการตรวจสอบข้อมูล: ${validationErrors}\n\nรายละเอียด: ${JSON.stringify(error.response.data.details, null, 2)}`
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถสร้างการแจ้งเตือนได้",
+        description: errorMessage,
         variant: "destructive",
       })
     }
@@ -413,7 +452,7 @@ export default function TeamNotificationsPage() {
           date: noti.createdAt || new Date().toISOString(),
           dueDate: noti.scheduledAt || new Date().toISOString(),
           frequency: 'no-repeat',
-          type: noti.category || '',
+          type: 'TODO', // <<--- fix: set type เป็น 'TODO' เสมอ
           priority: noti.priority || 'medium',
           status: noti.status || 'draft',
           isTeamAssignment: true,
@@ -455,16 +494,16 @@ export default function TeamNotificationsPage() {
       const payload = {
         title: formData.title,
         message: formData.details,
-        impact: formData.impact, // ส่ง impact แยก field
+        impact: formData.impact,
         scheduledAt: new Date(formData.date).toISOString(),
-        dueDate: new Date(formData.dueDate).toISOString(), // เพิ่ม dueDate
-        type: "TODO" as const, // เพิ่ม type field ที่ backend ต้องการ
-        category: "TASK", // เพิ่ม category ให้ตรง type
+        dueDate: new Date(formData.dueDate).toISOString(),
+        type: "TODO" as const,
+        category: "TASK",
         link: formData.link || undefined,
         linkUsername: formData.username || undefined,
         linkPassword: formData.password || undefined,
-        urgencyDays: 3, // เพิ่ม field ที่ backend ต้องการ
-        repeatIntervalDays: 0, // เพิ่ม field ที่ backend ต้องการ
+        urgencyDays: 3,
+        repeatIntervalDays: 0,
         recipients: formData.isTeamAssignment
           ? teamMembers.map(member => ({ type: 'USER' as const, userId: member.id }))
           : formData.selectedMembers.map(memberId => ({ type: 'USER' as const, userId: memberId }))

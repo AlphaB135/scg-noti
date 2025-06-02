@@ -1,6 +1,8 @@
 import { z } from 'zod'
 
-// Schema สำหรับ query list (skip, take)
+/**
+ * Schema สำหรับ query list (page, size) → transform เป็น skip, take
+ */
 export const listQuerySchema = z
   .object({
     page: z.coerce.number().int().min(1).default(1),
@@ -13,32 +15,53 @@ export const listQuerySchema = z
 
 export type ListQueryOpts = z.output<typeof listQuerySchema>
 
-// Schema สำหรับอัพเดตสถานะ
+/**
+ * Schema สำหรับอัพเดตสถานะการทำงาน
+ */
 export const updateStatusSchema = z.object({
   status: z.enum(['PENDING', 'DONE', 'IN_PROGRESS', 'OVERDUE']),
 })
 
-// Schema สำหรับ reschedule
+/**
+ * Schema สำหรับ reschedule (เลื่อนวันส่ง) 
+ */
 export const rescheduleSchema = z.object({
-  dueDate: z.coerce.date(),          // แปลงเป็น Date อัตโนมัติ
+  dueDate: z.coerce.date(), // แปลงเป็น Date อัตโนมัติ
   reason: z.string().min(1, {
     message: 'Reason is required when rescheduling',
   }),
 })
 
-// Schema สำหรับกำหนด recipient ของ notification
-export const recipientSchema = z.object({
-  type: z.enum(['ALL', 'USER', 'GROUP', 'COMPANY']),
-  userId: z.string().uuid().optional(),
-  groupId: z.string().uuid().optional(),
-  companyCode: z.string().min(1).optional(),
-})
+/**
+ * Schema สำหรับ recipient ของ notification
+ * แยกตาม type ด้วย discriminated union
+ */
+export const recipientSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('ALL'),
+  }),
+  z.object({
+    type: z.literal('USER'),
+    userId: z.string().uuid(),
+  }),
+  z.object({
+    type: z.literal('GROUP'),
+    groupId: z.string().uuid(),
+  }),
+  z.object({
+    type: z.literal('COMPANY'),
+    companyCode: z.string().min(1),
+  }),
+])
 
-// Base schema for notifications
+/**
+ * Base schema ของ notification (ใช้ตอนสร้าง)
+ * createdBy จะถูกเซ็ตโดย backend จาก req.user.id เท่านั้น
+ */
 const notificationBaseSchema = {
   title: z.string().min(1),
   message: z.string().min(1),
-  impact: z.string().nullish(), // เพิ่ม field impact ให้แยกจาก message
+  impact: z.string().nullish(), // เพิ่ม field impact แยกจาก message
   scheduledAt: z.coerce.date(),
   dueDate: z.coerce.date().optional(),
   type: z.enum(['SYSTEM', 'TODO', 'REMINDER']),
@@ -49,20 +72,40 @@ const notificationBaseSchema = {
   urgencyDays: z.coerce.number().int().min(0).default(0),
   repeatIntervalDays: z.coerce.number().int().min(0).default(0),
   recipients: z.array(recipientSchema).min(1),
-  /**
-   * createdBy จะถูกเซ็ตโดย backend จาก req.user.id เท่านั้น
-   * ห้ามรับค่าจาก client โดยตรง (controller จะ merge ให้ก่อน validate)
-   */
-  createdBy: z.string().uuid(),
-};
+  createdBy: z.string().uuid(), // รับจาก controller (req.user.id) เท่านั้น
+}
 
-// Schema for creating notifications
-export const createNotificationSchema = z.object(notificationBaseSchema);
+/**
+ * Schema สำหรับสร้าง notification
+ */
+export const createNotificationSchema = z.object(notificationBaseSchema)
 
-// Schema for updating notifications - all fields optional
-export const updateNotificationSchema = z.object({
-  ...Object.entries(notificationBaseSchema).reduce((acc, [key, schema]) => ({
-    ...acc,
-    [key]: schema.optional()
-  }), {})
-});
+/**
+ * Schema สำหรับอัพเดต notification (ทุก field เป็น optional)
+ */
+export const updateNotificationSchema = z.object(
+  Object.entries(notificationBaseSchema).reduce((acc, [key, schema]) => {
+    // @ts-ignore
+    acc[key] = (schema as z.ZodTypeAny).optional()
+    return acc
+  }, {} as Record<string, z.ZodTypeAny>)
+)
+
+/**
+ * Schema สำหรับ validateRequest ฝั่ง client (ไม่รวม createdBy)
+ */
+export const createNotificationClientSchema = z.object({
+  title: z.string().min(1),
+  message: z.string().min(1),
+  impact: z.string().nullish(),
+  scheduledAt: z.coerce.date(),
+  dueDate: z.coerce.date().optional(),
+  type: z.enum(['SYSTEM', 'TODO', 'REMINDER']),
+  category: z.string().min(1),
+  link: z.string().url().nullish(),
+  linkUsername: z.string().min(1).nullish(),
+  linkPassword: z.string().min(1).nullish(),
+  urgencyDays: z.coerce.number().int().min(0).default(0),
+  repeatIntervalDays: z.coerce.number().int().min(0).default(0),
+  recipients: z.array(recipientSchema).min(1),
+})
