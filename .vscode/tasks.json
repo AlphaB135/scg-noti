@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Test Notification Display",
+			"command": "npm run test",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "test",
+			"isBackground": false
+		}
+	]
+}

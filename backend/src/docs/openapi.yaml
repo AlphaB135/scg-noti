@@ -1,0 +1,618 @@
+openapi: 3.0.0
+info:
+  title: SCG Notification API
+  version: 1.0.0
+  description: |
+    API for managing notifications, approvals, and team management at SCG.
+    
+    Features:
+    - Authentication & Authorization
+    - Notification Management
+    - Team Management
+    - Employee Management
+    - Security & Audit Logs
+    - Dashboard & Analytics
+    - Mobile API Support
+
+servers:
+  - url: /api
+    description: API base URL
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login endpoint
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
+      description: Session token cookie for authentication
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        deviceFingerprint:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        refreshToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, SUPERADMIN, USER, TEAM_LEAD, EMPLOYEE]
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, LOCKED]
+        employeeProfile:
+          $ref: '#/components/schemas/Employee'
+
+    Employee:
+      type: object
+      properties:
+        id:
+          type: string
+        employeeCode:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        companyCode:
+          type: string
+        userId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        companyCode:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TeamMember:
+      type: object
+      properties:
+        userId:
+          type: string
+        teamId:
+          type: string
+        role:
+          type: string
+          enum: [TEAM_LEAD, MEMBER]
+        user:
+          $ref: '#/components/schemas/User'
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, PENDING, APPROVED, REJECTED]
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, URGENT]
+        recipientType:
+          type: string
+          enum: [ALL, TEAM, INDIVIDUAL]
+        createdById:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    NotificationCreate:
+      type: object
+      required:
+        - title
+        - message
+        - type
+        - recipients
+      properties:
+        title:
+          type: string
+        message:
+          type: string
+        type:
+          type: string
+          enum: [INFO, TODO, ALERT]
+        category:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        recipients:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [USER, TEAM]
+              userId:
+                type: string
+              teamId:
+                type: string
+
+    Approval:
+      type: object
+      properties:
+        id:
+          type: string
+        notificationId:
+          type: string
+        userId:
+          type: string
+        decision:
+          type: string
+          enum: [APPROVED, REJECTED]
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    PaginationMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    DashboardOverview:
+      type: object
+      properties:
+        notifications:
+          type: object
+          properties:
+            total: 
+              type: integer
+            pending:
+              type: integer
+            approved:
+              type: integer
+            approvedPercentage:
+              type: number
+        approvals:
+          type: object
+          properties:
+            total:
+              type: integer
+            pending:
+              type: integer
+            completed:
+              type: integer
+            completedPercentage:
+              type: number
+        users:
+          type: object
+          properties:
+            total:
+              type: integer
+            active:
+              type: integer
+            activePercentage:
+              type: number
+        recentActivity:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityLog'
+
+    SecurityLog:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        action:
+          type: string
+          enum: [LOGIN, LOGOUT, CREATE, UPDATE, DELETE]
+        resource:
+          type: string
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+paths:
+  /auth/login:
+    post:
+      summary: Login to get access token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /auth/logout:
+    post:
+      summary: Logout and invalidate session
+      tags: [Authentication]
+      security:
+        - BearerAuth: []
+        - CookieAuth: []
+      responses:
+        '200':
+          description: Successfully logged out
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me:
+    get:
+      summary: Get current user info
+      tags: [Authentication]
+      security:
+        - BearerAuth: []
+        - CookieAuth: []
+      responses:
+        '200':
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /notifications:
+    get:
+      summary: List notifications
+      tags: [Notifications]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [PENDING, APPROVED, REJECTED]
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+    post:
+      summary: Create new notification
+      tags: [Notifications]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationCreate'
+      responses:
+        '201':
+          description: Notification created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+
+  /notifications/{id}/approvals:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    get:
+      summary: List approvals for notification
+      tags: [Approvals]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of approvals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Approval'
+    post:
+      summary: Create approval for notification
+      tags: [Approvals]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - response
+              properties:
+                response:
+                  type: string
+                  enum: [APPROVED, REJECTED]
+                comment:
+                  type: string
+      responses:
+        '201':
+          description: Approval created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Approval'
+
+  /teams:
+    get:
+      summary: List teams
+      tags: [Teams]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  teams:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Team'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+    post:
+      summary: Create a new team
+      tags: [Teams]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - companyCode
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                companyCode:
+                  type: string
+      responses:
+        '201':
+          description: Team created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+  /dashboard/overview:
+    get:
+      summary: Get dashboard overview statistics
+      tags: [Dashboard]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Dashboard overview data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardOverview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /dashboard/metrics:
+    get:
+      summary: Get notification and approval metrics
+      tags: [Dashboard]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 7
+          description: Number of days to fetch metrics for
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date-time
+                        count:
+                          type: integer
+                  approvals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date-time
+                        count:
+                          type: integer
+
+  /employees/search:
+    get:
+      summary: Search employees
+      tags: [Employees]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Search query (name or employee code)
+        - in: query
+          name: companyCode
+          schema:
+            type: string
+          description: Filter by company code
+      responses:
+        '200':
+          description: List of matching employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Employee'
+
+components:
+  responses:
+    Unauthorized:
+      description: Authentication required or failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Permission denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              retryAfter:
+                type: integer
+                description: Seconds to wait before retrying
